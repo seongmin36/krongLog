@@ -1,0 +1,4 @@
+# 모든 봇이 사이트를 스캔하고 색인하도록 허용합니다.
+# 전체 구문: https://developers.google.com/search/docs/advanced/robots/create-robots-txt
+User-agent: *
+Allow: /
