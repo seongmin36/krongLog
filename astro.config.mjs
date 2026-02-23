@@ -22,7 +22,6 @@ export default defineConfig({
     }),
     react(),
     tailwindcss(),
-    mdx(),
     sitemap(),
   ],
 });
