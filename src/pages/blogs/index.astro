@@ -1,0 +1,17 @@
+---
+type PostModule = {
+  title: string;
+  description: string;
+  date: string;
+  updatedDate: string;
+  tags: string[];
+  image: string;
+};
+
+const matches = import.meta.glob<PostModule>("@content/post/blog/*.mdx", {
+  eager: true,
+});
+const posts = Object.values(matches);
+---
+
+{posts.map((post) => <p>{post.title}</p>)}

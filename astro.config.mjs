@@ -1,28 +1,28 @@
-// @ts-check
-import { defineConfig } from 'astro/config';
+import { defineConfig } from "astro/config";
+import tailwindcss from "@tailwindcss/vite";
+import react from "@astrojs/react";
+import mdx from "@astrojs/mdx";
+import sitemap from "@astrojs/sitemap";
+import vercel from "@astrojs/vercel";
+import image from "@astrojs/image";
 
-import tailwindcss from '@tailwindcss/vite';
-
-import react from '@astrojs/react';
-
-import mdx from '@astrojs/mdx';
-
-import sitemap from '@astrojs/sitemap';
-
-// https://astro.build/config
 export default defineConfig({
-  // 배포 URL 설정 (배포 시 실제 도메인으로 변경)
-  // site: 'https://example.com',
-
-  // 기본 경로 설정 (서브디렉토리에 배포하는 경우)
-  // base: '/',
-
-  // URL 끝 슬래시 처리 방식: 'always' | 'never' | 'ignore'
-  trailingSlash: 'ignore',
-
-  vite: {
-    plugins: [tailwindcss()]
+  output: "static",
+  adapter: vercel(),
+  // site: '/',
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "viewport",
   },
-
-  integrations: [react(), mdx(), sitemap()]
+  integrations: [
+    image(), // TODO: 엔트리 포인트 추가, sharp 옵션 등
+    mdx({
+      syntaxHighlight: "shiki",
+      // shikiConfig: {}
+    }),
+    react(),
+    tailwindcss(),
+    mdx(),
+    sitemap(),
+  ],
 });
