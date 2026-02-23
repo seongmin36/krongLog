@@ -9,7 +9,7 @@ import image from "@astrojs/image";
 export default defineConfig({
   output: "static",
   adapter: vercel(),
-  // site: '/',
+  site: "https://blog.kronglog.dev",
   prefetch: {
     prefetchAll: true,
     defaultStrategy: "viewport",
