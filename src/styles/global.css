@@ -1,1 +1,37 @@
 @import "tailwindcss";
+
+/* 다크모드: .dark 클래스 기반 수동 토글 */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'KaKao Big-Regular', sans-serif;
+
+  --color-primary: #5db87e;
+  
+  --color-dark: #121212;
+}
+
+@font-face {
+  font-family: 'KaKao Big';
+  src: url('/fonts/KakaoBigSans-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KaKao Big';
+  src: url('/fonts/KakaoBigSans-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'KaKao Big';
+  src: url('/fonts/KakaoBigSans-ExtraBold.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
