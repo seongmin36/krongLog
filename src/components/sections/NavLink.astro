@@ -1,0 +1,69 @@
+---
+interface Props {
+  href: string;
+  exact?: boolean;
+  class?: string;
+}
+
+const { href, exact = false, class: className } = Astro.props;
+const { pathname } = Astro.url;
+
+const isActive = exact
+  ? pathname === href
+  : pathname === href || pathname.startsWith(`${href}/`);
+---
+
+<a
+  href={href}
+  class:list={[
+    "nav-link",
+    { active: isActive },
+    className,
+  ]}
+  aria-current={isActive ? "page" : undefined}
+  data-astro-prefetch
+>
+  <slot />
+</a>
+
+<style>
+  .nav-link {
+    position: relative;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text-secondary, #6b7280);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    padding: 0.25rem 0;
+  }
+
+  .nav-link:hover {
+    color: var(--color-text-primary, #111827);
+  }
+
+  .nav-link.active {
+    color: var(--color-text-primary, #111827);
+    font-weight: 600;
+  }
+
+  .nav-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 1px;
+  }
+
+  /* 다크 모드 대응 */
+  :global(.dark) .nav-link {
+    color: var(--color-text-secondary-dark, #9ca3af);
+  }
+
+  :global(.dark) .nav-link:hover,
+  :global(.dark) .nav-link.active {
+    color: var(--color-text-primary-dark, #f9fafb);
+  }
+</style>
