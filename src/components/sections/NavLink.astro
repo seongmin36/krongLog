@@ -1,69 +1,25 @@
 ---
-interface Props {
-  href: string;
-  exact?: boolean;
-  class?: string;
-}
+import type { HTMLAttributes } from "astro/types";
 
-const { href, exact = false, class: className } = Astro.props;
+type Props = HTMLAttributes<'a'>;
+
+const { href, class: className, ...props } = Astro.props;
 const { pathname } = Astro.url;
 
-const isActive = exact
-  ? pathname === href
-  : pathname === href || pathname.startsWith(`${href}/`);
+const isActive = pathname === href || pathname.startsWith(`${href}/`);
 ---
 
 <a
   href={href}
   class:list={[
-    "nav-link",
-    { active: isActive },
+    "relative text-sm font-medium text-gray-500 dark:text-gray-400 no-underline transition-colors duration-200 py-1",
+    "hover:text-gray-900 dark:hover:text-gray-50",
+    isActive && "text-gray-900! dark:text-gray-50! font-semibold! after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-0.5 after:bg-current after:rounded-sm",
     className,
   ]}
   aria-current={isActive ? "page" : undefined}
   data-astro-prefetch
+  {...props}
 >
   <slot />
 </a>
-
-<style>
-  .nav-link {
-    position: relative;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--color-text-secondary, #6b7280);
-    text-decoration: none;
-    transition: color 0.2s ease;
-    padding: 0.25rem 0;
-  }
-
-  .nav-link:hover {
-    color: var(--color-text-primary, #111827);
-  }
-
-  .nav-link.active {
-    color: var(--color-text-primary, #111827);
-    font-weight: 600;
-  }
-
-  .nav-link.active::after {
-    content: "";
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: currentColor;
-    border-radius: 1px;
-  }
-
-  /* 다크 모드 대응 */
-  :global(.dark) .nav-link {
-    color: var(--color-text-secondary-dark, #9ca3af);
-  }
-
-  :global(.dark) .nav-link:hover,
-  :global(.dark) .nav-link.active {
-    color: var(--color-text-primary-dark, #f9fafb);
-  }
-</style>

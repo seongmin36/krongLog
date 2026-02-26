@@ -1,12 +1,4 @@
 ---
-/**
- * Layout - 글로벌 레이아웃 컴포넌트
- *
- * - SEO 메타 태그 (Open Graph, Twitter Card)
- * - 다크모드 FOUC 방지 inline script
- * - Header 포함
- * - global.css import
- */
 import Header from "@/components/Header.astro";
 import "@/styles/global.css";
 
@@ -65,44 +57,10 @@ const canonicalURL = new URL(Astro.url.pathname, Astro.site);
       })();
     </script>
   </head>
-  <body>
+  <body class="m-0 w-full min-h-full bg-white dark:bg-dark text-gray-900 dark:text-gray-50 transition-colors duration-300">
     <Header />
-    <main>
+    <main class="max-w-[1200px] mx-auto px-4 sm:px-6">
       <slot />
     </main>
   </body>
 </html>
-
-<style>
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    min-height: 100%;
-  }
-
-  body {
-    background-color: #ffffff;
-    color: #111827;
-    transition:
-      background-color 0.3s ease,
-      color 0.3s ease;
-  }
-
-  :global(.dark) body {
-    background-color: #111111;
-    color: #f9fafb;
-  }
-
-  main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
-  }
-
-  @media (max-width: 640px) {
-    main {
-      padding: 0 1rem;
-    }
-  }
-</style>

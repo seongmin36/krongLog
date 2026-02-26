@@ -5,6 +5,7 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 import image from "@astrojs/image";
+import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
   output: "static",
@@ -14,6 +15,9 @@ export default defineConfig({
     prefetchAll: true,
     defaultStrategy: "viewport",
   },
+  vite: {
+    plugins: [tailwindcss(), svgr()],
+  },
   integrations: [
     image(), // TODO: 엔트리 포인트 추가, sharp 옵션 등
     mdx({
@@ -21,7 +25,6 @@ export default defineConfig({
       // shikiConfig: {}
     }),
     react(),
-    tailwindcss(),
     sitemap(),
   ],
 });
