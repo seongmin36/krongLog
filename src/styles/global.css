@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+@import "./mdx.css";
 
 /* 다크모드: .dark 클래스 기반 수동 토글 */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -7,9 +8,55 @@
 @theme {
   --font-sans: 'KaKao Big', sans-serif;
 
-  --color-primary: #5db87e;
-  
+  --color-primary: #3B7A57;
   --color-dark: #121212;
+
+  /* 브랜드 컬러 토큰 */
+  --color-tag-react: #087EA4;
+  --color-tag-react-bg: rgba(8, 126, 164, 0.1);
+  --color-tag-react-text: #087EA4;
+  --color-tag-react-bg-dark: rgba(8, 126, 164, 0.15);
+  --color-tag-react-text-dark: #5DD5FC;
+
+  --color-tag-typescript: #3178C6;
+  --color-tag-typescript-bg: rgba(49, 120, 198, 0.1);
+  --color-tag-typescript-text: #3178C6;
+  --color-tag-typescript-bg-dark: rgba(49, 120, 198, 0.15);
+  --color-tag-typescript-text-dark: #93C5FD;
+
+  --color-tag-docker: #2496ED;
+  --color-tag-docker-bg: rgba(36, 150, 237, 0.1);
+  --color-tag-docker-text: #2496ED;
+  --color-tag-docker-bg-dark: rgba(36, 150, 237, 0.15);
+  --color-tag-docker-text-dark: #60A5FA;
+
+  --color-tag-nodejs: #339933;
+  --color-tag-nodejs-bg: rgba(51, 153, 51, 0.1);
+  --color-tag-nodejs-text: #339933;
+  --color-tag-nodejs-bg-dark: rgba(51, 153, 51, 0.15);
+  --color-tag-nodejs-text-dark: #86EFAC;
+
+  --color-tag-redis: #DC382D;
+  --color-tag-redis-bg: rgba(220, 56, 45, 0.1);
+  --color-tag-redis-text: #DC382D;
+  --color-tag-redis-bg-dark: rgba(220, 56, 45, 0.15);
+  --color-tag-redis-text-dark: #FCA5A5;
+
+  --color-tag-aws: #FF9900;
+  --color-tag-aws-bg: rgba(255, 153, 0, 0.1);
+  --color-tag-aws-text: #D97706;
+  --color-tag-aws-bg-dark: rgba(255, 153, 0, 0.12);
+  --color-tag-aws-text-dark: #FCD34D;
+
+  --color-tag-nextjs: #000000;
+  --color-tag-nextjs-bg: rgba(0, 0, 0, 0.06);
+  --color-tag-nextjs-text: #171717;
+  --color-tag-nextjs-bg-dark: rgba(255, 255, 255, 0.08);
+  --color-tag-nextjs-text-dark: #E5E7EB;
+
+  /* Astro 그라디언트 */
+  --background-image-gradient-astro: linear-gradient(90deg, #D83333 0%, #F041FF 100%);
+  --background-image-gradient-astro-dark: linear-gradient(90deg, #7a1f1f 0%, #6b1f7a 100%);
 }
 
 @font-face {

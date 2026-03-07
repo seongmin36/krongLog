@@ -1,7 +1,8 @@
 ---
-import { getTagColor } from "@/lib/utils/tags";
+import Tag from "@/components/ui/Tag.astro";
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
+import placeholderImage from "@/assets/img-default.png";
 
 interface Props {
   post: {
@@ -24,7 +25,7 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
 
 <a
   href={`/blogs/${post.id}`}
-  class="group flex flex-col overflow-hidden bg-white dark:bg-[#1a1a1a] transition-all duration-300 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20 hover:-translate-y-1"
+  class="group flex flex-col overflow-hidden bg-white dark:bg-dark transition-all duration-300 hover:shadow-black/5 hover:-translate-y-1"
   data-astro-prefetch
 >
   <div class="relative aspect-16/10 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
@@ -41,7 +42,16 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
         decoding="async"
       />
     ) : (
-      <div class="w-full h-full bg-linear-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700" />
+      <Image 
+        src={placeholderImage}
+        alt="placeholder" 
+        width={800} 
+        height={500} 
+        format="webp" 
+        quality={80} 
+        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" 
+        loading="lazy" 
+        decoding="async" />
     )}
   </div>
 
@@ -50,16 +60,7 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
     <!-- 태그 목록 -->
     {tags && tags.length > 0 && (
       <div class="flex flex-wrap gap-1.5">
-        {tags.map((tag) => {
-          const color = getTagColor(tag);
-          return (
-            <span
-              class={`inline-block px-2 py-0.5 rounded-md text-[11px] font-medium leading-relaxed ${color.bg} ${color.text}`}
-            >
-              {tag}
-            </span>
-          );
-        })}
+        {tags.map((tag) => <Tag name={tag} />)}
       </div>
     )}
 

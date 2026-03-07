@@ -1,0 +1,112 @@
+[data-tag] {
+  @apply bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400;
+}
+
+/* React 브랜드 */
+[data-tag="React"],
+[data-tag="Server Components"],
+[data-tag="Frontend"] {
+  background-color: var(--color-tag-react-bg);
+  color: var(--color-tag-react-text);
+}
+.dark [data-tag="React"],
+.dark [data-tag="Server Components"],
+.dark [data-tag="Frontend"] {
+  background-color: var(--color-tag-react-bg-dark);
+  color: var(--color-tag-react-text-dark);
+}
+
+/* Astro 그라디언트 */
+[data-tag="Astro"] {
+  @apply text-white font-semibold;
+  background: var(--background-image-gradient-astro);
+}
+.dark [data-tag="Astro"] {
+  @apply text-pink-100 font-semibold;
+  background: var(--background-image-gradient-astro-dark);
+}
+
+/* TypeScript 브랜드 */
+[data-tag="TypeScript"] {
+  background-color: var(--color-tag-typescript-bg);
+  color: var(--color-tag-typescript-text);
+}
+.dark [data-tag="TypeScript"] {
+  background-color: var(--color-tag-typescript-bg-dark);
+  color: var(--color-tag-typescript-text-dark);
+}
+
+/* Docker 브랜드 */
+[data-tag="Docker"] {
+  background-color: var(--color-tag-docker-bg);
+  color: var(--color-tag-docker-text);
+}
+.dark [data-tag="Docker"] {
+  background-color: var(--color-tag-docker-bg-dark);
+  color: var(--color-tag-docker-text-dark);
+}
+
+/* Node.js 브랜드 */
+[data-tag="Node.js"] {
+  background-color: var(--color-tag-nodejs-bg);
+  color: var(--color-tag-nodejs-text);
+}
+.dark [data-tag="Node.js"] {
+  background-color: var(--color-tag-nodejs-bg-dark);
+  color: var(--color-tag-nodejs-text-dark);
+}
+
+/* Redis 브랜드 */
+[data-tag="Redis"] {
+  background-color: var(--color-tag-redis-bg);
+  color: var(--color-tag-redis-text);
+}
+.dark [data-tag="Redis"] {
+  background-color: var(--color-tag-redis-bg-dark);
+  color: var(--color-tag-redis-text-dark);
+}
+
+/* AWS 브랜드 */
+[data-tag="AWS"] {
+  background-color: var(--color-tag-aws-bg);
+  color: var(--color-tag-aws-text);
+}
+.dark [data-tag="AWS"] {
+  background-color: var(--color-tag-aws-bg-dark);
+  color: var(--color-tag-aws-text-dark);
+}
+
+/* Next.js 브랜드 */
+[data-tag="Next.js"] {
+  background-color: var(--color-tag-nextjs-bg);
+  color: var(--color-tag-nextjs-text);
+}
+.dark [data-tag="Next.js"] {
+  background-color: var(--color-tag-nextjs-bg-dark);
+  color: var(--color-tag-nextjs-text-dark);
+}
+
+/* 팔레트: amber */
+[data-tag="Backend"] {
+  @apply bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300;
+}
+/* 팔레트: emerald */
+[data-tag="DevOps"] {
+  @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300;
+}
+/* 팔레트: teal */
+[data-tag="CI/CD"] {
+  @apply bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300;
+}
+/* 팔레트: orange */
+[data-tag="API"] {
+  @apply bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300;
+}
+/* 팔레트: indigo */
+[data-tag="Architecture"] {
+  @apply bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300;
+}
+/* 팔레트: purple */
+[data-tag="Serverless"] {
+  @apply bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300;
+}

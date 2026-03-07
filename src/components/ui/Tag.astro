@@ -1,0 +1,20 @@
+---
+interface Props {
+  name: string;
+  size?: "xs" | "sm";
+}
+
+const { name, size = "xs" } = Astro.props;
+
+const sizeClasses = {
+  xs: "px-2 py-0.5 text-[11px]",
+  sm: "px-2.5 py-1 text-xs",
+};
+---
+
+<span
+  data-tag={name}
+  class:list={["inline-block rounded-md font-medium leading-relaxed", sizeClasses[size]]}
+>
+  {name}
+</span>

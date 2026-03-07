@@ -2,7 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getCollection, render } from "astro:content";
 import { Image } from "astro:assets";
-import { getTagColor } from "@/lib/utils/tags";
+import Tag from "@/components/ui/Tag.astro";
 
 export async function getStaticPaths() {
   const allPosts = await getCollection("post");
@@ -26,16 +26,7 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
     <header class="mb-8 sm:mb-10 border-b border-gray-100 dark:border-gray-800 pb-8">
       {tags && tags.length > 0 && (
         <div class="flex flex-wrap gap-1.5 mb-4">
-          {tags.map((tag: string) => {
-            const color = getTagColor(tag);
-            return (
-              <span
-                class={`inline-block px-2.5 py-1 rounded-md text-xs font-medium ${color.bg} ${color.text}`}
-              >
-                {tag}
-              </span>
-            );
-          })}
+          {tags.map((tag: string) => <Tag name={tag} size="sm" />)}
         </div>
       )}
 
