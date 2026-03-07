@@ -1,17 +1,29 @@
 ---
-type PostModule = {
-  title: string;
-  description: string;
-  date: string;
-  updatedDate: string;
-  tags: string[];
-  image: string;
-};
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PostCard from "@/components/blog/PostCard.astro";
+import { getCollection } from "astro:content";
 
-const matches = import.meta.glob<PostModule>("@content/post/blog/*.mdx", {
-  eager: true,
-});
-const posts = Object.values(matches);
+const allPosts = await getCollection("post");
+const sortedPosts = allPosts.sort(
+  (a, b) => b.data.date.getTime() - a.data.date.getTime()
+);
 ---
 
-{posts.map((post) => <p>{post.title}</p>)}
+<BaseLayout title="전체 글 — Krong Dev." description="개발하면서 배운 것들을 기록합니다.">
+  <section class="pt-12 pb-8 sm:pt-16 sm:pb-10">
+    <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-gray-50 tracking-tight">
+      전체 글
+    </h1>
+    <p class="mt-2 text-sm sm:text-base text-gray-500 dark:text-gray-400">
+      지금까지 작성한 모든 글을 확인하세요.
+    </p>
+  </section>
+
+  <section class="pb-16 sm:pb-20">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+      {sortedPosts.map((post) => (
+        <PostCard post={post} />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

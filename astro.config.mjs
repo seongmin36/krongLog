@@ -4,7 +4,6 @@ import react from "@astrojs/react";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
-import image from "@astrojs/image";
 import svgr from "vite-plugin-svgr";
 
 export default defineConfig({
@@ -15,15 +14,46 @@ export default defineConfig({
     prefetchAll: true,
     defaultStrategy: "viewport",
   },
+
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: "github-light",
+        dark: "github-dark",
+      },
+      // 긴 코드라인 자동 줄바꿈 (가로 스크롤 방지)
+      wrap: true,
+      langs: [
+        "tsx",
+        "javascript",
+        "typescript",
+        "json",
+        "html",
+        "css",
+        "scss",
+        "less",
+        "sass",
+        "stylus",
+        "python",
+        "java",
+        "c",
+        "cpp",
+        "csharp",
+      ],
+      transformers: [],
+    },
+  },
+
   vite: {
     plugins: [tailwindcss(), svgr()],
   },
+  image: {
+    service: {
+      entrypoint: "astro/assets/services/sharp",
+    },
+  },
   integrations: [
-    image(), // TODO: 엔트리 포인트 추가, sharp 옵션 등
-    mdx({
-      syntaxHighlight: "shiki",
-      // shikiConfig: {}
-    }),
+    mdx(),
     react(),
     sitemap(),
   ],

@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getCollection, render } from "astro:content";
+import { Image } from "astro:assets";
+import { getTagColor } from "@/lib/utils/tags";
 
 export async function getStaticPaths() {
   const allPosts = await getCollection("post");
 
-  // 각 포스트마다 { params, props } 객체를 반환
   return allPosts.map((post) => ({
     params: { slug: post.id },
     props: { post },
@@ -14,16 +15,86 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const { title, description, date, tags, image } = post.data;
+
+const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
 ---
 
-<BaseLayout title={post.data.title} description={post.data.description}>
-  <article>
-    <!-- post.data: content.config.ts의 schema에 정의된 frontmatter 데이터 -->
-    <h1>{post.data.title}</h1>
-    <time datetime={post.data.date.toISOString()}>
-      {post.data.date.toLocaleDateString("ko-KR")}
-    </time>
+<BaseLayout title={`${title} — Krong Dev.`} description={description}>
+  <article class="max-w-[720px] mx-auto pt-12 pb-20 sm:pt-16">
+    <!-- 글 헤더 -->
+    <header class="mb-8 sm:mb-10 border-b border-gray-100 dark:border-gray-800 pb-8">
+      {tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-1.5 mb-4">
+          {tags.map((tag: string) => {
+            const color = getTagColor(tag);
+            return (
+              <span
+                class={`inline-block px-2.5 py-1 rounded-md text-xs font-medium ${color.bg} ${color.text}`}
+              >
+                {tag}
+              </span>
+            );
+          })}
+        </div>
+      )}
 
-    <Content />
+      <h1 class="text-2xl sm:text-3xl font-extrabold leading-tight text-gray-900 dark:text-gray-50 tracking-tight">
+        {title}
+      </h1>
+
+      {description && (
+        <p class="mt-3 text-base text-gray-500 dark:text-gray-400 leading-relaxed">
+          {description}
+        </p>
+      )}
+
+      <time
+        datetime={date.toISOString()}
+        class="block mt-4 text-sm text-gray-400 dark:text-gray-500"
+      >
+        {formattedDate}
+      </time>
+    </header>
+
+    <!-- 히어로 이미지 -->
+    {image && (
+      <div class="mb-8 sm:mb-10 rounded-lg overflow-hidden">
+        <Image
+          src={image}
+          alt={title}
+          width={720}
+          height={400}
+          format="webp"
+          quality={85}
+          class="w-full h-auto object-cover rounded-lg"
+        />
+      </div>
+    )}
+
+    <!-- MDX 본문: prose 스타일 적용 -->
+    <div class="prose prose-gray dark:prose-invert max-w-none
+      prose-headings:font-bold prose-headings:tracking-tight
+      prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4
+      prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3
+      prose-p:leading-relaxed prose-p:text-gray-700 dark:prose-p:text-gray-300
+      prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+      prose-code:text-sm prose-code:bg-gray-100 dark:prose-code:bg-gray-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded
+      prose-pre:bg-gray-50 dark:prose-pre:bg-[#1a1a1a] prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-700
+    ">
+      <Content />
+    </div>
+
+    <!-- 하단 네비게이션 -->
+    <div class="mt-16 pt-6 border-t border-gray-100 dark:border-gray-800">
+      <a
+        href="/blogs"
+        class="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-primary transition-colors duration-200"
+        data-astro-prefetch
+      >
+        <span>←</span>
+        <span>목록으로 돌아가기</span>
+      </a>
+    </div>
   </article>
 </BaseLayout>

@@ -9,12 +9,12 @@
     "astro": "astro"
   },
   "dependencies": {
-    "@astrojs/image": "^0.18.0",
     "@astrojs/mdx": "^4.3.13",
     "@astrojs/react": "^4.4.2",
     "@astrojs/sitemap": "^3.7.0",
     "@astrojs/vercel": "^9.0.4",
     "@nanostores/react": "^1.0.0",
+    "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.2.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
@@ -22,6 +22,7 @@
     "nanostores": "^1.1.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.2.0",
     "three": "^0.183.1"
   },
