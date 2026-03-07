@@ -1,0 +1,29 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection("post");
+
+  // 각 포스트마다 { params, props } 객체를 반환
+  return allPosts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article>
+    <!-- post.data: content.config.ts의 schema에 정의된 frontmatter 데이터 -->
+    <h1>{post.data.title}</h1>
+    <time datetime={post.data.date.toISOString()}>
+      {post.data.date.toLocaleDateString("ko-KR")}
+    </time>
+
+    <Content />
+  </article>
+</BaseLayout>
