@@ -5,6 +5,7 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 import svgr from "vite-plugin-svgr";
+import {transformerMetaHighlight} from "@shikijs/transformers";
 
 export default defineConfig({
   output: "static",
@@ -40,7 +41,9 @@ export default defineConfig({
         "cpp",
         "csharp",
       ],
-      transformers: [],
+      transformers: [
+        transformerMetaHighlight(),
+      ],
     },
   },
 
