@@ -4,5 +4,4 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://blog.kronglog.dev/sitemap.xml
 Sitemap: https://blog.kronglog.dev/sitemap-index.xml
