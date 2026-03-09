@@ -44,6 +44,7 @@ export default defineConfig({
         "sass",
         "stylus",
         "python",
+        "http",
         "java",
         "c",
         "cpp",
