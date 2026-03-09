@@ -30,7 +30,7 @@ export default defineConfig({
         dark: "github-dark",
       },
       // 긴 코드라인 자동 줄바꿈 (가로 스크롤 방지)
-      // wrap: true,
+      wrap: true,
       langs: [
         "tsx",
         "jsx",

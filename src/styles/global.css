@@ -84,6 +84,36 @@
   font-display: swap;
 }
 
+/* 링크: hover 시에만 underline */
+.prose a {
+  text-decoration: none;
+}
+.prose a:hover {
+  text-decoration: underline;
+}
+
+/* 인라인 코드 스타일 */
+.prose :not(pre) > code {
+  background-color: #f1f3f5;
+  color: var(--color-primary);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-weight: 700;
+}
+
+.dark .prose :not(pre) > code {
+  background-color: #2a2d35;
+  color: #f0a8b8;
+}
+
+/* backtick(`) 제거 */
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: "" !important;
+}
+
+/* Shiki 코드 블록 스타일 */
 .astro-code {
   background-color: var(--shiki-light-bg) !important;
   font-style: var(--shiki-light-font-style) !important;

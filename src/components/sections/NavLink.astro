@@ -14,7 +14,7 @@ const isActive = pathname === href || pathname.startsWith(`${href}/`);
   class:list={[
     "relative text-sm font-medium text-gray-500 dark:text-gray-400 no-underline transition-colors duration-200 py-1",
     "hover:text-gray-900 dark:hover:text-gray-50",
-    isActive && "text-gray-900! dark:text-gray-50! font-semibold! after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-0.5 after:bg-current after:rounded-sm",
+    isActive && "text-gray-900! dark:text-gray-50! font-semibold! after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-sm",
     className,
   ]}
   aria-current={isActive ? "page" : undefined}

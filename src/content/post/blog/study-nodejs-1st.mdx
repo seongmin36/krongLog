@@ -6,27 +6,27 @@ tags: ["Backend", "Node.js"]
 image: "./images/img-nodejs-learn-1st.jpg"
 ---
 
-Node.js로 백엔드를 시작하면서 가장 먼저 부딪힌 두 가지 질문이 있었다.
+Node.js로 백엔드를 시작하면서 가장 먼저 부딪힌 두 가지 질문이 있었습니다.
 
-> "미들웨어가 어떤 순서로 실행되는 거지?"
+> 미들웨어가 어떤 순서로 실행되는 거지?
 
-> "싱글 스레드라면서 왜 동시 요청을 처리할 수 있는 거지?"
+> 싱글 스레드라면서 왜 동시 요청을 처리할 수 있는 거지?
 
-이 글에서는 Express 미들웨어 파이프라인의 동작 구조와 Node.js 이벤트 루프의 실행 순서를 **직접 실험한 결과**를 바탕으로 정리한다.
+이 글에서는 Express 미들웨어 파이프라인의 동작 구조와 Node.js 이벤트 루프의 실행 순서를 **직접 실험한 결과**를 바탕으로 정리합니다.
 
 ---
 
-## Express 미들웨어 파이프라인
+# Express 미들웨어 파이프라인
 
 ### 요청이 서버에 도착하면 무슨 일이 벌어지는가?
 
-브라우저에서 `GET /users/1`을 보냈다고 가정하자. 이 요청은 Node.js HTTP 서버가 TCP 연결을 수신하고, HTTP를 파싱한 뒤, `req`/`res` 객체를 만들어 Express에 넘기는 과정을 거친다.
+브라우저에서 `GET /users/1`을 보냈다고 가정하겠습니다. 이 요청은 Node.js HTTP 서버가 TCP 연결을 수신하고, HTTP를 파싱한 뒤, `req`/`res` 객체를 만들어 Express에 넘기는 과정을 거칩니다.
 
-여기서 중요한 건 Express가 **우선순위 엔진이 아니라 순차 탐색 구조**라는 점이다. 등록된 미들웨어를 위에서 아래로 순서대로 실행하고, `next()`를 호출하면 다음 미들웨어로 넘어간다.
+여기서 중요한 건 Express가 **우선순위 엔진이 아니라 순차 탐색 구조**라는 점입니다. 등록된 미들웨어를 위에서 아래로 순서대로 실행하고, `next()`를 호출하면 다음 미들웨어로 넘어갑니다.
 
 ### 미들웨어 체인의 동작 방식
 
-Express의 요청 처리 흐름은 이렇게 생겼다.
+Express의 요청 처리 흐름은 이렇게 생겼습니다.
 
 ```text
 Client Request → Global Middleware → Router → Route Middleware → Controller → Response
@@ -34,7 +34,7 @@ Client Request → Global Middleware → Router → Route Middleware → Control
 
 이걸 `next()`로 이어붙이는 구조를 **Middleware Chain**이라 한다.
 
-실제 인증 API를 기준으로 미들웨어가 어떻게 쌓이는지 보면 직관적이다.
+실제 인증 API를 기준으로 미들웨어가 어떻게 쌓이는지 보면 직관적입니다.
 
 ```text
 Request
@@ -60,11 +60,11 @@ prisma       →  DB 접근
 Response
 ```
 
-각 단계가 `next()`를 호출해야 다음으로 넘어간다. 호출하지 않으면? 요청은 거기서 멈춘다.
+각 단계가 `next()`를 호출해야 다음으로 넘어갑니다. 호출하지 않으면? 요청은 거기서 멈춥니다.
 
 ### 흐름을 결정하는 세 가지 분기
 
-Express의 요청 흐름은 결국 아래 세 가지 중 하나로 끝난다.
+Express의 요청 흐름은 결국 아래 세 가지 중 하나로 끝납니다.
 
 | 분기 | 코드 | 의미 |
 |------|------|------|
@@ -72,7 +72,7 @@ Express의 요청 흐름은 결국 아래 세 가지 중 하나로 끝난다.
 | 여기서 응답 | `res.json(...)` | 응답 후 체인 종료 |
 | 에러로 점프 | `next(err)` / `throw` | 에러 미들웨어로 이동 |
 
-에러가 발생하면 일반 미들웨어를 전부 건너뛰고 에러 미들웨어로 직행한다.
+에러가 발생하면 일반 미들웨어를 전부 건너뛰고 에러 미들웨어로 직행합니다.
 
 ```
 middleware → 문제 발생 → next(err) → error middleware → error response
@@ -80,7 +80,7 @@ middleware → 문제 발생 → next(err) → error middleware → error respon
 
 ### 라우터 매칭 구조
 
-`/users/1` 요청이 들어오면 Express는 이런 순서로 매칭한다.
+`/users/1` 요청이 들어오면 Express는 이런 순서로 매칭합니다.
 
 1. app 레벨에서 `/users` prefix를 찾아 `userRouter`로 진입
 2. router 내부에서 `/:id`에 해당하는 route 탐색
@@ -90,13 +90,13 @@ middleware → 문제 발생 → next(err) → error middleware → error respon
 router.get('/:id', authMiddleware, userController.getUserById);
 ```
 
-여기서 `authMiddleware`는 **라우트 미들웨어**로, 이 특정 경로에서만 실행된다. 글로벌 미들웨어와 달리 필요한 라우트에만 붙일 수 있다.
+여기서 `authMiddleware`는 **라우트 미들웨어**로, 이 특정 경로에서만 실행됩니다. 글로벌 미들웨어와 달리 필요한 라우트에만 붙일 수 있습니다.
 
 ---
 
 ## 에러 미들웨어는 왜 인자가 4개여야 할까?
 
-Express 에러 미들웨어를 처음 접했을 때 가장 의아했던 건 **인자가 반드시 4개**여야 한다는 규칙이었다. 궁금해서 직접 실험해봤다.
+Express 에러 미들웨어를 처음 접했을 때 가장 의아했던 건 **인자가 반드시 4개**여야 한다는 규칙이었습니다. 궁금해서 직접 실험해봤습니다.
 
 ### 올바른 에러 미들웨어
 
@@ -117,9 +117,16 @@ export const errorMiddleware = (
 };
 ```
 
-이건 정상 동작한다. `(err, req, res, next)` — 4개의 인자를 받고 있기 때문이다.
+실험용 라우터에서 `next(new Error("강제 에러 발생"))`을 호출해 에러를 발생시킵니다.
 
-### 실험: 인자를 3개로 줄이면?
+![실험 결과 확인하기](/images/study-nodejs-1st/8.png)
+
+**결과** : 이건 정상 동작합니다. `(err, req, res, next)` 4개의 인자를 받고 있기 때문입니다.
+`/error-test` 엔드포인트에 `GET` 요청을 보내면 `{ ok: false, message: "강제 에러 발생" }` 형태의 JSON 응답이 정상적으로 반환됩니다.
+
+<br />
+
+### 실험 : 인자를 3개로 줄이면?
 
 ```typescript
 // next 파라미터를 제거한 에러 미들웨어
@@ -132,11 +139,19 @@ export const errorMiddleware = (
 };
 ```
 
-Express는 함수의 `.length` 프로퍼티(인자 개수)로 일반 미들웨어와 에러 미들웨어를 구분한다. 인자가 3개면 일반 미들웨어로 취급해서, `next(err)` 호출 시 이 함수를 **건너뛴다**. 결과적으로 Express 기본 에러 핸들러가 동작하면서 HTML 스택 트레이스 페이지가 반환된다.
+Express는 함수의 `.length` 프로퍼티(인자 개수)로 일반 미들웨어와 에러 미들웨어를 구분합니다. 인자가 3개면 일반 미들웨어로 취급해서, `next(err)` 호출 시 이 함수를 **건너뜁니다**.
 
-> [Express 소스 코드](https://github.com/expressjs/express/blob/main/lib/router/index.js#L586)를 보면 `fn.length === 4`일 때만 에러 핸들러로 인식하는 분기가 있다. 단순하지만, 모르면 디버깅에 시간을 많이 쓰게 되는 부분이다.
+![실험 결과 확인하기](/images/study-nodejs-1st/9.png)
 
-### 실험: next()도 res도 호출하지 않으면?
+**결과** : 인자 하나(`next`)를 주석 처리한 뒤 동일하게 `/error-test`에 `GET` 요청을 보냈을 때, 이전에는 JSON 형태로 응답이 왔지만 이번에는 **HTML 형식의 에러 페이지**가 반환됐습니다. 
+
+`next(err)` → 커스텀 에러 미들웨어 건너뜀 → Express 기본 에러 핸들러가 잡음 → 개발 모드 HTML 스택 트레이스 표시, 이 4단계를 거친 결과입니다.
+
+> Express 소스 코드를 보면 `fn.length === 4`일 때만 에러 핸들러로 인식하는 분기가 있습니다. 단순하지만, 모르면 디버깅에 시간을 많이 쓰게 되는 부분입니다.
+
+<br />
+
+### 실험 : next()도 res도 호출하지 않으면?
 
 ```typescript
 router.get("/hang-test", (_req, _res, _next) => {
@@ -145,24 +160,28 @@ router.get("/hang-test", (_req, _res, _next) => {
 });
 ```
 
-이 경우 클라이언트는 약 30초 후 타임아웃이 걸려 **무한 로딩** 상태가 된다. `next()`나 `res.*()` 중 하나는 반드시 호출해야 요청-응답 사이클이 완결된다.
+이 경우 클라이언트는 약 30초 후 타임아웃이 걸려 **무한 로딩** 상태가 됩니다. `next()`나 `res.*()` 중 하나는 반드시 호출해야 요청-응답 사이클이 완결됩니다. [Talend API Tester](https://chromewebstore.google.com/detail/talend-api-tester-free-ed/aejoelaoggembcahagimdiliamlcdmfm?hl=ko&pli=1)로 `/hang-test` 엔드포인트에 요청을 보내 확인했습니다.
+
+![실험 결과 확인하기](/images/study-nodejs-1st/7.png)
+
+**결과** : 대략 30초 정도 기다렸는데 무한 로딩이 걸렸습니다. 이후 `Abort` 버튼으로 강제 종료했고, `Request Aborted`라는 응답이 반환됐습니다.
 
 ---
 
-## Node.js 이벤트 루프: 싱글 스레드의 비밀
+# Node.js 이벤트 루프: 싱글 스레드의 비밀
 
 ### 왜 싱글 스레드인데 동시 처리가 되는가
 
-Node.js의 JavaScript 실행 스레드는 **딱 하나**다. 한 순간에 JS 코드는 하나의 작업만 실행한다.
+Node.js의 JavaScript 실행 스레드는 **딱 하나**입니다. 한 순간에 JS 코드는 하나의 작업만 실행합니다.
 
-그런데 I/O가 발생하면 이야기가 달라진다. 파일 읽기, 네트워크 요청 같은 작업을 직접 기다리지 않고 **시스템 커널 또는 libuv**에 위임한다. 작업이 끝나면 콜백이 이벤트 루프를 통해 실행 큐에 올라온다.
+그런데 I/O가 발생하면 이야기가 달라집니다. 파일 읽기, 네트워크 요청 같은 작업을 직접 기다리지 않고 **시스템 커널 또는 libuv**에 위임합니다. 작업이 끝나면 콜백이 이벤트 루프를 통해 실행 큐에 올라옵니다.
 
 | 구성 요소 | 역할 |
 |-----------|------|
 | **OS 커널** | 네트워크 소켓, TCP 연결, DB 커넥션 등 시스템 자원 관리 |
 | **libuv** | 이벤트 루프 관리, 비동기 I/O 추상화, 스레드풀 제공 |
 
-각 OS마다 비동기 I/O 방식이 다르다(Linux는 `epoll`, macOS는 `kqueue`, Windows는 `IOCP`). libuv가 이 차이를 추상화해주기 때문에, 같은 JavaScript 코드가 어느 OS에서든 동일하게 동작한다.
+각 OS마다 비동기 I/O 방식이 다릅니다(Linux는 `epoll`, macOS는 `kqueue`, Windows는 `IOCP`). libuv가 이 차이를 추상화해주기 때문에, 같은 JavaScript 코드가 어느 OS에서든 동일하게 동작합니다.
 
 ### 파일 I/O의 실제 흐름
 
@@ -175,19 +194,19 @@ app.get("/file", async (_req, res) => {
 });
 ```
 
-`readFile()`이 호출되면 JS 메인 스레드는 파일 읽기를 **libuv 스레드풀에 위임**하고, 즉시 다른 요청을 처리하러 간다. 파일 읽기가 끝나면 이벤트 루프가 Promise 후속 처리를 실행하고, 그때 `res.send()`가 호출된다.
+`readFile()`이 호출되면 JS 메인 스레드는 파일 읽기를 **libuv 스레드풀에 위임**하고, 즉시 다른 요청을 처리하러 갑니다. 파일 읽기가 끝나면 이벤트 루프가 Promise 후속 처리를 실행하고, 그때 `res.send()`가 호출됩니다.
 
-네트워크 I/O는 OS 커널이, 파일 I/O는 libuv 스레드풀이 처리한다. 메인 JS 스레드가 while문 돌면서 기다리는 게 아니라는 점이 핵심이다.
+네트워크 I/O는 OS 커널이, 파일 I/O는 libuv 스레드풀이 처리합니다. 메인 JS 스레드가 while문 돌면서 기다리는 게 아니라는 점이 핵심입니다.
 
 ---
 
 ## 이벤트 루프 실행 순서 실험
 
-이론만으로는 확신이 안 생겨서 직접 코드를 짜고 실행해봤다.
+이론만으로는 확신이 안 생겨서 직접 코드를 짜고 실행해봤습니다.
 
-### 실험 1: 동기 / Promise / Timer
+### 실험 1 : 동기 / Promise / Timer
 
-```javascript
+```typescript
 console.log("1. start");
 
 setTimeout(() => {
@@ -201,22 +220,37 @@ Promise.resolve().then(() => {
 console.log("4. end");
 ```
 
-**결과**: `1. start` → `4. end` → `3. promise then` → `2. setTimeout`
+**결과** : `1. start` → `4. end` → `3. promise then` → `2. setTimeout`
 
-동기 코드가 먼저, 마이크로태스크(Promise)가 그다음, 매크로태스크(setTimeout)가 마지막이다. `setTimeout(0)`이라고 "즉시" 실행되는 게 아니다.
+![실행 결과](/images/study-nodejs-1st/1.png)
 
-### 실험 2: setTimeout(0) vs setImmediate()
+동기 코드가 먼저, 마이크로태스크(Promise)가 그다음, 매크로태스크(setTimeout)가 마지막입니다. `setTimeout(0)`이라고 "즉시" 실행되는 게 아닙니다. 현재 실행 중인 코드가 끝나면 마이크로태스크 큐가 먼저 비워지고, 그다음 타이머 큐가 처리됩니다.
+<br />
 
-```javascript
-setTimeout(() => console.log("setTimeout"), 0);
-setImmediate(() => console.log("setImmediate"));
+
+### 실험 2 : setTimeout(0) vs setImmediate()
+
+```typescript
+console.log('start');
+
+setTimeout(() => {
+  console.log('setTimeout 0');
+}, 0);
+
+setImmediate(() => {
+  console.log('setImmediate');
+});
+
+console.log('end');
 ```
 
-메인 컨텍스트에서 실행하면 두 함수의 순서가 **비결정적**이다. 실행할 때마다 바뀔 수 있다.
+**결과** : 메인 컨텍스트에서 실행하면 두 함수의 순서가 **비결정적**입니다. 실행할 때마다 바뀔 수 있습니다. `setTimeout(0)`이 '즉시' 실행되지는 않습니다.
 
-하지만 **I/O 콜백 내부**에서는 이야기가 다르다.
+![실행 결과](/images/study-nodejs-1st/2.png)
 
-```javascript
+하지만 **I/O 콜백 내부**에서는 이야기가 다릅니다.
+
+```typescript
 import fs from "node:fs";
 
 fs.readFile(import.meta.url, () => {
@@ -225,11 +259,15 @@ fs.readFile(import.meta.url, () => {
 });
 ```
 
-I/O 콜백 내부에서는 `setImmediate`가 **항상 먼저** 실행된다. I/O 콜백이 처리되는 poll phase 직후가 check phase(setImmediate 실행 단계)이기 때문이다.
+**결과** : I/O 콜백 이후에는 check phase의 `setImmediate`가 timer보다 먼저 실행됩니다. poll phase 직후가 check phase이기 때문입니다.
 
-### 실험 3: process.nextTick() 우선순위
+![실행 결과](/images/study-nodejs-1st/3.png)
 
-```javascript
+<br />
+
+### 실험 3 : process.nextTick() 우선순위
+
+```cjs
 // node event-loop.cjs 로 실행 (순수 Node.js CJS 환경)
 console.log("start");
 
@@ -241,18 +279,22 @@ process.nextTick(() => console.log("nextTick"));
 console.log("end");
 ```
 
-**결과**: `start` → `end` → `nextTick` → `promise then` → `setTimeout` / `setImmediate`
+**결과** : `start` → `end` → `nextTick` → `promise then` → `setTimeout` / `setImmediate` (순수 `node` 환경 기준)
 
-`process.nextTick()`은 현재 호출 스택이 완료된 직후, 이벤트 루프의 다음 phase로 넘어가기 전에 실행된다.
+![실행 결과](/images/study-nodejs-1st/5.png)
 
-### 주의: 실행 환경에 따라 결과가 달라진다
+`process.nextTick()`은 현재 호출 스택이 완료된 직후, 이벤트 루프의 다음 phase로 넘어가기 전에 실행됩니다. [Node.js 공식 문서](https://nodejs.org/ko/learn/asynchronous-work/understanding-processnexttick)에 따르면 "대기 중인 다른 작업이나 단계가 처리되기 전에 해당 함수가 실행되도록 예약"됩니다.
 
-같은 코드를 `tsx`로 실행하면 `promise then`이 `nextTick`보다 **먼저** 출력되는 현상이 발생했다. 원인을 추적해보니 두 가지였다.
+### 주의: 실행 환경에 따라 결과가 달라집니다
 
-- **ESM 모듈 시스템**은 코드 실행 전부터 Promise 환경(마이크로태스크 큐) 안에서 동작한다
-- **tsx**는 코드 변환 시 비동기 래퍼로 감싸 실행하므로, Promise.then의 우선순위가 달라질 수 있다
+같은 코드를 `tsx`로 실행하면 `promise then`이 `nextTick`보다 **먼저** 출력되는 현상이 발생했습니다. 원인을 추적해보니 두 가지였습니다.
 
-순수 `node` 명령어 + CJS로 다시 실행하니 이론대로 `nextTick`이 먼저 실행되었다.
+![실행 결과](/images/study-nodejs-1st/4.png)
+
+- **ESM 모듈 시스템**은 코드 실행 전부터 Promise 환경(마이크로태스크 큐) 안에서 동작합니다
+- **tsx**는 코드 변환 시 비동기 래퍼로 감싸 실행하므로, `Promise.then`의 우선순위가 달라질 수 있습니다
+
+순수 `node` 명령어 + CJS로 다시 실행하니 이론대로 `nextTick`이 먼저 실행됐습니다.
 
 ```bash
 # tsx — promise then이 먼저 (비동기 래퍼 영향)
@@ -262,17 +304,19 @@ pnpm tsx src/playground/event-loop.cjs
 node src/playground/event-loop.cjs
 ```
 
-**교훈**: 이벤트 루프의 실행 순서를 검증할 때는 반드시 **순수 Node.js 환경**(CJS + node 명령어)에서 돌려야 한다. 실행 도구, 모듈 시스템, Node.js 버전에 따라 미묘하게 순서가 바뀔 수 있기 때문이다.
+![실행 결과](/images/study-nodejs-1st/6.png)
+
+**교훈** : 이벤트 루프의 실행 순서를 검증할 때는 반드시 **순수 Node.js 환경**(CJS + node 명령어)에서 돌려야 합니다. 실행 도구, 모듈 시스템, Node.js 버전에 따라 미묘하게 순서가 바뀔 수 있기 때문입니다.
 
 ---
 
 ## 마치며
 
-Express 미들웨어 체인과 Node.js 이벤트 루프는 처음에 각각 따로 느껴졌지만, 결국 하나의 흐름으로 연결된다. 요청이 들어오면 이벤트 루프가 이를 감지하고, Express 미들웨어 체인이 순차적으로 처리하며, I/O가 필요하면 다시 이벤트 루프에 위임하는 구조다.
+Express 미들웨어 체인과 Node.js 이벤트 루프는 처음에 각각 따로 느껴졌지만, 결국 하나의 흐름으로 연결됩니다. 요청이 들어오면 이벤트 루프가 이를 감지하고, Express 미들웨어 체인이 순차적으로 처리하며, I/O가 필요하면 다시 이벤트 루프에 위임하는 구조입니다.
 
-직접 실험하면서 두 가지가 확실히 와닿았다.
+직접 실험하면서 두 가지가 확실히 와닿았습니다.
 
 - 에러 미들웨어의 인자 4개 규칙은 Express가 `.length`로 구분하기 때문이라는 것
 - `process.nextTick`의 우선순위는 **실행 환경에 따라 달라질 수 있다**는 것
 
-다음 글에서는 CJS와 ESM의 모듈 로딩 메커니즘 차이를 더 깊이 파볼 예정이다.
+다음 글에서는 HTTP 기본기에 대해 정리할 예정입니다.
