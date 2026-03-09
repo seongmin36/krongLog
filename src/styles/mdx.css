@@ -18,7 +18,7 @@
 
 .dark .prose :not(pre) > code {
   background-color: #2a2d35;
-  color: #f0a8b8;
+  color: var(--color-dark-text);
 }
 
 /* backtick(`) 제거 */
@@ -175,7 +175,7 @@
 }
 
 .dark [data-note] {
-  border-bottom: 1.5px solid var(--color-);
+  border-bottom: 1.5px solid var(--color-dark-text);
 }
 
 [data-note]::after {
@@ -190,7 +190,7 @@
   line-height: 1.5;
   padding: 8px 12px;
   border-radius: 6px;
-  white-space: normal;
+  white-space: pre-line;
   width: max-content;
   max-width: 320px;
   z-index: 50;

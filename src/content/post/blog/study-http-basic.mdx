@@ -12,7 +12,7 @@ Express로 API를 만들면서 자연스럽게 HTTP 스펙을 다시 들여다�
 
 > Header에 들어가는 정보가 이렇게 많은데, 역할 구분이 어떻게 되는 거지?
 
-이 글에서는 HTTP 메서드 9종의 역할, 상태 코드 체계, 그리고 Header·Body의 구조를 정리합니다.
+이 글에서는 HTTP 메서드 9종의 역할, 상태 코드 체계, 그리고 Header와 Body의 구조를 정리합니다.
 
 ---
 
@@ -23,41 +23,18 @@ Express로 API를 만들면서 자연스럽게 HTTP 스펙을 다시 들여다�
 | 메서드 | 역할 | 멱등성 |
 |--------|------|--------|
 | `GET` | 리소스 조회. 데이터를 가져올 때만 사용 | O |
-| `POST` | 리소스 생성·제출. 서버 상태를 변경할 수 있음 | X |
+| `POST` | 리소스 생성, 제출. 서버 상태를 변경할 수 있음 | X |
 | `PUT` | 리소스 전체 교체. 없으면 생성 | O |
 | `PATCH` | 리소스 부분 수정 | X |
 | `DELETE` | 리소스 삭제 | O |
 
-여기서 핵심은 <span data-note="동일한 요청을 한 번 보내는 것과 여러 번 보내는 것이 같은 효과를 지니고, 서버의 상태도 동일하게 남을 때 '멱등하다'고 합니다.">**멱등성(Idempotency)**</span> 입니다. 동일한 요청을 한 번 보내든 여러 번 보내든 서버의 상태가 동일하게 남으면 멱등하다고 합니다.
+여기서 핵심은 <span data-note="동일한 요청을 한 번 보내는 것과 여러 번 보내는 것이 같은 효과를 지니고, 서버의 상태도 동일하게 남을 때 '멱등하다'고 합니다.">**멱등성(Idempotency)**</span>입니다. 동일한 요청을 한 번 보내든 여러 번 보내든 서버의 상태가 동일하게 남으면 멱등하다고 합니다.
 
 `PUT`은 멱등합니다. 같은 데이터를 여러 번 보내도 결과가 동일합니다. 반면 `PATCH`는 멱등하지 않을 수 있습니다. 예를 들어 사용자의 주소를 수정하면 배송비 재계산 로직이 실행되는 식으로 side effect가 발생할 수 있기 때문입니다.
 
 `POST`도 기본적으로 멱등하지 않지만, 실무에서 멱등성을 보장해야 하는 경우가 있습니다. 대표적으로 <span data-note="클라이언트가 요청마다 고유한 멱등키를 헤더에 담아 보내고, 서버는 이 키를 확인해 이미 처리된 요청인지 체크하는 방식을 사용합니다.">**결제 중복 클릭 방지**</span>가 있습니다. 클라이언트가 요청마다 고유한 멱등키(Idempotency Key)를 헤더에 담아 보내고, 서버는 이 키로 이미 처리된 요청인지 체크하는 방식을 사용합니다.
 
-### POST와 PUT의 차이
-
-`POST`와 `PUT`의 차이는 결국 멱등성입니다. `POST`는 호출할 때마다 새 리소스가 생길 수 있고, `PUT`은 몇 번을 호출해도 같은 결과를 보장합니다. 본문의 유형은 `Content-Type` 헤더로 나타냅니다.
-
-### PUT과 PATCH의 차이
-
-`PUT`은 리소스 **전체를 교체**합니다. 반면 `PATCH`는 **부분만 수정**합니다. CORS 환경에서 `PATCH`를 사용하려면 서버가 `Access-Control-Allow-Methods` 헤더에 `PATCH`를 포함해야 합니다. 브라우저가 preflight 요청으로 "PATCH 써도 되나요?"라고 물어볼 때 서버가 허용해줘야 통신이 가능합니다.
-
-### 덜 쓰이지만 알아야 하는 4가지
-
-**HEAD** — `GET`과 동일하지만 응답 바디 없이 **상태줄과 헤더만** 돌려줍니다. 파일 크기 확인이나 리소스 존재 여부 체크처럼 바디가 필요 없는 경우에 사용합니다.
-
-**OPTIONS** — 서버가 허용하는 통신 옵션을 확인합니다. 브라우저의 CORS **preflight 요청**이 바로 이 메서드입니다. <span data-note="프로토콜 + 도메인 + 포트 세 가지가 모두 같아야 Same Origin입니다. 비슷한 용어로 SameSite가 있는데, 이쪽은 도메인만 같으면 되며 주로 쿠키 보안 설정에서 CSRF 공격 방지용으로 쓰입니다.">**Same-Origin Policy**</span>를 벗어나는 요청을 보내기 전에, 브라우저가 먼저 OPTIONS로 "이 요청 보내도 되는지" 확인합니다.
-
-**CONNECT** — 프록시 서버에 TCP 터널을 열어달라고 요청하는 메서드입니다. <span data-note="데이터가 한 장비에서 다음 장비로 건너가는 한 단위를 홉(Hop)이라 합니다. CONNECT는 클라이언트 바로 앞의 프록시 서버에만 전달되고, 최종 목적지까지 가지 않습니다. 면접 포인트: 프록시 환경에서 HTTPS 통신 시, 클라이언트가 CONNECT로 TCP 터널 생성을 요청하면 프록시는 데이터를 복호화하지 않고 전달만 하여 보안성을 유지합니다.">**홉바이홉(Hop-by-hop)**</span> 메서드로, 최종 목적지 서버까지 전달되지 않고 프록시 선에서 처리됩니다. HTTPS 사이트에 접속할 때 프록시가 암호화된 데이터를 들여다보지 못하도록 터널을 형성하는 데 쓰입니다.
-
-```text
-클라이언트 → CONNECT 목적지:443 → 프록시
-프록시 → 목적지 서버와 TCP 연결
-연결 완료 → 프록시는 데이터를 그냥 통과(Proxying)
-클라이언트 ↔ 암호화된 터널 ↔ 목적지 서버
-```
-
-**TRACE** — 요청이 서버에 도달하기까지 중간 프록시/게이트웨이가 요청을 어떻게 수정했는지 확인하는 루프백 테스트용 메서드입니다. 다만 보안 문제가 있습니다. 해커가 자바스크립트로 `TRACE` 요청을 보내면, 서버가 요청 헤더에 담긴 **모든 정보(쿠키 포함)** 를 응답 바디에 그대로 담아 보내버립니다. 이를 **XST(Cross-Site Tracing)** 공격이라 하며, HttpOnly 쿠키까지 탈취될 수 있어 대부분의 서버에서 비활성화합니다.
+`PUT`은 리소스 **전체를 교체**하고 `PATCH`는 **부분만 수정**합니다. 본문의 유형은 `Content-Type` 헤더로 나타냅니다. CORS 환경에서 `PATCH`를 사용하려면 서버가 `Access-Control-Allow-Methods` 헤더에 `PATCH`를 포함해야 합니다. 브라우저가 preflight 요청으로 "PATCH 써도 되나요?"라고 물어볼 때 서버가 허용해줘야 통신이 가능합니다.
 
 ### 엔티티(Entity)란?
 
@@ -67,19 +44,28 @@ HTTP 맥락에서 엔티티는 클라이언트가 서버로 보내는 **실제 �
 
 | 맥락 | 의미 |
 |------|------|
-| **HTTP 엔티티** | 요청·응답에 실려 전송되는 실제 데이터 |
+| **HTTP 엔티티** | 요청, 응답에 실려 전송되는 실제 데이터 |
 | **DB 엔티티** | 테이블 구조로 정의된 객체. 사용자 입력값 + 시스템 값 포함 |
 | **HTML 엔티티** | `&amp;`처럼 `&`로 시작하고 `;`로 끝나는 특수문자 표현 |
 
-<span data-note="DB 엔티티에만 담기고 HTTP 엔티티에는 담기지 않는 값의 예시입니다.">DB 엔티티에는 createdAt, id 같은 시스템 값이 포함</span>되지만, HTTP 엔티티(요청 바디)에는 담기지 않습니다.
+DB 엔티티에는 `createdAt`, `id` 같은 <span data-note="DB 엔티티에만 담기고 HTTP 엔티티에는 담기지 않는 값의 예시입니다.">시스템 값</span>이 포함되지만, HTTP 엔티티(요청 바디)에는 담기지 않습니다.
 
-### Content-Type과 MIME Sniffing
+### 덜 쓰이지만 알아야 하는 4가지
 
-`Content-Type` 헤더는 리소스의 미디어 타입을 나타냅니다. 원래 <span data-note="파일의 형식을 나타내는 문자열로, 파일과 함께 송신되어 content의 형식을 나타내기 위해 사용됩니다.">**MIME Type**</span>이라 불렸으며, 파일의 형식을 나타내는 문자열로 content와 함께 전송됩니다.
+**HEAD** — `GET`과 동일하지만 응답 바디 없이 **상태줄과 헤더만** 돌려줍니다. 파일 크기 확인이나 리소스 존재 여부 체크처럼 바디가 필요 없는 경우에 사용합니다.
 
-문제는 <span data-note="공격자가 악성 JS를 이미지 파일로 속여 올리면, 서버는 Content-Type: image/png라고 인식하지만, 브라우저는 JS 코드로 인식하여 실행해버립니다.">**MIME Sniffing**</span>입니다. 일부 브라우저가 서버의 `Content-Type`을 무시하고 자체적으로 미디어 타입을 추측하는 동작입니다. 공격자가 악성 JavaScript를 이미지 파일로 속여 올리면, 서버는 `Content-Type: image/png`로 보내지만, 브라우저는 JavaScript로 인식해 실행해버릴 수 있습니다.
+**OPTIONS** — 서버가 허용하는 통신 옵션을 확인합니다. 브라우저의 CORS **preflight 요청**이 바로 이 메서드입니다. <span data-note="프로토콜 + 도메인 + 포트 세 가지가 모두 같아야 Same Origin입니다. 비슷한 용어로 SameSite가 있는데, 이쪽은 도메인만 같으면 되며 주로 쿠키 보안 설정에서 CSRF 공격 방지용으로 쓰입니다.">**Same-Origin Policy**</span>를 벗어나는 요청을 보내기 전에, 브라우저가 먼저 OPTIONS로 "이 요청 보내도 되는지" 확인합니다.
 
-이를 막기 위해 `X-Content-Type-Options: nosniff` 헤더를 사용합니다. 브라우저에게 "서버가 지정한 Content-Type을 그대로 따르라"고 강제하는 보안 헤더입니다.
+**CONNECT** — 프록시 서버에 TCP 터널을 열어달라고 요청하는 메서드입니다. <span data-note="데이터가 한 장비에서 다음 장비로 건너가는 한 단위를 홉(Hop)이라 합니다.&#10;CONNECT는 클라이언트 바로 앞의 프록시 서버에만 전달되고, 최종 목적지까지 가지 않습니다.">**홉바이홉(Hop-by-hop)**</span> 메서드로, 최종 목적지 서버까지 전달되지 않고 프록시 선에서 처리됩니다. HTTPS 사이트에 접속할 때 프록시가 암호화된 데이터를 들여다보지 못하도록 터널을 형성하는 데 쓰입니다.
+
+```text
+클라이언트 → CONNECT 목적지:443 → 프록시
+프록시 → 목적지 서버와 TCP 연결
+연결 완료 → 프록시는 데이터를 그냥 통과(Proxying)
+클라이언트 ↔ 암호화된 터널 ↔ 목적지 서버
+```
+
+**TRACE** — 요청이 서버에 도달하기까지 중간 프록시/게이트웨이가 요청을 어떻게 수정했는지 확인하는 루프백 테스트용 메서드입니다.<br />다만 보안 문제가 있습니다. 해커가 자바스크립트로 `TRACE` 요청을 보내면, 서버가 요청 헤더에 담긴 **모든 정보**를 응답 바디에 그대로 담아 보내버립니다. 이를 **XST(Cross-Site Tracing)** 공격이라 하며, HttpOnly 쿠키까지 탈취될 수 있어 대부분의 서버에서 비활성화합니다.
 
 ---
 
@@ -114,20 +100,20 @@ HTTP 맥락에서 엔티티는 클라이언트가 서버로 보내는 **실제 �
 
 ### Header의 역할
 
-HTTP 헤더는 클라이언트와 서버가 요청·응답에 **부가적인 정보를 전송**할 수 있도록 해줍니다. 헤더는 역할에 따라 4가지로 분류됩니다.
+HTTP 헤더는 클라이언트와 서버가 요청, 응답에 **부가적인 정보를 전송**할 수 있도록 해줍니다. 헤더는 역할에 따라 4가지로 분류됩니다.
 
 | 종류 | 역할 |
 |------|------|
-| **일반 헤더** | 요청·응답 모두에 적용. 바디 데이터와 직접 관련 없음 |
+| **일반 헤더** | 요청, 응답 모두에 적용. 바디 데이터와 직접 관련 없음 |
 | **요청 헤더** | 클라이언트 정보, 인증, 선호 형식 등을 서버에 전달 |
 | **응답 헤더** | 서버 정보, 허용 메서드 등을 클라이언트에 전달 |
 | **표현 헤더** | 바디 데이터의 형식, 언어, 인코딩 등을 설명 |
 
-> 표현 헤더와 응답 헤더는 헷갈리기 쉽습니다. 서버가 보낸 메시지에 들어있으면 무조건 '응답 헤더'라고 부르기 쉽지만, HTTP 표준에서는 **역할에 따라 분류**합니다. 응답 메시지 안에 있더라도 데이터(Content)를 설명하는 헤더는 '표현 헤더'입니다.
+> 표현 헤더와 응답 헤더는 헷갈리기 쉽습니다. 서버가 보낸 메시지에 들어있으면 무조건 '응답 헤더'라고 부르기 쉽지만, HTTP 표준에서는 **역할에 따라 분류**합니다. 응답 메시지 안에 있더라도 데이터(Content)를 설명하는 헤더는 '표현 헤더'입니다. — [MDN : 응답 헤더](https://developer.mozilla.org/ko/docs/Glossary/Response_header)
 
 ### 일반 헤더 (General Header)
 
-```json
+```http
 Date: Mon, 18 Jul 2016 16:06:00 GMT
 Connection: keep-alive
 Cache-Control: no-cache, max-age=3600
@@ -142,7 +128,7 @@ Cache-Control: no-cache, max-age=3600
 
 ### 요청 헤더 (Request Header)
 
-```json
+```http
 Host: www.example.com
 User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; ...)
 Accept: text/html, application/json
@@ -155,7 +141,7 @@ Authorization: Bearer xxx.xxx.xxx
 
 ### 응답 헤더 (Response Header)
 
-```json
+```http
 Server: nginx/1.10.2
 Allow: GET, POST, PUT
 Content-Disposition: attachment; filename="report.pdf"
@@ -165,7 +151,7 @@ Content-Disposition: attachment; filename="report.pdf"
 
 ### 표현 헤더 (Representation Header)
 
-```json
+```http
 Content-Type: text/html; charset=utf-8
 Content-Encoding: gzip
 Content-Language: ko-KR
@@ -176,13 +162,39 @@ Content-Length: 3495
 - `Content-Type: text/html` — 원래 데이터의 정체
 - `Content-Encoding: gzip` — 현재 압축 상태
 
+실제 응답 헤더는 이렇게 생겼습니다.
+
+```http
+200 OK
+Access-Control-Allow-Origin: *
+Connection: Keep-Alive
+Content-Encoding: gzip
+Content-Type: text/html; charset=utf-8
+Date: Mon, 18 Jul 2016 16:06:00 GMT
+Etag: "c561c68d0ba92bbeb8b0f612a9199f722e3a621a"
+Keep-Alive: timeout=5, max=997
+Last-Modified: Mon, 18 Jul 2016 02:36:04 GMT
+Server: Apache
+Set-Cookie: mykey=myvalue; expires=Mon, 17-Jul-2017 16:06:00 GMT; Max-Age=31449600; Path=/; secure
+Transfer-Encoding: chunked
+x-frame-options: DENY
+```
+
+### Content-Type과 MIME Sniffing
+
+`Content-Type` 헤더는 리소스의 미디어 타입을 나타냅니다. 원래 <span data-note="파일의 형식을 나타내는 문자열로, 파일과 함께 송신되어 content의 형식을 나타내기 위해 사용됩니다.">**MIME Type**</span>이라 불렸으며, 파일의 형식을 나타내는 문자열로 content와 함께 전송됩니다.
+
+문제는 <span data-note="공격자가 악성 JS를 이미지 파일로 속여 올리면, 서버는 Content-Type: image/png라고 인식하지만, 브라우저는 JS 코드로 인식하여 실행해버립니다.">**MIME Sniffing**</span>입니다. 일부 브라우저가 서버의 `Content-Type`을 무시하고 자체적으로 미디어 타입을 추측하는 동작입니다. 공격자가 악성 JavaScript를 이미지 파일로 속여 올리면, 서버는 `Content-Type: image/png`로 보내지만, 브라우저는 JavaScript로 인식해 실행해버릴 수 있습니다.
+
+이를 막기 위해 `X-Content-Type-Options: nosniff` 헤더를 사용합니다. 브라우저에게 "서버가 지정한 Content-Type을 그대로 따르라"고 강제하는 보안 헤더입니다.
+
 ### Body의 역할
 
 Body는 서버와 클라이언트가 실제로 주고 받으려는 **데이터 그 자체**입니다. JSON, HTML, 이미지, 파일 등 다양한 형태가 될 수 있으며, 어떤 형태인지를 `Content-Type` 헤더로 알립니다.
 
 ### 콘텐츠 협상
 
-클라이언트와 서버가 "어떤 형태의 데이터를 주고 받을지" 합의하는 과정을 **콘텐츠 협상(Content Negotiation)** 이라 합니다.
+클라이언트와 서버가 "어떤 형태의 데이터를 주고 받을지" 합의하는 과정을 <strong>콘텐츠 협상(Content Negotiation)</strong>이라 합니다.
 
 - **서버 주도** — 클라이언트가 `Accept` 헤더로 선호 형식을 알리면, 서버가 적절한 표현을 선택합니다. 빠르지만, 헤더가 많아지고 개인정보 노출 위험이 있습니다.
 - **에이전트 주도** — 서버가 선택지 목록을 보내고 클라이언트가 고릅니다. 깔끔하지만, 여러 번 왔다 갔다 해야 해서 느립니다.
@@ -191,11 +203,11 @@ Body는 서버와 클라이언트가 실제로 주고 받으려는 **데이터 �
 
 ## 마치며
 
-HTTP 메서드, 상태 코드, Header·Body는 결국 클라이언트와 서버가 **어떻게 대화하는지**를 정의하는 규약입니다. Express로 API를 만들 때 이 기본기를 알고 있으면, 라우트 설계부터 에러 핸들링까지 더 명확한 판단을 내릴 수 있습니다.
+HTTP 메서드, 상태 코드, Header와 Body는 결국 클라이언트와 서버가 **어떻게 대화하는지**를 정의하는 규약입니다. Express로 API를 만들 때 이 기본기를 알고 있으면, 라우트 설계부터 에러 핸들링까지 더 명확한 판단을 내릴 수 있습니다.
 
 정리하면서 확실히 와닿은 점은:
 
 - 멱등성은 단순한 개념이 아니라, 결제 중복 방지처럼 **실무 설계에 직접 영향을 주는 속성**이라는 것
 - Header는 단순히 "부가 정보"가 아니라, 보안(`X-Content-Type-Options`), 캐싱(`Cache-Control`), 인증(`Authorization`) 등 **서버 동작을 결정하는 핵심 요소**라는 것
 
-다음 글에서는 콘텐츠 협상과 에이전트 주도 협상에 대해 자세히 알아보겠습니다.
+다음 글에서는 콘텐츠 협상과 에이전트 주도 협상에 대해 자세히 정리할 예정입니다.
