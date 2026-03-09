@@ -5,7 +5,14 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
 import svgr from "vite-plugin-svgr";
-import {transformerMetaHighlight} from "@shikijs/transformers";
+import {
+  transformerMetaHighlight,
+  transformerMetaWordHighlight,
+  transformerNotationDiff,
+  transformerNotationErrorLevel,
+  transformerNotationFocus,
+  transformerNotationHighlight,
+} from "@shikijs/transformers";
 
 export default defineConfig({
   output: "static",
@@ -23,9 +30,10 @@ export default defineConfig({
         dark: "github-dark",
       },
       // 긴 코드라인 자동 줄바꿈 (가로 스크롤 방지)
-      wrap: true,
+      // wrap: true,
       langs: [
         "tsx",
+        "jsx",
         "javascript",
         "typescript",
         "json",
@@ -40,9 +48,23 @@ export default defineConfig({
         "c",
         "cpp",
         "csharp",
+        "bash",
+        "shell",
+        "sql",
+        "yaml",
+        "markdown",
+        "diff",
+        "docker",
+        "go",
+        "rust",
       ],
       transformers: [
         transformerMetaHighlight(),
+        transformerMetaWordHighlight(),
+        transformerNotationDiff(),
+        transformerNotationErrorLevel(),
+        transformerNotationFocus(),
+        transformerNotationHighlight(),
       ],
     },
   },

@@ -10,6 +10,7 @@
 
   --color-primary: #3B7A57;
   --color-dark: #121212;
+  --color-description: #6B7684;
 
   /* 브랜드 컬러 토큰 */
   --color-tag-react: #087EA4;
@@ -83,31 +84,28 @@
   font-display: swap;
 }
 
-/* 라이트 모드 (기본) */
-.astro-code,
-.astro-code span {
-  color: var(--shiki-light) !important;
+.astro-code {
   background-color: var(--shiki-light-bg) !important;
   font-style: var(--shiki-light-font-style) !important;
   font-weight: var(--shiki-light-font-weight) !important;
   text-decoration: var(--shiki-light-text-decoration) !important;
 }
 
+/* 라이트 모드 코드 블럭 배경을 GitHub 실제 배경색으로 */
+.astro-code {
+  --shiki-light-bg: #f6f8fa !important;
+}
+
 /* 다크 모드 (.dark 클래스 토글) */
-.dark .astro-code,
+.dark .astro-code {
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+}
+
 .dark .astro-code span {
   color: var(--shiki-dark) !important;
-  background-color: var(--shiki-dark-bg) !important;
   font-style: var(--shiki-dark-font-style) !important;
   font-weight: var(--shiki-dark-font-weight) !important;
   text-decoration: var(--shiki-dark-text-decoration) !important;
 }
 
-/* 코드 블록 공통 스타일 */
-.astro-code {
-  padding: 1.25rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  line-height: 1.7;
-  overflow-x: auto;
-}
