@@ -18,9 +18,10 @@ const { Content } = await render(post);
 const { title, description, date, tags, image } = post.data;
 
 const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
 ---
 
-<BaseLayout title={`${title} — Krong Dev.`} description={description}>
+<BaseLayout title={`${title} — Krong Dev.`} description={description} ogImage={ogImage}>
   <article class="max-w-[720px] mx-auto pt-12 pb-20 sm:pt-16">
     <!-- 글 헤더 -->
     <header class="mb-8 sm:mb-10 border-b border-gray-100 dark:border-gray-800 pb-8">
