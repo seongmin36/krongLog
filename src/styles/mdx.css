@@ -1,3 +1,58 @@
+/* 링크: hover 시에만 underline */
+.prose a {
+  text-decoration: none;
+}
+.prose a:hover {
+  text-decoration: underline;
+}
+
+/* 인라인 코드 스타일 */
+.prose :not(pre) > code {
+  background-color: #f1f3f5;
+  color: var(--color-primary);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+  font-weight: 700;
+}
+
+.dark .prose :not(pre) > code {
+  background-color: #2a2d35;
+  color: #f0a8b8;
+}
+
+/* backtick(`) 제거 */
+.prose :not(pre) > code::before,
+.prose :not(pre) > code::after {
+  content: "" !important;
+}
+
+/* Shiki 코드 블록 스타일 */
+.astro-code {
+  background-color: var(--shiki-light-bg) !important;
+  font-style: var(--shiki-light-font-style) !important;
+  font-weight: var(--shiki-light-font-weight) !important;
+  text-decoration: var(--shiki-light-text-decoration) !important;
+}
+
+/* 라이트 모드 코드 블럭 배경을 GitHub 실제 배경색으로 */
+.astro-code {
+  --shiki-light-bg: #f6f8fa !important;
+}
+
+/* 다크 모드 (.dark 클래스 토글) */
+.dark .astro-code {
+  background-color: var(--shiki-dark-bg) !important;
+  color: var(--shiki-dark) !important;
+}
+
+.dark .astro-code span {
+  color: var(--shiki-dark) !important;
+  font-style: var(--shiki-dark-font-style) !important;
+  font-weight: var(--shiki-dark-font-weight) !important;
+  text-decoration: var(--shiki-dark-text-decoration) !important;
+}
+
 [data-tag] {
   @apply bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400;
 }
@@ -109,4 +164,44 @@
 /* 팔레트: purple */
 [data-tag="Serverless"] {
   @apply bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300;
+}
+
+
+/* CSS-only 툴팁 (data-note 속성) */
+[data-note] {
+  position: relative;
+  border-bottom: 1.5px solid var(--color-primary);
+  cursor: help;
+}
+
+.dark [data-note] {
+  border-bottom: 1.5px solid var(--color-);
+}
+
+[data-note]::after {
+  content: attr(data-note);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1f2937;
+  color: #f3f4f6;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  white-space: normal;
+  width: max-content;
+  max-width: 320px;
+  z-index: 50;
+  pointer-events: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+[data-note]:hover::after {
+  opacity: 1;
+  visibility: visible;
 }
