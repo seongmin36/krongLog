@@ -1,0 +1,64 @@
+name: "📄 문서 생성"
+description: "블로그 글 작성, 수정, 보완 요청"
+title: "[Docs] "
+labels: ["docs"]
+body:
+  - type: dropdown
+    id: doc-type
+    attributes:
+      label: "문서 유형"
+      description: "이 이슈가 해당하는 작업 유형을 선택해주세요."
+      options:
+        - "✍️ 새 글 작성"
+        - "🔧 기존 글 수정"
+        - "➕ 내용 보완"
+        - "🗑️ 글 삭제 / 비공개 처리"
+    validations:
+      required: true
+
+  - type: input
+    id: post-title
+    attributes:
+      label: "글 제목 (또는 예정 제목)"
+      placeholder: "예: Next.js App Router 완전 정복"
+    validations:
+      required: true
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: "작업 개요"
+      description: "어떤 내용을 다룰 글인지, 혹은 어떤 부분을 고치려는 건지 간략히 설명해주세요."
+      placeholder: |
+        예: App Router의 layout.tsx / page.tsx 동작 방식을 처음 접하는 사람도 이해할 수 있도록 정리.
+        기존 글의 경우 코드 예시가 outdated 되어 최신 문법으로 교체 필요.
+
+  - type: textarea
+    id: outline
+    attributes:
+      label: "목차 또는 수정 포인트 (선택)"
+      description: "작성 예정인 목차나, 수정이 필요한 섹션을 나열해주세요."
+      placeholder: |
+        1. App Router란?
+        2. layout.tsx vs page.tsx 차이
+        3. 중첩 레이아웃 예시
+        4. 마무리
+      render: markdown
+
+  - type: textarea
+    id: references
+    attributes:
+      label: "참고 자료 (선택)"
+      description: "참고할 공식 문서, 링크, 레퍼런스 글 등을 첨부해주세요."
+      placeholder: |
+        - https://nextjs.org/docs/app/building-your-application/routing
+        - 이전 작성 글: #12
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: "작업 전 체크리스트"
+      options:
+        - label: "중복 이슈가 없는지 확인했습니다."
+        - label: "글의 방향성과 대상 독자를 정했습니다."
+        - label: "참고 자료를 최소 1개 이상 확보했습니다."
