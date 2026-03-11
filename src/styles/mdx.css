@@ -1,3 +1,12 @@
+/* MDX 본문 내 첨부 이미지 */
+.prose img {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+.dark .prose img {
+  border-color: #374151;
+}
+
 /* 링크: hover 시에만 underline */
 .prose a {
   text-decoration: none;
@@ -73,11 +82,11 @@
 
 /* Astro 그라디언트 */
 [data-tag="Astro"] {
-  @apply text-white font-semibold;
+  @apply font-semibold text-white;
   background: var(--background-image-gradient-astro);
 }
 .dark [data-tag="Astro"] {
-  @apply text-pink-100 font-semibold;
+  @apply font-semibold text-pink-100;
   background: var(--background-image-gradient-astro-dark);
 }
 
@@ -166,7 +175,6 @@
   @apply bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300;
 }
 
-
 /* CSS-only 툴팁 (data-note 속성) */
 [data-note] {
   position: relative;
@@ -198,7 +206,9 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease, visibility 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    visibility 0.15s ease;
 }
 
 [data-note]:hover::after {
