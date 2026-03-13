@@ -1,0 +1,26 @@
+name: "✨ Feature"
+description: "블로그에 새로운 기능 추가 요청"
+title: "[Feature] "
+labels: ["feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: "어떤 불편함이 있나요?"
+      placeholder: "예: 태그 필터가 없어서 글을 찾기 불편합니다."
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: "어떤 기능을 원하나요?"
+      placeholder: "예: 글 목록 상단에 태그 필터 버튼 추가"
+    validations:
+      required: true
+
+  - type: input
+    id: reference
+    attributes:
+      label: "참고 레퍼런스 (선택)"
+      placeholder: "https://..."
