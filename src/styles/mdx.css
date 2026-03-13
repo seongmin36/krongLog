@@ -182,16 +182,6 @@
   @apply bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300;
 }
 
-/* 툴팁 (data-note 속성) */
-[data-note] {
-  @apply relative cursor-help;
-  border-bottom: 1.5px solid var(--color-primary);
-}
-
-.dark [data-note] {
-  border-bottom-color: var(--color-dark-text);
-}
-
 [data-note]::after {
   @apply pointer-events-none absolute z-50 max-w-xs rounded-md px-3 py-2 text-xs leading-relaxed shadow-lg;
   background-color: var(--tootip-light);

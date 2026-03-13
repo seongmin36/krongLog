@@ -24,7 +24,7 @@ const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
 <BaseLayout title={`${title} — Krong Dev.`} description={description} ogImage={ogImage}>
   <article class="max-w-[720px] mx-auto pt-12 pb-20 sm:pt-16">
     <!-- 글 헤더 -->
-    <header class="mb-8 sm:mb-10 border-b border-gray-100 dark:border-gray-800 pb-8">
+    <header class="mb-8 sm:mb-10 border-b border-gray-300 dark:border-gray-600 pb-8">
       {tags && tags.length > 0 && (
         <div class="flex flex-wrap gap-1.5 mb-4">
           {tags.map((tag: string) => <Tag name={tag} size="sm" />)}

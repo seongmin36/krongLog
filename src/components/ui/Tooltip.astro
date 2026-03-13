@@ -1,0 +1,14 @@
+---
+interface TooltipProps {
+  note: string;
+}
+
+const { note } = Astro.props;
+---
+
+<span
+  data-note={note}
+  class="border-primary dark:border-dark-text relative cursor-help border-b-[1.5px]"
+>
+  <slot />
+</span>
