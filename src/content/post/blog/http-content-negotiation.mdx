@@ -3,7 +3,7 @@ title: "HTTP 콘텐츠 협상과 Vary 헤더"
 description: "서버 주도 협상과 에이전트 주도 협상의 동작 원리, 그리고 Vary 헤더가 캐시 정합성을 보장하는 방식을 정리합니다."
 date: "2026-03-11"
 tags: ["Backend", "HTTP"]
-image: "./images/img-http-content-negotiation.png"
+image: "./images/img-http-content-negotiation.jpg"
 ---
 
 import Tooltip from "@/components/ui/Tooltip.astro";
@@ -20,8 +20,10 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 # 콘텐츠 협상이란
 
-<Tooltip note="HTML 페이지 혹은 이미지나 비디오 또는 스크립트들을 가져오는 것처럼, 컨텍스트에 따라 다양해질 수 있습니다.">**표현 헤더**</Tooltip>에서 클라이언트는 `Accept-*` 헤더를 사용해 전송받기를 선호하는 형식을 지정하고, 서버는 실제로 선택한
-<Tooltip note="표현(Representation)이라는 단어를 쓴 이유는 리소스는 하나지만, 그것을 보여주는 방법은 여러 가지일 수 있기 때문입니다.">**표현(Representation)**</Tooltip>의 형식을 클라이언트에게 알려줍니다.
+<Tooltip note="HTML 페이지 혹은 이미지나 비디오 또는 스크립트들을 가져오는 것처럼, 컨텍스트에 따라 다양해질 수 있습니다.">**표현 헤더**</Tooltip>에서 클라이언트는 `Accept-*` 헤더를 사용해 전송받기를
+선호하는 형식을 지정하고, 서버는 실제로 선택한
+<Tooltip note="표현(Representation)이라는 단어를 쓴 이유는 리소스는 하나지만, 그것을 보여주는 방법은 여러 가지일 수 있기 때문입니다.">**표현(Representation)**</Tooltip>의 형식을 클라이언트에게
+알려줍니다.
 
 `HTTP`에서 **콘텐츠 협상**이란 동일한 URI에서 리소스의 서로 다른 버전을 제공하기 위해 사용하는 메커니즘입니다. 사용자 에이전트가 문서의 언어, 이미지 포맷, 컨텐츠 인코딩 중 어떤 것이 적절한지 명시할 수 있습니다. — [MDN : 콘텐츠 협상](https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Content_negotiation)
 
@@ -206,7 +208,12 @@ UA-CH 방식     :  브라우저가 처음부터  →  ?1 / ?0 만 전송
 
 ### Edge Computing (Edge Function)
 
-<Tooltip note={`엣지(Edge)는 사용자(클라이언트)와 가장 가까운 네트워크의 끝 지점을 의미합니다.\n\n- 원본 서버(Origin) : 모든 데이터의 원본이 저장된 중앙 서버\n- 엣지 서버(Edge Server/POP) : 전 세계 주요 거점에 흩어져 있는 캐시 서버`}>**CDN 엣지 서버**</Tooltip>에서 실행되는 짧은 코드(Lambda@Edge 등)가 사용자의 기기를 판단하여 최적의 리소스를 골라줍니다.
+<Tooltip
+  note={`엣지(Edge)는 사용자(클라이언트)와 가장 가까운 네트워크의 끝 지점을 의미합니다.\n\n- 원본 서버(Origin) : 모든 데이터의 원본이 저장된 중앙 서버\n- 엣지 서버(Edge Server/POP) : 전 세계 주요 거점에 흩어져 있는 캐시 서버`}
+>
+  **CDN 엣지 서버**
+</Tooltip>
+에서 실행되는 짧은 코드(Lambda@Edge 등)가 사용자의 기기를 판단하여 최적의 리소스를 골라줍니다.
 
 원본 서버(Origin)까지 가지 않고 엣지 단에서 모든 결정을 내리기 때문에, `Vary` 헤더의 복잡성을 서버가 일일이 감당할 필요가 없습니다. 정규화가 "중간에서 UA를 단순화"하는 방식이라면, Edge Computing은 "아예 중간에서 최종 판단까지 내려버리는" 방식입니다.
 
