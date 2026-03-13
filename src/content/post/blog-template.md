@@ -85,7 +85,8 @@ Node.js로 백엔드를 시작하면서 가장 먼저 부딪힌 두 가지 질�
 
 **규칙**
 - 핵심 개념은 `**굵게**` 강조. 남용 금지 (문단당 1~2개)
-- 괄호가 포함된 강조(예: `정확히 일치(Exact Match)`)나 `span`/`data-note` 인접 구문에서 렌더가 깨지면 `<strong>...</strong>` 사용
+- **툴팁**은 `<Tooltip note="설명">내용</Tooltip>` 사용. MDX 상단에 `import Tooltip from "@/components/ui/Tooltip.astro"` 추가
+- 괄호가 포함된 강조(예: `정확히 일치(Exact Match)`)나 Tooltip 안의 굵은 글씨에서 렌더가 깨지면 `<strong>...</strong>` 사용
 - 코드, 명령어, 파일명은 인라인 코드 `` `backtick` `` 처리
 - 문단은 2~4문장. 길면 나눈다
 
@@ -282,6 +283,8 @@ date: "YYYY-MM-DD"
 tags: [""]
 image: "./images/이미지.jpg"
 ---
+
+import Tooltip from "@/components/ui/Tooltip.astro";
 
 [도입 — 1인칭 경험 + blockquote 질문 1~2개]
 
