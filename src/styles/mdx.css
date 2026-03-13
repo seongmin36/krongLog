@@ -3,6 +3,15 @@
   @apply rounded-lg border border-gray-200 dark:border-gray-700;
 }
 
+/* 이미지 캡션 */
+.prose figure {
+  @apply my-6;
+}
+
+.prose figcaption {
+  @apply mt-2 text-right text-xs text-gray-500 dark:text-gray-400;
+}
+
 /* 인용구 */
 .prose blockquote {
   @apply border-l-4 bg-slate-50 px-4 py-1 dark:bg-[#1a1b1e];
@@ -18,6 +27,11 @@
 /* 링크: hover 시에만 underline */
 .prose a {
   @apply text-primary dark:text-dark-text no-underline hover:underline;
+}
+
+/* bold 강조 */
+.prose strong {
+  @apply font-bold;
 }
 
 /* 인라인 코드 스타일 */
