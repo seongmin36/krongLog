@@ -1,3 +1,55 @@
+/* MDX 본문 prose 커스텀 */
+.prose-blog {
+  @apply prose-gray dark:prose-invert max-w-none;
+
+  & :where(h1, h2, h3, h4, h5, h6) {
+    @apply font-bold tracking-tight;
+  }
+  & h2 {
+    @apply mt-10 mb-4 text-2xl;
+  }
+  & h3 {
+    @apply mt-8 mb-3 text-base;
+  }
+
+  & p {
+    @apply text-dark leading-relaxed;
+  }
+
+  & pre {
+    @apply border border-gray-200 bg-transparent text-inherit;
+  }
+
+  & hr {
+    @apply border-gray-300;
+  }
+
+  & th {
+    color: var(--color-dark);
+  }
+  & td {
+    @apply text-gray-600;
+  }
+}
+
+.dark .prose-blog {
+  & p {
+    @apply text-gray-300;
+  }
+  & pre {
+    @apply border-gray-800;
+  }
+  & hr {
+    @apply border-gray-600;
+  }
+  & th {
+    @apply text-gray-300;
+  }
+  & td {
+    @apply text-gray-400;
+  }
+}
+
 /* 본문 이미지 */
 .prose img {
   @apply rounded-lg border border-gray-200 dark:border-gray-700;
@@ -15,12 +67,12 @@
 /* 인용구 */
 .prose blockquote {
   @apply border-l-4 bg-slate-50 px-4 py-1 dark:bg-[#1a1b1e];
-  color: var(--color-primary);
+  color: var(--color-description);
   border-left-color: var(--color-primary);
 }
 
 .dark .prose blockquote {
-  color: var(--color-dark-text);
+  color: #9ca3af;
   border-left-color: var(--color-dark-text);
 }
 
@@ -204,6 +256,26 @@
   color: var(--tootip-dark-text);
 }
 
-[data-note]:hover::after {
+[data-note]:hover::after,
+[data-note]:focus::after,
+[data-note]:active::after {
   @apply visible opacity-100;
+}
+
+[data-note]:focus {
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  [data-note]::after {
+    position: fixed;
+    bottom: 2rem;
+    left: 1rem;
+    right: 1rem;
+    top: auto;
+    transform: none;
+    width: auto;
+    max-width: none;
+    text-align: center;
+  }
 }

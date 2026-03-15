@@ -80,10 +80,8 @@ const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
       )
     }
 
-    <!-- MDX 본문: prose 스타일 적용 -->
-    <div
-      class="prose prose-gray dark:prose-invert prose-headings:font-bold prose-headings:tracking-tight prose-h2:text-xl prose-h2:mt-10 prose-h2:mb-4 prose-h3:text-md prose-h3:mt-8 prose-h3:mb-3 prose-p:leading-relaxed prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-pre:bg-transparent prose-pre:text-inherit prose-pre:border prose-pre:border-gray-200 dark:prose-pre:border-gray-800 prose-hr:border-gray-300 dark:prose-hr:border-gray-600 prose-th:text-gray-700 dark:prose-th:text-gray-300 prose-td:text-gray-600 dark:prose-td:text-gray-400 max-w-none"
-    >
+    <!-- MDX 본문 -->
+    <div class="prose prose-blog">
       <Content />
     </div>
 

@@ -1,0 +1,416 @@
+---
+title: "Astro 프레임워크로 나만의 블로그 개발하기"
+description: "플랫폼 블로그 대신 Astro로 직접 블로그를 만든 이유와 초기 세팅, 그리고 앞으로의 블로그 목표를 정리합니다."
+date: "2026-02-23"
+tags: ["Astro", "블로그"]
+image: "./images/img-astro.jpg"
+---
+
+import Tooltip from "@/components/ui/Tooltip.astro";
+
+프론트엔드 개발을 공부하면서 자연스럽게 기술 블로그를 운영하고 싶다는 생각이 들었습니다.
+velog, tistory, GitHub Pages 등 선택지가 많았지만, 글을 쓰기 전에 아래의 질문부터 떠올랐습니다.
+
+> 이미 잘 만들어진 플랫폼이 있는데, 굳이 직접 만들 필요가 있을까?
+
+> 하지만, 내 블로그니까 내가 직접 구현해보고 싶어.
+
+> 그렇다면, 어떤 프레임워크가 블로그에 가장 적합할까?
+
+사실 이렇게 **단순한 호기심**으로 시작하게 되었습니다.
+
+이 글에서는 Astro를 선택한 이유와 블로그 초기 세팅 과정, 그리고 앞으로 구현할 기능들을 정리합니다.
+
+---
+
+# 왜 직접 만들기로 정했을까?
+
+### 플랫폼 블로그의 한계
+
+velog이나 tistory는 가입 후 바로 글을 쓸 수 있다는 점에서 진입 장벽이 낮습니다.
+하지만 몇 가지 불편함이 있었습니다.
+
+- 디자인 커스텀의 범위가 제한적입니다
+- 코드 하이라이팅, 다크모드, 컴포넌트 삽입 등 세부 제어가 어렵습니다
+- SEO 설정이나 메타 태그를 내 의도대로 관리할 수 없습니다
+
+결국 "내가 원하는 대로 만들 수 없다"는 점이 가장 큰 문제였습니다. Three.js, 애니메이션 등 구현하고 싶은 것이 산더미였습니다.
+또한 개발자 블로그라면 블로그 자체가 하나의 프로젝트이자 포트폴리오가 될 수 있다고 판단했습니다.
+
+<br />
+
+## 왜 [Astro](https://docs.astro.build/ko/)인가
+
+블로그는 대부분의 페이지가 **정적 콘텐츠**입니다.
+
+글 목록, 본문, 태그 등 사용자 인터랙션이 거의 없는 페이지에 번들을 내려보내는 것은 낭비라고 생각했습니다. 그래서 최소한으로 JS를 사용하는 Astro를 선택했습니다.
+
+Astro는 이 문제를 구조적으로 해결합니다.
+
+### 정적 사이트 생성에 최적화된 구조
+
+Astro는 `output: "static"` 모드에서 빌드 시점에 모든 HTML 페이지를 미리 생성합니다.
+서버에서 요청마다 계산하는 과정이 없으므로 응답 속도가 매우 빠릅니다.
+
+DB 연동이나 복잡한 서버 로직이 존재하지 않기 때문에, 공격 표면 자체가 줄어들어 **보안성**도 우수합니다.
+
+### Zero-JS 기본 동작
+
+Astro는 기본적으로 **클라이언트에 JavaScript를 전송하지 않습니다.**
+상호작용이 없는 페이지에서는 JS 다운로드 → 파싱 → 실행이라는 전체 과정이 사라집니다.
+
+이는 네트워크 환경이 열악한 상황에서도 빠른 로딩을 보장합니다.
+Lighthouse 성능 점수에서도 JS 번들이 없다는 것은 그 자체로 큰 이점입니다.
+
+### [Island Architecture](https://docs.astro.build/ko/concepts/islands/)
+
+Zero-JS로 동작하지만, 다크모드 토글이나 Three.js 캔버스처럼 반드시 JS가 필요한 영역이 있습니다.
+Astro는 전체 페이지를 정적 HTML로 만들고, 상호작용이 필요한 부분만 <strong>섬(island)</strong>으로 지정해 해당 영역에만 JS를 주입합니다.
+
+```text
+전체 페이지 (정적 HTML)
+  ├── Header (sea)         → Zero-JS, 순수 HTML/CSS
+  ├── 본문 콘텐츠 (sea)     → Zero-JS, 순수 HTML/CSS
+  ├── ThemeToggle (island)  → React + nanostores, client:load
+  ├── Footer (sea)         → Zero-JS, 순수 HTML/CSS
+  └── Three.js (island)    → JS 번들, client:visible (예정)
+```
+
+| 영역                   | 종류          | JS 포함 여부       |
+| ---------------------- | ------------- | ------------------ |
+| 내비게이션, 본문, 푸터 | sea (정적)    | 없음               |
+| 다크모드 토글          | island (활성) | React 번들 포함    |
+| Three.js 캔버스 (예정) | island (활성) | Three.js 번들 포함 |
+
+실제 블로그의 `Header.astro`에서 이 패턴을 확인할 수 있습니다.
+
+```astro
+<!-- components/Header.astro -->
+<header>
+  <nav>
+    <!-- sea: Astro 컴포넌트 → 정적 HTML, JS 없음 -->
+    <a href="/">Krong Dev.</a>
+    <NavLink href="/blogs">전체 글</NavLink>
+
+    <!-- island: React 컴포넌트 → client:load로 즉시 hydrate -->
+    <ThemeToggle client:load />
+  </nav>
+</header>
+```
+
+[`client:load`](https://docs.astro.build/ko/reference/directives-reference/#clientload)는 페이지 로드 즉시 hydrate하고, [`client:visible`](https://docs.astro.build/ko/reference/directives-reference/#clientvisible)은 뷰포트에 진입할 때 hydrate합니다.
+
+```astro
+<ThemeToggle client:load />
+<!-- 즉시 hydrate → 항상 보이는 UI -->
+<ThreeCanvas client:visible />
+<!-- 뷰포트 진입 시 hydrate → 스크롤해야 보이는 영역 -->
+```
+
+이 구조 덕분에 페이지 전체의 JS 비용은 최소화하면서, 필요한 인터랙션은 그대로 유지할 수 있습니다.
+
+---
+
+# Astro 블로그 초기 세팅하기
+
+> 이 블로그는 <Tooltip note="pnpm은 심볼릭 링크 기반의 node_modules 구조로 디스크 공간을 절약하고, npm보다 설치 속도가 빠릅니다. 특히 모노레포나 의존성이 많은 프로젝트에서 유리합니다.">pnpm</Tooltip>을 패키지 매니저로 사용합니다.
+
+현재 블로그의 프로젝트 구조입니다.
+
+```text
+src/
+├── components/
+│   ├── Header.astro                 ← 내비게이션, ThemeToggle island 포함
+│   ├── blog/PostCard.astro
+│   └── ui/
+│       ├── ThemeToggle.tsx          ← React island (client:load)
+│       ├── Tag.astro
+│       └── Tooltip.astro
+├── content/
+│   ├── content.config.ts            ← Content Collections 스키마
+│   └── post/blog/                   ← MDX 글 파일
+├── layouts/
+│   └── BaseLayout.astro             ← SEO 메타, FOUC 방지, <slot />
+├── lib/stores/theme.ts              ← nanostores 다크모드 상태
+├── pages/
+│   ├── index.astro
+│   └── blogs/
+│       ├── index.astro
+│       └── [...slug].astro          ← 동적 라우트
+└── styles/
+    ├── global.css
+    └── mdx.css
+```
+
+### 프로젝트 생성과 핵심 의존성
+
+```bash
+pnpm create astro@latest
+```
+
+이후 MDX, React, Tailwind, sitemap 등 필요한 통합(integration)을 추가합니다.
+
+```bash
+pnpm astro add mdx react tailwind sitemap
+```
+
+현재 블로그에서 사용 중인 핵심 기술 스택은 다음과 같습니다.
+
+| 기술                                                                                                                      | 역할                                                |
+| ------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Astro v5                                                                                                                  | 정적 사이트 생성 프레임워크                         |
+| MDX                                                                                                                       | Markdown 안에서 컴포넌트를 사용할 수 있는 확장 포맷 |
+| [Tailwind CSS v4](https://tailwindcss.com/docs)                                                                           | 유틸리티 기반 스타일링                              |
+| React 19                                                                                                                  | Island 컴포넌트 (다크모드 토글 등)                  |
+| [nanostores](https://docs.astro.build/ko/recipes/sharing-state-islands/#%EC%99%9C-nano-stores%EC%9D%B8%EA%B0%80%EC%9A%94) | 경량 전역 상태 관리 (다크모드)                      |
+| [Shiki](https://docs.astro.build/ko/guides/integrations-guide/markdoc/#shiki)                                             | 코드 블럭 듀얼 테마 하이라이팅                      |
+| Vercel                                                                                                                    | 배포 플랫폼                                         |
+
+<br />
+
+### astro.config.mjs 설정
+
+```typescript
+import { defineConfig } from "astro/config";
+import mdx from "@astrojs/mdx";
+import react from "@astrojs/react";
+import tailwind from "@astrojs/tailwind";
+import sitemap from "@astrojs/sitemap";
+import vercel from "@astrojs/vercel";
+
+export default defineConfig({
+  site: "https://blog.kronglog.dev", // 배포한 도메인
+  output: "static",
+  adapter: vercel(),
+  integrations: [mdx(), react(), tailwind(), sitemap()],
+  markdown: {
+    shikiConfig: {
+      themes: {
+        light: "github-light",
+        dark: "github-dark",
+      },
+    },
+  },
+  prefetch: {
+    prefetchAll: true,
+    defaultStrategy: "viewport",
+  },
+});
+```
+
+각 설정의 역할을 정리하면 다음과 같습니다.
+
+- `site` — 사이트의 기본 URL. sitemap 생성과 canonical URL에 사용됩니다
+- `output: "static"` — 모든 페이지를 빌드 타임에 HTML로 미리 생성합니다
+- `adapter: vercel()` — Vercel 배포 환경에 맞는 출력 구조를 생성합니다
+- `shikiConfig` — 코드 블럭에 라이트/다크 듀얼 테마를 적용합니다
+- `prefetch` — 링크가 뷰포트에 진입하면 해당 페이지를 미리 가져와 체감 속도를 높입니다
+
+<br />
+
+### Sitemap과 robots.txt
+
+`@astrojs/sitemap` 통합을 추가하면 빌드 시 `sitemap-index.xml`이 자동으로 생성됩니다.
+검색 엔진이 사이트의 모든 페이지를 크롤링할 수 있도록 `robots.txt`에 sitemap 경로를 명시해야 합니다.
+
+```text
+User-agent: *
+Allow: /
+
+Sitemap: https://blog.kronglog.dev/sitemap-index.xml
+```
+
+`robots.txt`는 `public/` 디렉토리에 위치시키면 빌드 결과물의 루트에 그대로 복사됩니다.
+
+<br />
+
+### 도메인 연결과 Google Search Console
+
+Vercel 대시보드에서 커스텀 도메인을 연결한 뒤, DNS 레코드를 설정합니다.
+Google Search Console 인증은 HTML 파일 방식을 사용했습니다.
+
+```text
+public/
+  └── googleba2b3a8dda7e7039.html   ← Search Console 인증 파일
+```
+
+`public/` 디렉토리에 인증 파일을 넣으면 빌드 시 루트 경로에 배포되어 Google이 소유권을 확인할 수 있습니다.
+
+<figure>
+  <img src="/images/blog-astro-impl/1.png" alt="Google Search Console" />
+  <figcaption>Google Search Console</figcaption>
+</figure>
+
+<br />
+
+### [Content Collections](https://docs.astro.build/ko/guides/content-collections/)로 콘텐츠 관리
+
+블로그 글은 Content Collections로 관리합니다.
+`content.config.ts`에서 <Tooltip note="glob 로더는 파일 시스템에서 패턴에 맞는 파일을 자동으로 수집합니다">glob 로더</Tooltip>와 Zod 스키마를 정의하면, 모든 MDX 파일의 frontmatter가 빌드 타임에 검증됩니다.
+
+```typescript
+import { defineCollection, z } from "astro:content";
+import { glob } from "astro/loaders";
+
+const post = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/post/blog" }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string().optional(),
+    date: z.coerce.date(),
+    tags: z.array(z.string()).optional(),
+    image: z.string().optional(),
+  }),
+});
+
+export const collections = { post };
+```
+
+`z.coerce.date()`는 frontmatter의 문자열 `"2026-03-15"`를 Date 객체로 자동 변환합니다.
+스키마에 맞지 않는 글이 있으면 빌드 자체가 실패하므로, 데이터 무결성이 보장됩니다.
+
+<br />
+
+### [동적 라우트](https://docs.astro.build/ko/reference/routing-reference/)와 글 렌더링
+
+개별 글 페이지는 `pages/blogs/[...slug].astro`에서 처리합니다.
+[`getStaticPaths()`](https://docs.astro.build/ko/reference/routing-reference/#getstaticpaths)가 빌드 타임에 모든 글의 경로를 생성하고, 각 경로의 데이터를 `Astro.props`로 전달합니다.
+
+```typescript
+// pages/blogs/[...slug].astro
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection("post");
+
+  return allPosts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+```
+
+```text
+getStaticPaths()
+  ↓
+각 글마다 { params: { slug }, props: { post } } 반환
+  ↓
+Astro가 빌드 타임에 각 경로의 HTML 생성
+  ↓
+Astro.props로 해당 글 데이터 접근
+  ↓
+render(post) → <Content /> 컴포넌트로 MDX 본문 렌더링
+```
+
+> Astro <Tooltip note="이전에는 모든 글 데이터 객체에 render 함수가 포함되어 있어 메모리를 많이 잡아먹었습니다. 이제는 데이터만 가볍게 들고 있다가 필요할 때만 render 함수를 쓰므로 빌드 속도가 훨씬 빨라졌습니다.">[v5](https://docs.astro.build/ko/guides/upgrade-to/v5/)</Tooltip>에서 `render()`는 Content Layer API의 독립 함수입니다.
+> 이전 버전의 `post.render()` 메서드 호출 방식은 v5에서 더 이상 사용할 수 없습니다.
+
+<br />
+
+### BaseLayout과 SEO 메타 관리
+
+위의 설정, 콘텐츠, 라우트를 하나로 감싸는 것이 `BaseLayout.astro`입니다.
+모든 페이지가 이 레이아웃을 공유하며, SEO 메타 태그와 전역 스타일이 여기서 관리됩니다.
+
+```astro
+---
+// layouts/BaseLayout.astro
+import Header from "@/components/Header.astro";
+import "@/styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+}
+
+const { title = "Krong Dev.", description, ogImage } = Astro.props;
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+---
+
+<html lang="ko">
+  <head>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Open Graph / Twitter -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {ogImage && <meta property="og:image" content={ogImage} />}
+
+    <!-- 다크모드 FOUC 방지: 페인트 전에 테마 적용 -->
+    <script is:inline>
+      (function () {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark" || (!theme && matchMedia("(prefers-color-scheme: dark)").matches)) {
+          document.documentElement.classList.add("dark");
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <Header />
+    <main><slot /></main>
+    <!-- 각 페이지의 콘텐츠가 여기에 삽입 -->
+  </body>
+</html>
+```
+
+각 페이지에서 `<BaseLayout title="..." description="...">`로 감싸면 SEO 메타 태그가 자동으로 채워지고, `<slot />` 위치에 해당 페이지의 콘텐츠가 삽입됩니다.
+
+`<head>` 안의 인라인 스크립트는 <Tooltip note="실행 시점의 차이: <head> 안에 이 스크립트를 넣으면, 브라우저가 화면에 글자나 그림을 그리기(Paint) 직전에 이 코드를 먼저 읽고 실행합니다.">`is:inline`</Tooltip> 디렉티브로 번들링 없이 HTML에 그대로 출력됩니다.
+이 방식은 브라우저가 HTML을 파싱하는 흐름을 활용하여 다음과 같은 순서로 <Tooltip note="FOUC(Flash of Unstyled Content) 현상: 브라우저가 HTML을 파싱하고 화면에 그리기 전에 임시로 흰색 화면이 깜빡이는 현상입니다.">**FOUC 현상**</Tooltip>을 방지합니다.
+
+1. `<head>` 도달: 아직 화면에는 아무것도 그려지지 않은 상태입니다.
+
+2. 인라인 스크립트 실행: localStorage를 확인해 이전 테마 설정을 체크하고, 설정이 없다면 시스템 테마(OS 설정)를 확인합니다.
+
+3. `.dark` 클래스 주입: 화면을 그리기 전, 최상단 `<html>` 태그에 즉시 `.dark` 클래스를 추가합니다.
+
+4. 첫 페인트(First Paint): 브라우저가 화면을 그리기 시작할 때 이미 클래스가 적용되어 있으므로, 새로고침 시에도 흰색 화면이 깜빡이지 않고 처음부터 의도한 테마로 렌더링됩니다.
+
+---
+
+# 블로그를 통한 개발 계획
+
+### 구현한 것들
+
+현재 블로그에는 다음 기능들이 구현되어 있습니다.
+
+- **다크모드** — nanostores 기반 전역 상태 관리, localStorage 저장, 시스템 테마 감지, FOUC 방지 인라인 스크립트
+- **태그 시스템** — React, TypeScript, Docker, Node.js 등 기술 스택별 브랜드 컬러 매핑
+- **SEO 최적화** — OG/Twitter 메타 태그, canonical URL, sitemap 자동 생성
+- **커스텀 MDX 컴포넌트** — Tooltip, Tag 등 블로그 글 안에서 사용하는 Astro 컴포넌트
+- **코드 하이라이팅** — Shiki 듀얼 테마 (라이트/다크 자동 전환)
+
+<br />
+
+### 구현할 것들
+
+블로그를 직접 만든 가장 큰 이유는 **원하는 기능을 제약 없이 구현할 수 있기 때문**입니다.
+
+- **Three.js 히어로 섹션** — 메인 페이지에 인터랙티브 3D 요소를 추가할 예정입니다. Island Architecture 덕분에 Three.js 번들은 해당 영역에만 로드됩니다
+- **글 검색 기능** — 태그 필터링과 키워드 검색을 조합한 클라이언트 사이드 검색을 계획하고 있습니다
+- **목차(TOC) 자동 생성** — MDX 본문의 heading을 파싱해서 사이드바 목차를 자동으로 구성할 예정입니다
+- **댓글 시스템** — giscus 또는 자체 구현을 검토 중입니다
+- **RSS 피드** — `@astrojs/rss` 통합으로 RSS 구독을 지원할 예정입니다
+
+이 기능들은 플랫폼 블로그에서는 구현할 수 없거나 제한적으로만 가능한 것들입니다.
+직접 만들었기 때문에 기술적 제약 없이 하나씩 추가해 나갈 수 있습니다.
+
+---
+
+## 마치며
+
+플랫폼 블로그 대신 Astro로 직접 블로그를 만드는 과정을 정리했습니다.
+
+직접 세팅하면서 두 가지가 확실히 와닿았습니다.
+
+- Astro의 Zero-JS 기본 동작과 Island Architecture는 블로그처럼 정적 콘텐츠 중심의 사이트에 구조적으로 가장 적합한 설계입니다
+- 직접 만든 블로그는 단순한 글 저장소가 아니라, 새로운 기술을 실험하고 적용하는 살아있는 프로젝트가 됩니다
+
+다음 글에서는 SEO를 높이기 위한 전략에 대해 소개할 예정입니다.

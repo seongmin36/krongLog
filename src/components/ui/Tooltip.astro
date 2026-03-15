@@ -8,6 +8,8 @@ const { note } = Astro.props;
 
 <span
   data-note={note}
+  tabindex="0"
+  role="button"
   class="border-primary dark:border-dark-text relative cursor-help border-b-[1.5px]"
 >
   <slot />
