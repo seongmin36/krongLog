@@ -256,6 +256,26 @@
   color: var(--tootip-dark-text);
 }
 
-[data-note]:hover::after {
+[data-note]:hover::after,
+[data-note]:focus::after,
+[data-note]:active::after {
   @apply visible opacity-100;
+}
+
+[data-note]:focus {
+  outline: none;
+}
+
+@media (max-width: 640px) {
+  [data-note]::after {
+    position: fixed;
+    bottom: 2rem;
+    left: 1rem;
+    right: 1rem;
+    top: auto;
+    transform: none;
+    width: auto;
+    max-width: none;
+    text-align: center;
+  }
 }
