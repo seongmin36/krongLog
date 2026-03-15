@@ -67,8 +67,11 @@
 /* 인용구 */
 .prose blockquote {
   @apply border-l-4 bg-slate-50 px-4 py-1 dark:bg-[#1a1b1e];
-  color: var(--color-description);
   border-left-color: var(--color-primary);
+}
+
+.prose blockquote p {
+  color: var(--color-description);
 }
 
 .dark .prose blockquote {
