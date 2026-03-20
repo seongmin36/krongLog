@@ -35,3 +35,5 @@ pnpm preview    # 프로덕션 빌드 로컬 미리보기
 - SVG 파일은 SVGR(Vite 플러그인, `astro.config.mjs`)을 통해 React 컴포넌트로 임포트됩니다.
 
 **SEO**는 `src/types/seo.ts`에 타입이 정의된 props를 통해 `BaseLayout.astro`에서 처리됩니다.
+
+**본문 형광펜 하이라이트:** 색상 토큰은 `global.css`의 `--color-highlight-pen` (#E9F1EC)·`--color-highlight-pen-dark`입니다. MDX에서 의미 있는 강조는 표준 `<mark>텍스트</mark>`로 쓰고, 스타일은 `mdx.css`의 `.prose mark`에서 처리합니다(추가 JS 없음). 코드 블록은 기존 Shiki 설정 그대로 두고, `transformerMetaHighlight` / `transformerNotationHighlight` 등으로 붙는 `.line.highlighted`, `.highlighted-word`에 동일 팔레트를 맞춥니다.
