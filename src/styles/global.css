@@ -18,25 +18,21 @@
   --tootip-dark-text: #312e81;
 
   /* 브랜드 컬러 토큰 */
-  --color-tag-react: #087ea4;
   --color-tag-react-bg: rgba(8, 126, 164, 0.1);
   --color-tag-react-text: #087ea4;
   --color-tag-react-bg-dark: rgba(8, 126, 164, 0.15);
   --color-tag-react-text-dark: #5dd5fc;
 
-  --color-tag-typescript: #3178c6;
   --color-tag-typescript-bg: rgba(49, 120, 198, 0.1);
   --color-tag-typescript-text: #3178c6;
   --color-tag-typescript-bg-dark: rgba(49, 120, 198, 0.15);
   --color-tag-typescript-text-dark: #93c5fd;
 
-  --color-tag-docker: #2496ed;
   --color-tag-docker-bg: rgba(36, 150, 237, 0.1);
   --color-tag-docker-text: #2496ed;
   --color-tag-docker-bg-dark: rgba(36, 150, 237, 0.15);
   --color-tag-docker-text-dark: #60a5fa;
 
-  --color-tag-nodejs: #339933;
   --color-tag-nodejs-bg: rgba(51, 153, 51, 0.1);
   --color-tag-nodejs-text: #339933;
   --color-tag-nodejs-bg-dark: rgba(51, 153, 51, 0.15);

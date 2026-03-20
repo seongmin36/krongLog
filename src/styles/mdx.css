@@ -2,6 +2,8 @@
 .prose-blog {
   @apply prose-gray dark:prose-invert max-w-none;
 
+  --tw-prose-bullets: var(--color-tag-nodejs-text);
+
   & :where(h1, h2, h3, h4, h5, h6) {
     @apply font-bold tracking-tight;
   }
