@@ -12,6 +12,10 @@
   --color-dark: #121212;
   --color-dark-text: #f0a8b8;
   --color-description: #6b7684;
+
+  /* 본문·코드 형광펜 하이라이트 (#E9F1EC 계열) */
+  --color-highlight-pen: #e9f1ec;
+  --color-highlight-pen-dark: #7a5b69;
   --tootip-light: #3a3f3a;
   --tootip-light-text: #f1fdf4;
   --tootip-dark: #eef2ff;
@@ -38,7 +42,6 @@
   --color-tag-nodejs-bg-dark: rgba(51, 153, 51, 0.15);
   --color-tag-nodejs-text-dark: #86efac;
 
-  --color-tag-redis: #dc382d;
   --color-tag-redis-bg: rgba(220, 56, 45, 0.1);
   --color-tag-redis-text: #dc382d;
   --color-tag-redis-bg-dark: rgba(220, 56, 45, 0.15);
