@@ -60,9 +60,11 @@ const resolvedOgImage =
       })();
     </script>
   </head>
-  <body class="m-0 w-full min-h-full bg-white dark:bg-dark text-dark dark:text-gray-50 transition-colors duration-300">
+  <body
+    class="dark:bg-dark text-dark m-0 min-h-full w-full bg-white transition-colors duration-300 dark:text-gray-50"
+  >
     <Header />
-    <main class="max-w-[1200px] mx-auto px-4 sm:px-6">
+    <main class="mx-auto max-w-[1200px] px-4 sm:px-6">
       <slot />
     </main>
   </body>
