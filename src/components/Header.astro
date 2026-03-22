@@ -4,24 +4,35 @@ import { AppIcon } from "@/components/ui/AppIcons";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV_ITEMS = [
-  { href: "/about", label: "개발자 소개" },
+  // { href: "/about", label: "개발자 소개" },
   { href: "/blogs", label: "전체 글" },
 ] as const;
 ---
 
 <header
-  class="sticky top-0 z-50 w-full h-[60px] bg-white/85 dark:bg-dark/85 backdrop-blur-md border-b border-black/6 dark:border-white/6 transition-colors duration-300"
+  class="dark:bg-dark/85 sticky top-0 z-50 h-[60px] w-full border-b border-black/6 bg-white/85 backdrop-blur-md transition-colors duration-300 dark:border-white/6"
   id="main-header"
 >
-  <div class="flex items-center justify-between h-full max-w-[1200px] mx-auto px-4 sm:px-6">
-    <a href="/" class="group flex items-center shrink-0 no-underline" data-astro-prefetch>
-      <span class="text-lg font-bold text-gray-900 dark:text-gray-50 tracking-tight transition-colors duration-200 group-hover:text-primary dark:group-hover:text-primary">
+  <div
+    class="mx-auto flex h-full max-w-[1200px] items-center justify-between px-4 sm:px-6"
+  >
+    <a
+      href="/"
+      class="group flex shrink-0 items-center no-underline"
+      data-astro-prefetch
+    >
+      <span
+        class="group-hover:text-primary dark:group-hover:text-primary text-lg font-bold tracking-tight text-gray-900 transition-colors duration-200 dark:text-gray-50"
+      >
         Krong Dev.
       </span>
     </a>
 
     <nav class="flex items-center gap-4 sm:gap-8" aria-label="메인 네비게이션">
-      <ul class="flex items-center gap-3 sm:gap-6 list-none m-0 p-0" role="list">
+      <ul
+        class="m-0 flex list-none items-center gap-3 p-0 sm:gap-6"
+        role="list"
+      >
         {
           NAV_ITEMS.map((item) => (
             <li>
@@ -31,13 +42,16 @@ const NAV_ITEMS = [
         }
       </ul>
 
-      <div class="flex items-center gap-0 sm:gap-1" role="toolbar" aria-label="사이트 도구">
+      <div
+        class="flex items-center gap-0 sm:gap-1"
+        role="toolbar"
+        aria-label="사이트 도구"
+      >
         <ThemeToggle client:load />
-
 
         <NavLink
           href="https://github.com/seongmin36"
-          class="inline-flex items-center justify-center size-8 sm:size-9 border-none rounded-lg bg-transparent text-gray-500 dark:text-gray-400 no-underline transition-colors duration-200 hover:text-gray-900 hover:bg-black/5 dark:hover:text-gray-50 dark:hover:bg-white/8"
+          class="inline-flex size-8 items-center justify-center rounded-lg border-none bg-transparent text-gray-500 no-underline transition-colors duration-200 hover:bg-black/5 hover:text-gray-900 sm:size-9 dark:text-gray-400 dark:hover:bg-white/8 dark:hover:text-gray-50"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="GitHub"
@@ -46,14 +60,13 @@ const NAV_ITEMS = [
           <AppIcon name="github" className="size-4.5 sm:size-4.5" />
         </NavLink>
 
-
         <NavLink
-        href="https://www.linkedin.com/in/krongsungmin/"
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="LinkedIn"
-        class="inline-flex items-center justify-center size-8 sm:size-9 border-none rounded-lg bg-transparent text-gray-500 dark:text-gray-400 no-underline transition-colors duration-200 hover:text-[#0A66C2]! hover:bg-black/5 dark:hover:text-[#0A66C2]! dark:hover:bg-white/8"
-      >
+          href="https://www.linkedin.com/in/krongsungmin/"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="LinkedIn"
+          class="inline-flex size-8 items-center justify-center rounded-lg border-none bg-transparent text-gray-500 no-underline transition-colors duration-200 hover:bg-black/5 hover:text-[#0A66C2]! sm:size-9 dark:text-gray-400 dark:hover:bg-white/8 dark:hover:text-[#0A66C2]!"
+        >
           <AppIcon name="linkedin" className="size-4.5 sm:size-6" />
         </NavLink>
       </div>
