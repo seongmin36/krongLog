@@ -1,0 +1,504 @@
+---
+title: "NestJS 핵심 아키텍처와 Pipe 유효성 검사"
+description: "NestJS의 Module-Controller-Service 구조와 Dependency Injection, 그리고 Pipe를 활용한 유효성 검사를 직접 구현하며 정리합니다."
+date: "2026-03-22"
+tags: ["Backend", "Nest.js", "Node.js"]
+image: "./images/study-nodejs-2nd.jpg"
+---
+
+import Tooltip from "@/components/ui/Tooltip.astro";
+
+Node.js로 서버를 구축할 때 Express만으로도 충분히 API를 만들 수 있습니다.
+하지만 프로젝트 규모가 커지면서 두 가지 질문이 생겼습니다.
+
+> 컨트롤러, 서비스, 모델을 어떤 기준으로 분리해야 하는가?
+
+> 데이터 유효성 검사는 어디서, 어떤 방식으로 처리해야 하는가?
+
+이 글에서는 NestJS의 핵심 아키텍처와 Pipe를 활용한 유효성 검사를 직접 구현한 결과를 바탕으로 정리합니다.
+
+---
+
+# NestJS는 왜 쓰는가
+
+### Express 위에 얹은 구조화된 프레임워크
+
+NestJS는 효율적이고 확장 가능한 Node.js 서버 측 애플리케이션을 구축하기 위한 프레임워크입니다.
+내부적으로 Express(또는 Fastify)를 사용하면서, 그 위에 <Tooltip note="객체지향프로그래밍(OOP), 함수형 프로그래밍(FP), 함수 관계 프로그래밍(FRP)의 요소를 결합합니다">세 가지 프로그래밍 패러다임</Tooltip>을 결합한 구조를 제공합니다.
+
+NestJS의 핵심 장점은 두 가지입니다.
+
+- **추상화 수준 제공** — `@Controller()`, `@Get()` 같은 데코레이터만 붙이면 내부적으로 Express가 알아서 동작합니다. 복잡한 라우팅 설정을 직접 작성할 필요가 없습니다
+- **Express API 직접 노출** — NestJS의 기능만으로 해결되지 않는 경우, `req`, `res` 객체를 직접 다룰 수 있습니다. 기존 Express 생태계의 수만 개 라이브러리를 그대로 가져다 쓸 수 있는 통로가 열려 있습니다
+
+<br />
+
+### 프로젝트 초기 구조
+
+NestJS CLI로 프로젝트를 생성하면 아래와 같은 구조가 만들어집니다.
+
+```text
+project/
+├── eslint.config.mjs    ← TypeScript 가이드라인, 문법 오류 체크
+├── .prettierrc           ← 코드 포맷터 (따옴표, 인덴트 등)
+├── nest-cli.json         ← sourceRoot 등 CLI 설정
+├── package.json          ← 프로젝트 메타, 의존성
+└── src/
+    ├── main.ts           ← 엔트리 포인트 (시작점)
+    ├── app.module.ts     ← 루트 모듈
+    ├── app.controller.ts
+    └── app.service.ts
+```
+
+`eslint.config.mjs`는 코드 품질을 체크하는 린터이고, `.prettierrc`는 코드 형식을 맞추는 포맷터입니다.
+이 둘은 역할이 다릅니다. ESLint는 "이 코드가 문제 없는가"를, Prettier는 "이 코드가 보기 좋은가"를 담당합니다.
+
+시작점인 `main.ts`는 애플리케이션 인스턴스를 생성하고 서버를 리스닝하는 엔트리 포인트입니다.
+
+```typescript
+// src/main.ts
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  await app.listen(process.env.PORT ?? 3000);
+}
+bootstrap();
+```
+
+`NestFactory.create()`에 루트 모듈인 `AppModule`을 전달하면, Nest가 모듈 트리를 순회하며 모든 의존성을 자동으로 조립합니다.
+
+---
+
+# NestJS 핵심 아키텍처
+
+NestJS의 요청 처리 흐름은 명확한 계층 구조를 따릅니다.
+
+```text
+클라이언트 요청
+  ↓
+main.ts              → 애플리케이션 인스턴스 생성, 서버 리스닝
+  ↓
+AppModule            → 루트 모듈, 모든 모듈의 조립 지점
+  ↓
+Controller           → 요청 라우팅, Service로 전달
+  ↓
+Service              → 비즈니스 로직 처리
+  ↓
+Entity / Repository  → DB 접근, 데이터 저장/조회
+  ↓
+Controller           → 결과를 응답으로 반환
+  ↓
+클라이언트 응답
+```
+
+<br />
+
+### Module — 기능 단위의 조립
+
+`@Module()` 데코레이터로 주석이 달린 클래스입니다.
+같은 기능에 해당하는 것들은 하나의 모듈 폴더 안에 넣어서 관리합니다.
+
+루트 모듈인 `AppModule`은 기능 모듈을 `imports`에 등록하는 조립 지점입니다.
+
+```typescript
+// src/app.module.ts
+import { Module } from "@nestjs/common";
+import { BoardsModule } from "./boards/boards.module";
+
+@Module({
+  imports: [BoardsModule],
+})
+export class AppModule {}
+```
+
+기능 모듈인 `BoardsModule`은 해당 기능에 필요한 컨트롤러와 서비스를 한 곳에서 관리합니다.
+
+```typescript
+// boards/boards.module.ts
+import { Module } from "@nestjs/common";
+import { BoardsController } from "./boards.controller";
+import { BoardsService } from "./boards.service";
+
+@Module({
+  controllers: [BoardsController],
+  providers: [BoardsService],
+})
+export class BoardsModule {}
+```
+
+예를 들어 게시판 기능이라면 `BoardsController`, `BoardsService`, `BoardEntity`가 모두 `boards/` 폴더 안에 위치합니다.
+
+<br />
+
+### Controller — 요청의 입구
+
+컨트롤러는 들어온 요청을 처리하고 클라이언트에 응답을 반환하는 역할입니다.
+`@Get()`, `@Post()` 같은 데코레이터로 엔드포인트를 정의하고, 실제 로직은 Service에 위임합니다.
+
+```typescript
+// boards/boards.controller.ts
+import { Controller, Get, Post, Body, Param, Delete, Patch, UsePipes, ValidationPipe } from "@nestjs/common";
+import { BoardsService } from "./boards.service";
+import type { Board, BoardStatus } from "./boards.model";
+import { CreateBoardDto } from "./dto/create-board.dto";
+import { BoardStatusValidationPipe } from "./pipes/board-status-validation.pipe";
+
+@Controller("boards")
+export class BoardsController {
+  constructor(private boardsService: BoardsService) {}
+
+  @Get("/")
+  getAllBoards(): Board[] {
+    return this.boardsService.getAllBoards();
+  }
+
+  @Post("/")
+  @UsePipes(ValidationPipe)
+  createBoard(@Body() createBoard: CreateBoardDto): Board {
+    return this.boardsService.createBoard(createBoard);
+  }
+
+  @Get("/:id")
+  getBoardById(@Param("id") id: string): Board | undefined {
+    return this.boardsService.getBoardById(id);
+  }
+
+  @Delete("/:id")
+  deleteBoard(@Param("id") id: string): void {
+    this.boardsService.deleteBoard(id);
+  }
+
+  @Patch("/:id/status")
+  updateBoardStatus(@Param("id") id: string, @Body("status", BoardStatusValidationPipe) status: BoardStatus): Board | undefined {
+    return this.boardsService.updateBoardStatus(id, status);
+  }
+}
+```
+
+5개의 엔드포인트가 전체 CRUD를 구성합니다.
+`@UsePipes(ValidationPipe)`은 생성 시 DTO 유효성 검사를, `BoardStatusValidationPipe`은 상태 변경 시 커스텀 검증을 담당합니다.
+
+<br />
+
+### Service — 비즈니스 로직의 핵심
+
+서비스는 컨트롤러에서 하기 어려운 복잡한 비즈니스 로직을 담당합니다.
+데이터 유효성 체크, 데이터베이스 아이템 생성 등의 작업이 여기서 처리됩니다.
+
+```typescript
+// boards/boards.service.ts
+import { Injectable, NotFoundException } from "@nestjs/common";
+import { Board, BoardStatus } from "./boards.model";
+import { v1 as uuid } from "uuid";
+import { CreateBoardDto } from "./dto/create-board.dto";
+
+@Injectable()
+export class BoardsService {
+  private boards: Board[] = [];
+
+  getAllBoards(): Board[] {
+    return this.boards;
+  }
+
+  createBoard(createBoardDto: CreateBoardDto): Board {
+    const { title, description } = createBoardDto;
+    const board: Board = {
+      id: uuid(),
+      title,
+      description,
+      status: BoardStatus.PUBLIC,
+    };
+    this.boards.push(board);
+    return board;
+  }
+
+  getBoardById(id: string): Board | undefined {
+    const found = this.boards.find((board) => board.id === id);
+    if (!found) {
+      throw new NotFoundException(`Board with ID ${id} not found`);
+    }
+    return found;
+  }
+
+  deleteBoard(id: string): void {
+    const found = this.getBoardById(id);
+    this.boards = this.boards.filter((board) => board.id !== found?.id);
+  }
+
+  updateBoardStatus(id: string, status: BoardStatus): Board | undefined {
+    const board = this.getBoardById(id);
+    if (board) {
+      board.status = status;
+    }
+    return board;
+  }
+}
+```
+
+`@Injectable()` 데코레이터로 감싸져 있으므로, 이 서비스 인스턴스는 모듈에 등록된 뒤 애플리케이션 전체에서 사용할 수 있습니다.
+
+현재는 DB가 없으므로 로컬 메모리(배열)에 데이터를 저장하고, 고유한 ID는 `uuid` 모듈로 생성합니다.
+
+<br />
+
+### Provider와 Dependency Injection
+
+Service가 Controller에서 사용되려면 **종속성 주입(Dependency Injection)**이 필요합니다.
+
+> 종속성을 주입한다는 것은, 컨트롤러가 필요로 하는 서비스·팩토리·헬퍼·레포지토리 같은 것들을 직접 생성하지 않고, Nest 런타임이 알아서 인스턴스를 만들어 넣어주는 것입니다.
+
+```typescript
+@Controller("boards")
+export class BoardsController {
+  // 생성자에서 타입을 선언하면 Nest가 자동으로 인스턴스를 주입
+  constructor(private boardsService: BoardsService) {}
+}
+```
+
+프로바이더를 사용하려면 모듈의 `providers` 배열에 등록해야 합니다.
+대부분의 Nest 클래스(서비스, 레포지토리, 팩토리, 헬퍼)는 프로바이더로 취급될 수 있습니다.
+
+<br />
+
+### Model과 DTO
+
+**Model**은 데이터의 형태를 정의합니다.
+
+```typescript
+// boards/boards.model.ts
+export enum BoardStatus {
+  PUBLIC = "PUBLIC",
+  PRIVATE = "PRIVATE",
+}
+
+export interface Board {
+  id: string;
+  title: string;
+  description: string;
+  status: BoardStatus;
+}
+```
+
+타입을 정의하면 원하는 타입과 다른 값이 들어올 때 컴파일 단계에서 에러가 발생하고, 코드를 읽는 입장에서도 데이터 구조를 쉽게 파악할 수 있습니다.
+
+**DTO(Data Transfer Object)**는 계층 간 데이터 교환을 위한 객체입니다.
+
+```typescript
+// boards/dto/create-board.dto.ts
+import { IsNotEmpty } from "class-validator";
+
+export class CreateBoardDto {
+  @IsNotEmpty()
+  title: string;
+
+  @IsNotEmpty()
+  description: string;
+}
+```
+
+| 구분             | Model (Interface) | DTO (Class)         |
+| ---------------- | ----------------- | ------------------- |
+| 역할             | 데이터 형태 정의  | 계층 간 데이터 전달 |
+| 런타임 존재 여부 | 컴파일 후 사라짐  | 런타임에 존재       |
+| Pipe 적용        | 불가              | 가능                |
+
+NestJS에서 DTO는 Class로 정의하는 것을 권장합니다.
+Interface는 컴파일 후 사라지기 때문에 Pipe 같은 런타임 기능을 활용할 수 없기 때문입니다.
+
+DTO가 필요한 또 다른 이유는 **유지보수**입니다.
+프로퍼티가 많아지면서 이름을 변경해야 할 때, DTO 없이 여러 곳에 흩어진 프로퍼티를 일일이 수정하는 것은 치명적인 오류로 이어질 수 있습니다.
+
+---
+
+# Pipe를 활용한 유효성 검사
+
+### Pipe란
+
+파이프는 `@Injectable()` 데코레이터로 주석이 달린 클래스로, 두 가지 역할을 수행합니다.
+
+- **Data Transformation** — 입력 데이터를 원하는 형식으로 자동 변환합니다 (예: 문자열 → 정수)
+- **Data Validation** — 입력 데이터가 유효하면 그대로 전달하고, 올바르지 않으면 예외를 발생시킵니다
+
+Nest는 컨트롤러 메서드가 호출되기 **직전에** 파이프를 삽입합니다.
+파이프를 거친 뒤에야 Route Handler(컨트롤러 메서드)에 데이터가 도달합니다.
+
+```text
+클라이언트 요청 (ex. GET /boards/1)
+  ↓
+Middleware / Guard     → 권한 확인, 로그 기록
+  ↓
+Pipe                   → Validation & Transformation
+  ↓
+Route Handler          → 검증이 끝난 데이터로 Service 호출
+  ↓
+클라이언트 응답
+```
+
+<br />
+
+### Pipe 적용 레벨
+
+파이프는 세 가지 레벨에서 적용할 수 있습니다.
+
+```typescript
+// 1. Handler-level — 특정 핸들러의 모든 파라미터에 적용
+@Post('/')
+@UsePipes(ValidationPipe)
+createBoard(@Body() createBoard: CreateBoardDto): Board {
+  return this.boardsService.createBoard(createBoard);
+}
+
+// 2. Parameter-level — 특정 파라미터에만 적용
+@Get('/:id')
+getBoardById(@Param('id') id: string): Board | undefined {
+  return this.boardsService.getBoardById(id);
+}
+
+// 3. Global-level — 모든 요청에 적용 (main.ts)
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe());
+  await app.listen(process.env.PORT ?? 3000);
+}
+```
+
+NestJS에는 기본 제공되는 6가지 Built-in Pipe가 있습니다.
+
+| Pipe               | 역할                 |
+| ------------------ | -------------------- |
+| `ValidationPipe`   | DTO 기반 유효성 검사 |
+| `ParseIntPipe`     | 문자열 → 정수 변환   |
+| `ParseBoolPipe`    | 문자열 → 불리언 변환 |
+| `ParseArrayPipe`   | 배열 파싱            |
+| `ParseUUIDPipe`    | UUID 형식 검증       |
+| `DefaultValuePipe` | 기본값 설정          |
+
+예를 들어 `ParseIntPipe`을 사용한 파라미터에 문자열이 들어오면, 자동으로 `400 Bad Request`를 반환합니다.
+
+<br />
+
+### DTO와 class-validator를 활용한 유효성 검사
+
+게시물 생성 시 빈 문자열이 들어오는 것을 방지하려면, DTO에 `@IsNotEmpty()` 데코레이터를 추가하고 핸들러에 `ValidationPipe`을 적용합니다.
+
+```bash
+npm i class-validator class-transformer
+```
+
+```typescript
+// dto/create-board.dto.ts
+import { IsNotEmpty } from "class-validator";
+
+export class CreateBoardDto {
+  @IsNotEmpty()
+  title: string;
+
+  @IsNotEmpty()
+  description: string;
+}
+```
+
+```typescript
+// boards.controller.ts
+@Post('/')
+@UsePipes(ValidationPipe)
+createBoard(@Body() createBoard: CreateBoardDto): Board {
+  return this.boardsService.createBoard(createBoard);
+}
+```
+
+`title`이나 `description`이 빈 문자열로 들어오면 `ValidationPipe`이 자동으로 `400 Bad Request`와 에러 메시지를 반환합니다.
+
+<br />
+
+### 예외 처리 — NotFoundException
+
+존재하지 않는 게시물을 조회하거나 삭제하려 할 때는 `NotFoundException`을 사용합니다.
+
+```typescript
+getBoardById(id: string): Board | undefined {
+  const found = this.boards.find((board) => board.id === id);
+  if (!found) {
+    throw new NotFoundException(`Board with ID ${id} not found`);
+  }
+  return found;
+}
+
+deleteBoard(id: string): void {
+  const found = this.getBoardById(id);
+  this.boards = this.boards.filter((board) => board.id !== found?.id);
+}
+```
+
+삭제 로직에서도 `getBoardById()`를 먼저 호출하면, 존재 여부 체크와 에러 메시지를 재사용할 수 있습니다.
+`found?.id`처럼 옵셔널 체이닝을 사용해 안전하게 접근합니다.
+
+<br />
+
+### 커스텀 Pipe — PipeTransform 구현
+
+NestJS의 Built-in Pipe만으로 부족할 때, `PipeTransform` 인터페이스를 구현해서 커스텀 파이프를 만들 수 있습니다.
+
+예를 들어, 게시물의 `status`는 `PUBLIC` 또는 `PRIVATE`만 허용해야 합니다.
+이 검증을 커스텀 파이프로 구현합니다.
+
+```typescript
+// boards/pipes/board-status-validation.pipe.ts
+import { ArgumentMetadata, BadRequestException, PipeTransform } from "@nestjs/common";
+import { BoardStatus } from "../boards.model";
+
+export class BoardStatusValidationPipe implements PipeTransform {
+  readonly StatusOptions = [BoardStatus.PRIVATE, BoardStatus.PUBLIC];
+
+  transform(value: string, metadata: ArgumentMetadata) {
+    const upperValue = value.toUpperCase() as BoardStatus;
+
+    if (!this.isStatusValid(upperValue)) {
+      throw new BadRequestException(`${upperValue} is an invalid status`);
+    }
+
+    return upperValue;
+  }
+
+  private isStatusValid(status: BoardStatus) {
+    const index = this.StatusOptions.indexOf(status);
+    return index !== -1;
+  }
+}
+```
+
+`transform()` 메서드는 모든 파이프에서 필수로 구현해야 합니다.
+`value`는 처리될 인자의 값이고, `metadata`는 `ArgumentMetadata` 타입으로 해당 인자의 메타데이터를 포함합니다.
+반환된 값은 Route Handler로 전달되고, 예외가 발생하면 클라이언트에 바로 응답됩니다.
+
+`readonly`로 선언된 `StatusOptions`는 클래스 외부에서 접근할 수 있지만 값을 변경할 수 없습니다.
+검증 로직에서는 `indexOf()`를 사용해 허용된 상태 목록에 포함되어 있는지 확인하고, 없으면 `-1`을 반환하므로 `!== -1`로 유효성을 판단합니다.
+
+```typescript
+// 컨트롤러에서 Parameter-level로 적용
+@Patch('/:id/status')
+updateBoardStatus(
+  @Param('id') id: string,
+  @Body('status', BoardStatusValidationPipe) status: BoardStatus,
+): Board | undefined {
+  return this.boardsService.updateBoardStatus(id, status);
+}
+```
+
+`PUBLIC`, `PRIVATE` 외의 값이 들어오면 `400 Bad Request`와 함께 에러 메시지가 반환됩니다.
+
+---
+
+## 마치며
+
+NestJS의 Module-Controller-Service 아키텍처와 Pipe를 활용한 유효성 검사를 정리했습니다.
+
+직접 구현하면서 세 가지가 확실히 와닿았습니다.
+
+- NestJS는 Express의 자유로움 위에 **구조적인 틀**을 얹어주는 프레임워크입니다. 데코레이터 기반의 추상화 덕분에 코드의 역할이 파일 단위로 명확하게 분리됩니다
+- Provider와 Dependency Injection은 "필요한 것을 직접 만들지 않고 Nest가 넣어준다"는 단순한 원칙이지만, 컨트롤러와 서비스 간의 결합도를 크게 낮춰줍니다
+- Pipe는 컨트롤러에 도달하기 전에 데이터를 걸러주는 관문입니다. Built-in Pipe와 커스텀 Pipe를 조합하면 유효성 검사 로직을 비즈니스 로직에서 완전히 분리할 수 있습니다
+
+다음 글에서는 NestJS와 TypeORM을 연동한 데이터베이스 계층 구현에 대해 정리할 예정입니다.

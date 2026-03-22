@@ -236,6 +236,16 @@
   color: var(--color-tag-nodejs-text-dark);
 }
 
+/* NestJS 브랜드 */
+[data-tag="Nest.js"] {
+  background-color: var(--color-tag-nestjs-bg);
+  color: var(--color-tag-nestjs-text);
+}
+.dark [data-tag="Nest.js"] {
+  background-color: var(--color-tag-nestjs-bg-dark);
+  color: var(--color-tag-nestjs-text-dark);
+}
+
 /* Redis 브랜드 */
 [data-tag="Redis"] {
   background-color: var(--color-tag-redis-bg);

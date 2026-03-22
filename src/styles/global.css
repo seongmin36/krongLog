@@ -42,6 +42,11 @@
   --color-tag-nodejs-bg-dark: rgba(51, 153, 51, 0.15);
   --color-tag-nodejs-text-dark: #86efac;
 
+  --color-tag-nestjs-bg: rgba(224, 35, 78, 0.1);
+  --color-tag-nestjs-text: #e0234e;
+  --color-tag-nestjs-bg-dark: rgba(224, 35, 78, 0.15);
+  --color-tag-nestjs-text-dark: #fda4af;
+
   --color-tag-redis-bg: rgba(220, 56, 45, 0.1);
   --color-tag-redis-text: #dc382d;
   --color-tag-redis-bg-dark: rgba(220, 56, 45, 0.15);
