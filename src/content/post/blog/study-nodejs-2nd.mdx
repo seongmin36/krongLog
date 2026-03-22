@@ -11,9 +11,9 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 Node.js로 서버를 구축할 때 Express만으로도 충분히 API를 만들 수 있습니다.
 하지만 프로젝트 규모가 커지면서 두 가지 질문이 생겼습니다.
 
-> 컨트롤러, 서비스, 모델을 어떤 기준으로 분리해야 하는가?
+> 컨트롤러, 서비스, 모델을 어떤 기준으로 분리해야 하지?
 
-> 데이터 유효성 검사는 어디서, 어떤 방식으로 처리해야 하는가?
+> 데이터 유효성 검사는 어디서, 어떤 방식으로 처리해야 하지?
 
 이 글에서는 NestJS의 핵심 아키텍처와 Pipe를 활용한 유효성 검사를 직접 구현한 결과를 바탕으로 정리합니다.
 
@@ -241,13 +241,21 @@ export class BoardsService {
 
 현재는 DB가 없으므로 로컬 메모리(배열)에 데이터를 저장하고, 고유한 ID는 `uuid` 모듈로 생성합니다.
 
+POST로 게시물을 생성하고 GET으로 확인한 결과입니다.
+
+![실행 결과](/images/study-nodejs-2nd/1.png)
+
+![실행 결과](/images/study-nodejs-2nd/2.png)
+
+![실행 결과](/images/study-nodejs-2nd/3.png)
+
 <br />
 
 ### Provider와 Dependency Injection
 
-Service가 Controller에서 사용되려면 **종속성 주입(Dependency Injection)**이 필요합니다.
+Service가 Controller에서 사용되려면 <strong>종속성 주입(Dependency Injection)</strong>이 필요합니다.
 
-> 종속성을 주입한다는 것은, 컨트롤러가 필요로 하는 서비스·팩토리·헬퍼·레포지토리 같은 것들을 직접 생성하지 않고, Nest 런타임이 알아서 인스턴스를 만들어 넣어주는 것입니다.
+> 종속성을 주입한다는 것은, 컨트롤러가 필요로 하는 서비스, 팩토리, 헬퍼, 레포지토리 같은 것들을 직접 생성하지 않고, Nest 런타임이 알아서 인스턴스를 만들어 넣어주는 것입니다.
 
 ```typescript
 @Controller("boards")
@@ -283,7 +291,7 @@ export interface Board {
 
 타입을 정의하면 원하는 타입과 다른 값이 들어올 때 컴파일 단계에서 에러가 발생하고, 코드를 읽는 입장에서도 데이터 구조를 쉽게 파악할 수 있습니다.
 
-**DTO(Data Transfer Object)**는 계층 간 데이터 교환을 위한 객체입니다.
+<strong>DTO(Data Transfer Object)</strong>는 계층 간 데이터 교환을 위한 객체입니다.
 
 ```typescript
 // boards/dto/create-board.dto.ts
@@ -384,7 +392,7 @@ NestJS에는 기본 제공되는 6가지 Built-in Pipe가 있습니다.
 게시물 생성 시 빈 문자열이 들어오는 것을 방지하려면, DTO에 `@IsNotEmpty()` 데코레이터를 추가하고 핸들러에 `ValidationPipe`을 적용합니다.
 
 ```bash
-npm i class-validator class-transformer
+pnpm i class-validator class-transformer
 ```
 
 ```typescript
@@ -411,6 +419,8 @@ createBoard(@Body() createBoard: CreateBoardDto): Board {
 
 `title`이나 `description`이 빈 문자열로 들어오면 `ValidationPipe`이 자동으로 `400 Bad Request`와 에러 메시지를 반환합니다.
 
+![실행 결과](/images/study-nodejs-2nd/4.png)
+
 <br />
 
 ### 예외 처리 — NotFoundException
@@ -435,6 +445,14 @@ deleteBoard(id: string): void {
 삭제 로직에서도 `getBoardById()`를 먼저 호출하면, 존재 여부 체크와 에러 메시지를 재사용할 수 있습니다.
 `found?.id`처럼 옵셔널 체이닝을 사용해 안전하게 접근합니다.
 
+`NotFoundException`에 메시지를 전달하기 전에는 기본 "Not Found"만 반환됩니다.
+
+![실행 결과](/images/study-nodejs-2nd/5.png)
+
+커스텀 메시지를 전달하면 어떤 리소스가 없는지 구체적으로 알 수 있습니다.
+
+![실행 결과](/images/study-nodejs-2nd/6.png)
+
 <br />
 
 ### 커스텀 Pipe — PipeTransform 구현
@@ -442,6 +460,12 @@ deleteBoard(id: string): void {
 NestJS의 Built-in Pipe만으로 부족할 때, `PipeTransform` 인터페이스를 구현해서 커스텀 파이프를 만들 수 있습니다.
 
 예를 들어, 게시물의 `status`는 `PUBLIC` 또는 `PRIVATE`만 허용해야 합니다.
+커스텀 파이프가 없으면 `status`에 아무 문자열이나 들어가도 그대로 저장됩니다.
+
+![실행 결과](/images/study-nodejs-2nd/7.png)
+
+![실행 결과](/images/study-nodejs-2nd/8.png)
+
 이 검증을 커스텀 파이프로 구현합니다.
 
 ```typescript
@@ -487,7 +511,17 @@ updateBoardStatus(
 }
 ```
 
-`PUBLIC`, `PRIVATE` 외의 값이 들어오면 `400 Bad Request`와 함께 에러 메시지가 반환됩니다.
+커스텀 파이프를 적용한 뒤 동일하게 테스트합니다.
+
+![실행 결과](/images/study-nodejs-2nd/9.png)
+
+잘못된 값을 보내면 파이프가 요청을 거부합니다.
+
+![실행 결과](/images/study-nodejs-2nd/10.png)
+
+유효한 값은 정상적으로 통과됩니다.
+
+![실행 결과](/images/study-nodejs-2nd/11.png)
 
 ---
 
