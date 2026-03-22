@@ -251,7 +251,7 @@ POST로 게시물을 생성하고 GET으로 확인한 결과입니다.
 
 <br />
 
-### Provider와 Dependency Injection
+### <mark>Provider와 Dependency Injection</mark>
 
 Service가 Controller에서 사용되려면 <strong>종속성 주입(Dependency Injection)</strong>이 필요합니다.
 
@@ -312,7 +312,7 @@ export class CreateBoardDto {
 | 런타임 존재 여부 | 컴파일 후 사라짐  | 런타임에 존재       |
 | Pipe 적용        | 불가              | 가능                |
 
-NestJS에서 DTO는 Class로 정의하는 것을 권장합니다.
+NestJS에서 DTO는 `Class`로 정의하는 것을 권장합니다.
 Interface는 컴파일 후 사라지기 때문에 Pipe 같은 런타임 기능을 활용할 수 없기 때문입니다.
 
 DTO가 필요한 또 다른 이유는 **유지보수**입니다.
@@ -455,7 +455,7 @@ deleteBoard(id: string): void {
 
 <br />
 
-### 커스텀 Pipe — PipeTransform 구현
+### <mark>커스텀 Pipe — PipeTransform 구현</mark>
 
 NestJS의 Built-in Pipe만으로 부족할 때, `PipeTransform` 인터페이스를 구현해서 커스텀 파이프를 만들 수 있습니다.
 
@@ -535,4 +535,6 @@ NestJS의 Module-Controller-Service 아키텍처와 Pipe를 활용한 유효성 
 - Provider와 Dependency Injection은 "필요한 것을 직접 만들지 않고 Nest가 넣어준다"는 단순한 원칙이지만, 컨트롤러와 서비스 간의 결합도를 크게 낮춰줍니다
 - Pipe는 컨트롤러에 도달하기 전에 데이터를 걸러주는 관문입니다. Built-in Pipe와 커스텀 Pipe를 조합하면 유효성 검사 로직을 비즈니스 로직에서 완전히 분리할 수 있습니다
 
-다음 글에서는 NestJS와 TypeORM을 연동한 데이터베이스 계층 구현에 대해 정리할 예정입니다.
+사실 NestJS를 써보고 나서 Express에서도 같은 환경을 구현해서 비교해보고 싶어졌습니다.
+
+따라서 다음 글에서는 Express와 NestJS를 비교하며 데이터베이스 계층 구현에 차이가 있는지 비교해보겠습니다.

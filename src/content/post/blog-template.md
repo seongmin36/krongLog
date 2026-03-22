@@ -85,6 +85,8 @@ Node.js로 백엔드를 시작하면서 가장 먼저 부딪힌 두 가지 질�
 
 **규칙**
 - 핵심 개념은 `**굵게**` 강조. 남용 금지 (문단당 1~2개)
+- **형광펜 하이라이트**는 `<mark>내용</mark>` 사용. **문장이 아닌 헤딩(`#`, `##`, `###`)에만** 사용. 글 전체에서 꼭 필요한 핵심 소제목에만 제한적으로 적용 (2~3개 이내)
+  - 예: `### <mark>Provider와 Dependency Injection</mark>`
 - **툴팁**은 `<Tooltip note="설명">내용</Tooltip>` 사용. MDX 상단에 `import Tooltip from "@/components/ui/Tooltip.astro"` 추가
 - 괄호가 포함된 강조(예: `정확히 일치(Exact Match)`)나 Tooltip 안의 굵은 글씨에서 렌더가 깨지면 `<strong>...</strong>` 사용
 - 코드, 명령어, 파일명은 인라인 코드 `` `backtick` `` 처리
