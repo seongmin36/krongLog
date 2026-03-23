@@ -1,7 +1,7 @@
 ---
 import type { HTMLAttributes } from "astro/types";
 
-type Props = HTMLAttributes<'a'>;
+type Props = HTMLAttributes<"a">;
 
 const { href, class: className, ...props } = Astro.props;
 const { pathname } = Astro.url;
@@ -12,9 +12,10 @@ const isActive = pathname === href || pathname.startsWith(`${href}/`);
 <a
   href={href}
   class:list={[
-    "relative text-sm font-medium text-gray-500 dark:text-gray-400 no-underline transition-colors duration-200 py-1",
+    "relative py-1 text-sm font-medium text-gray-500 no-underline transition-colors duration-200 dark:text-gray-400",
     "hover:text-gray-900 dark:hover:text-gray-50",
-    isActive && "text-gray-900! dark:text-gray-50! font-semibold! after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-0.5 after:bg-primary after:rounded-sm",
+    isActive &&
+      "after:bg-primary font-semibold! text-gray-900! after:absolute after:right-0 after:bottom-[-2px] after:left-0 after:h-0.5 after:rounded-sm after:content-[''] dark:text-gray-50!",
     className,
   ]}
   aria-current={isActive ? "page" : undefined}
