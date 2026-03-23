@@ -9,9 +9,10 @@
   --font-sans: "KaKao Big", sans-serif;
 
   --color-primary: #3b7a57;
-  --color-dark: #121212;
+  --color-description: #4b5563;
+  --color-dark: #1b1b1b;
   --color-dark-text: #f0a8b8;
-  --color-description: #6b7684;
+  --color-dark-description: #d1d5db;
 
   /* 본문·코드 형광펜 하이라이트 (#E9F1EC 계열) */
   --color-highlight-pen: #e9f1ec;
@@ -75,6 +76,14 @@
     #7a1f1f 0%,
     #6b1f7a 100%
   );
+}
+
+@font-face {
+  font-family: "KaKaO Small";
+  src: url("/fonts/KakaoSmall-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
