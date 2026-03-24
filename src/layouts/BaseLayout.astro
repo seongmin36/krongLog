@@ -47,28 +47,37 @@ const resolvedOgImage =
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={resolvedOgImage} />
 
+    <style is:inline>
+      @media (prefers-color-scheme: dark) {
+        html:not(.light) {
+          color-scheme: dark;
+          background-color: var(--color-dark);
+        }
+      }
+    </style>
+
     <!-- 다크모드 FOUC 방지: 페인트 전에 테마 적용 -->
     <script is:inline>
-      (function () {
+      function applyTheme() {
         const theme = localStorage.getItem("theme");
         if (
           theme === "dark" ||
           (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
         ) {
           document.documentElement.classList.add("dark");
+          document.documentElement.style.colorScheme = "dark";
+        } else {
+          document.documentElement.classList.remove("dark");
+          document.documentElement.style.colorScheme = "light";
         }
-      })();
+      }
+      applyTheme();
+
+      document.addEventListener("astro:after-swap", applyTheme);
+
       window.addEventListener("pageshow", function (e) {
         if (e.persisted) {
-          const theme = localStorage.getItem("theme");
-          if (
-            theme === "dark" ||
-            (!theme && matchMedia("(prefers-color-scheme: dark)").matches)
-          ) {
-            document.documentElement.classList.add("dark");
-          } else {
-            document.documentElement.classList.remove("dark");
-          }
+          applyTheme();
         }
       });
     </script>

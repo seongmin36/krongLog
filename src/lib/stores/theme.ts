@@ -1,62 +1,56 @@
 import { atom } from "nanostores";
 
-export type Theme = "light" | "dark";
+export const ThemeKey = {
+  LIGHT: "light",
+  DARK: "dark",
+} as const;
 
-export const $theme = atom<Theme>("light");
+export type ThemeType = (typeof ThemeKey)[keyof typeof ThemeKey];
 
-function getStoredTheme(): Theme | null {
+function getStoredTheme(): ThemeType | null {
   if (typeof localStorage === "undefined") return null;
-  const storedTheme = localStorage.getItem("theme");
-  return storedTheme === "light" || storedTheme === "dark" ? storedTheme : null;
+  try {
+    const storedTheme = localStorage.getItem("theme");
+    return storedTheme === ThemeKey.LIGHT || storedTheme === ThemeKey.DARK
+      ? (storedTheme as ThemeType)
+      : null;
+  } catch (error) {
+    return null;
+  }
 }
 
-// 초기 테마 resolve -> store에 반영
-function resolveTheme(): Theme {
+// 우선 순위 : localStorage -> system -> light
+function resolveTheme(): ThemeType {
   const storedTheme = getStoredTheme();
   if (storedTheme) return storedTheme;
-  if (typeof window === "undefined") return "light";
+  if (typeof window === "undefined") return ThemeKey.LIGHT;
   return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+    ? ThemeKey.DARK
+    : ThemeKey.LIGHT;
 }
 
-function applyToDOM(theme: Theme) {
-  document.documentElement.classList.toggle("dark", theme === "dark");
+export const $theme = atom<ThemeType>(resolveTheme());
+
+export function toggleTheme() {
+  $theme.set($theme.get() === ThemeKey.DARK ? ThemeKey.LIGHT : ThemeKey.DARK);
+}
+
+function applyToDOM(theme: ThemeType) {
+  const isDark = theme === ThemeKey.DARK;
+  document.documentElement.classList.toggle("dark", isDark);
+  document.documentElement.classList.toggle("light", !isDark);
+  document.documentElement.style.colorScheme = isDark ? "dark" : "light";
   localStorage.setItem("theme", theme);
 }
 
-export function toggleTheme() {
-  $theme.set($theme.get() === "dark" ? "light" : "dark");
-}
-
 if (typeof window !== "undefined") {
-  $theme.set(resolveTheme());
-  $theme.subscribe(applyToDOM);
-  window
-    .matchMedia("(prefers-color-scheme: dark)")
-    .addEventListener("change", (e) => {
-      if (!getStoredTheme()) {
-        $theme.set(e.matches ? "dark" : "light");
-      }
-    });
-}
-
-let initialized = false;
-
-// 클라이언트 1회 호출
-export function initThemeStore() {
-  if (initialized) return;
-  initialized = true;
-
-  $theme.set(resolveTheme());
-
   $theme.subscribe(applyToDOM);
 
   window
     .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", (e) => {
       if (!getStoredTheme()) {
-        $theme.set(e.matches ? "dark" : "light");
+        $theme.set(e.matches ? ThemeKey.DARK : ThemeKey.LIGHT);
       }
     });
 }
