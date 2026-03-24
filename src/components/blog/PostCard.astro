@@ -25,7 +25,7 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
 
 <a
   href={`/blogs/${post.id}`}
-  class="group dark:bg-dark flex flex-col overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-black/5"
+  class="group dark:bg-dark flex flex-col overflow-hidden bg-white transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-black/5"
   data-astro-prefetch
 >
   <div
@@ -39,7 +39,7 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
           width={800}
           height={500}
           format="webp"
-          quality={80}
+          quality="high"
           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           decoding="async"
@@ -51,7 +51,7 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
           width={800}
           height={500}
           format="webp"
-          quality={80}
+          quality="high"
           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
           decoding="async"

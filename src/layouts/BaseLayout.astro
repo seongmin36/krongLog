@@ -1,5 +1,6 @@
 ---
 import Header from "@/components/Header.astro";
+// import ClientRouter from "astro:transitions";
 import "@/styles/global.css";
 
 interface Props {
@@ -20,7 +21,7 @@ const resolvedOgImage =
 ---
 
 <!doctype html>
-<html lang="ko">
+<html lang="ko" class="no-transition">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -48,42 +49,70 @@ const resolvedOgImage =
     <meta name="twitter:image" content={resolvedOgImage} />
 
     <style is:inline>
+      html.no-transition,
+      html.no-transition * {
+        transition: none !important;
+      }
       @media (prefers-color-scheme: dark) {
         html:not(.light) {
           color-scheme: dark;
-          background-color: var(--color-dark);
+          background-color: #1b1b1b;
         }
       }
     </style>
 
     <!-- 다크모드 FOUC 방지: 페인트 전에 테마 적용 -->
     <script is:inline>
-      function applyTheme() {
-        const theme = localStorage.getItem("theme");
-        if (
-          theme === "dark" ||
-          (!theme && window.matchMedia("(prefers-color-scheme: dark)").matches)
-        ) {
-          document.documentElement.classList.add("dark");
-          document.documentElement.style.colorScheme = "dark";
-        } else {
-          document.documentElement.classList.remove("dark");
-          document.documentElement.style.colorScheme = "light";
+      (function () {
+        var d = document.documentElement;
+
+        function applyTheme() {
+          var theme = localStorage.getItem("theme");
+          var isDark =
+            theme === "dark" ||
+            (!theme &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+          d.classList.toggle("dark", isDark);
+          d.classList.toggle("light", !isDark);
+          d.style.colorScheme = isDark ? "dark" : "light";
         }
-      }
-      applyTheme();
 
-      document.addEventListener("astro:after-swap", applyTheme);
+        applyTheme();
 
-      window.addEventListener("pageshow", function (e) {
-        if (e.persisted) {
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            d.classList.remove("no-transition");
+          });
+        });
+
+        document.addEventListener("astro:after-swap", function () {
+          d.classList.add("no-transition");
           applyTheme();
-        }
-      });
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              d.classList.remove("no-transition");
+            });
+          });
+        });
+
+        window.addEventListener("pageshow", function (e) {
+          if (e.persisted) {
+            d.classList.add("no-transition");
+            applyTheme();
+            requestAnimationFrame(function () {
+              requestAnimationFrame(function () {
+                d.classList.remove("no-transition");
+              });
+            });
+          }
+        });
+      })();
+      // <ClientRouter transition:name="fade" />;
     </script>
   </head>
   <body
-    class="dark:bg-dark text-dark m-0 min-h-full w-full bg-white transition-colors duration-300 dark:text-gray-50"
+    class="dark:bg-dark text-dark m-0 min-h-full w-full bg-white dark:text-gray-50"
   >
     <Header />
     <main class="mx-auto max-w-[1200px] px-4 sm:px-6">

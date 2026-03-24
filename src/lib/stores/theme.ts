@@ -32,7 +32,11 @@ function resolveTheme(): ThemeType {
 export const $theme = atom<ThemeType>(resolveTheme());
 
 export function toggleTheme() {
+  document.documentElement.classList.add("theme-transitioning");
   $theme.set($theme.get() === ThemeKey.DARK ? ThemeKey.LIGHT : ThemeKey.DARK);
+  setTimeout(() => {
+    document.documentElement.classList.remove("theme-transitioning");
+  }, 300);
 }
 
 function applyToDOM(theme: ThemeType) {
