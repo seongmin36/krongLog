@@ -5,9 +5,10 @@
 ## 명령어
 
 ```bash
-pnpm dev        # 개발 서버 실행 (localhost:4321)
-pnpm build      # ./dist/ 로 빌드 (Vercel 정적 출력)
-pnpm preview    # 프로덕션 빌드 로컬 미리보기
+pnpm dev          # 개발 서버 실행 (localhost:4321)
+pnpm build        # 동영상 변환 + ./dist/ 로 빌드 (Vercel 정적 출력)
+pnpm preview      # 프로덕션 빌드 로컬 미리보기
+pnpm video:build  # raw-videos/*.mov → public/videos/*.mp4 변환만 실행
 ```
 
 테스트 및 린트 스크립트는 별도로 설정되어 있지 않습니다.
@@ -18,7 +19,7 @@ pnpm preview    # 프로덕션 빌드 로컬 미리보기
 
 **스택:** Astro (SSG) + React 19 (인터랙티브 아일랜드 전용) + Tailwind CSS v4 + MDX + Nanostores
 
-**콘텐츠 컬렉션:** 블로그 포스트는 `src/content/post/blog/**/*.{md,mdx}` 경로에 위치하며, `src/content.config.ts`에서 glob으로 로드됩니다. 스키마 필수 필드는 `title`과 `date`이며, 선택 필드는 `description`, `updatedDate`, `tags`, `image`입니다.
+**콘텐츠 컬렉션:** 블로그 포스트는 `src/content/post/blog/**/*.{md,mdx}` 경로에 위치하며, `src/content.config.ts`에서 glob으로 로드됩니다. 스키마 필수 필드는 `title`과 `date`이며, 선택 필드는 `description`, `updatedDate`, `tags`입니다. `image`는 스키마상 선택이지만 모든 포스트에 포함하는 것을 원칙으로 합니다.
 
 **라우팅:**
 - `/` → 홈 (최근 포스트)
@@ -37,3 +38,7 @@ pnpm preview    # 프로덕션 빌드 로컬 미리보기
 **SEO**는 `src/types/seo.ts`에 타입이 정의된 props를 통해 `BaseLayout.astro`에서 처리됩니다.
 
 **본문 형광펜 하이라이트:** 색상 토큰은 `global.css`의 `--color-highlight-pen` (#E9F1EC)·`--color-highlight-pen-dark`입니다. MDX에서 의미 있는 강조는 표준 `<mark>텍스트</mark>`로 쓰고, 스타일은 `mdx.css`의 `.prose mark`에서 처리합니다(추가 JS 없음). 코드 블록은 기존 Shiki 설정 그대로 두고, `transformerMetaHighlight` / `transformerNotationHighlight` 등으로 붙는 `.line.highlighted`, `.highlighted-word`에 동일 팔레트를 맞춥니다.
+
+**괄호 포함 볼드:** 괄호가 포함된 강조 텍스트(예: `ORM(Object Relational Mapping)`)는 `**...**` 대신 `<strong>...</strong>` 태그를 사용합니다. `**...()**` 형태는 MDX 렌더링이 깨질 수 있습니다.
+
+**동영상 파이프라인:** 원본 `.mov` 파일은 `raw-videos/` 폴더에 저장하며(git-ignored), `pnpm video:build` 또는 `pnpm build` 시 `scripts/process-videos.mjs`가 ffmpeg로 `public/videos/`에 `.mp4`로 자동 변환합니다. 이미 변환된 파일은 스킵됩니다. MDX에서는 `<Video src="/videos/폴더명/파일.mp4" />` 컴포넌트(`src/components/ui/Video.astro`)로 사용하며, 런타임 JS 없이 `<video>` 태그만 렌더링됩니다.
