@@ -1,0 +1,372 @@
+---
+title: "TypeORM으로 NestJS 데이터베이스 연동하기"
+description: "서버와 데이터베이스의 기본 개념부터 TypeORM을 활용한 NestJS 데이터베이스 연동, 그리고 TypeORM 버전 호환성 이슈 해결까지 정리합니다."
+date: "2026-03-29"
+tags: ["Backend", "Nest.js", "TypeORM"]
+image: "./images/img-study-nodejs-3rd.jpg"
+---
+
+NestJS로 CRUD API를 만들면서 로컬 메모리(배열)에 데이터를 저장하는 단계를 지나니 자연스럽게 두 가지 질문이 생겼습니다.
+
+> 서버와 데이터베이스는 정확히 어떤 관계이고, 어떻게 연결하지?
+
+> TypeORM은 왜 쓰는 건지, NestJS에서는 어떻게 세팅하지?
+
+이 글에서는 서버와 데이터베이스의 기본 개념을 정리하고, TypeORM을 활용해 NestJS에 PostgreSQL을 연동한 과정을 정리합니다.
+
+---
+
+# 핵심 개념 정리
+
+### 서버란
+
+서버(Server)는 클라이언트(브라우저, 앱 등)의 요청을 받아서, 처리하고, 응답을 돌려주는 컴퓨터 또는 프로그램입니다.
+
+예를 들어 브라우저에서 `GET /todos`를 날리면, 서버가 그 요청을 받아서 DB에서 투두 목록을 꺼내고, JSON으로 응답해주는 것입니다. 이 구조를 **클라이언트-서버 모델**이라고 하며, 하나의 서버가 여러 클라이언트의 요청을 동시에 처리할 수 있습니다.
+
+서버를 보는 관점은 세 가지가 있습니다.
+
+- <strong>물리 서버(하드웨어 관점)</strong> — 데이터센터에 있는 고성능 컴퓨터 자체입니다. 일반 PC보다 안정성, 성능에 초점을 맞춰 설계됩니다
+- <strong>가상 서버(배포 관점)</strong> — AWS EC2나 Vercel 같은 클라우드 위의 가상 머신/컨테이너입니다. 물리 머신 한 대 위에 여러 가상 서버가 돌아갑니다
+- <strong>서버 프로세스(소프트웨어 관점)</strong> — OS 위에서 돌아가면서 요청을 듣고 응답을 돌려주는 프로그램 자체입니다. NestJS로 `npm run start:dev` 하면 뜨는 것이 서버 프로세스입니다
+
+서버의 핵심 역할을 정리하면 다음과 같습니다.
+
+- **요청-응답 처리** — 네트워크 포트(예: 3000번)에서 클라이언트 요청을 수신하고, 비즈니스 로직을 수행한 뒤, 결과를 응답으로 반환합니다. NestJS에서 `await app.listen(3000)` 하는 것이 이 포트를 여는 것입니다
+- **동시성 처리** — 여러 클라이언트가 동시에 요청을 보내기 때문에, 서버는 이를 버틸 수 있어야 합니다. Node.js는 이벤트 루프 + 비동기 I/O 방식으로 처리합니다
+- **신뢰성과 가용성** — 서버는 보통 24시간 켜져 있어야 하고, 장애가 나도 빠르게 복구되도록 설계합니다. 트래픽이 몰리면 서버를 늘려서(수평 확장) 대응합니다
+- **보안** — 서버는 네트워크의 중심이므로, 인증/인가, 암호화, 로그 관리 등으로 데이터를 보호해야 합니다. NestJS에서 Guard나 Pipe로 요청을 걸러내는 것도 이 맥락입니다
+
+<br />
+
+### 데이터베이스란
+
+데이터베이스(Database)는 구조화된 데이터를 효율적으로 저장하고, 검색하고, 수정하고, 관리하기 위해 조직화된 데이터의 집합입니다.
+
+쉽게 말하면, 엑셀 시트처럼 데이터를 행과 열로 정리해서 저장하는 것인데, 엑셀보다 훨씬 크고, 빠르고, 안전한 버전이라고 보면 됩니다. 텍스트, 숫자뿐 아니라 이미지, 파일 경로 등 다양한 데이터를 저장할 수 있습니다.
+
+여기서 헷갈리기 쉬운 것이 Database와 DBMS의 구분입니다.
+
+- **Database** — 데이터 그 자체입니다. 잘 구조화해서 모아둔 데이터의 집합입니다. 예를 들어 todo 테이블에 들어있는 투두 항목들, student 테이블에 들어있는 학생 정보들이 이에 해당합니다
+- <strong>DBMS(Database Management System)</strong> — 그 데이터베이스를 관리하는 소프트웨어입니다. 데이터 삽입, 수정, 삭제, 조회를 처리하고, 동시 접근 제어, 권한 관리, 백업/복구까지 담당합니다.
+  PostgreSQL, MySQL, SQLite, MongoDB 등이 DBMS입니다
+- **Database System** — 데이터베이스 + DBMS + 하드웨어 + 사용자/운영 절차까지 포함하는 전체 생태계입니다
+
+"데이터베이스"라고 하면 보통 데이터 자체 + DBMS + 관련 앱까지 싸잡아서 부르는 경우가 많지만, 정확히는 위처럼 구분됩니다.
+
+<strong>SQL(Structured Query Language)</strong>은 관계형 데이터베이스(RDBMS)에 저장된 데이터를 정의하고, 조작하고, 조회하기 위한 표준 질의 언어입니다.
+
+<br />
+
+### Entity란
+
+데이터베이스에 저장하고 관리해야 할 현실 세계의 중요한 대상(객체/개념)이며, 보통 하나의 테이블에 대응하는 개념입니다.
+
+현실 세계에서 사람, 학생, 주문, 결제, 상품, 게시글 같은 '관심사를 분리해야지'하는 대상이 있습니다. 이런 것들을 데이터 모델링(ERD 설계)에서 엔티티라고 부르고, 구현 단계에서는 각 엔티티가 하나의 테이블로 만들어지는 것이 일반적입니다.
+
+- 학생 엔티티 → `student` 테이블
+- 주문 엔티티 → `orders` 테이블
+- 게시글 엔티티 → `posts` 테이블
+
+엔티티를 좀 더 쪼개보면 다음과 같습니다.
+
+- <strong>엔티티(Entity)</strong> — 관리할 대상 자체
+- <strong>속성(Attribute)</strong> — 엔티티가 가진 정보들, 즉 칼럼(이름, 나이, 제목, 작성일 등)
+- <strong>엔티티 인스턴스(Instance)</strong> — 실제 저장된 개별 행(레코드) 한 줄(학생 한 명, 주문 한 건 등)
+
+예를 들어 '학생'이라는 엔티티는 학번, 이름, 학점, 전공, 성적 등의 속성으로 특징지어질 수 있고, 이러한 학생 정보 하나, 즉 '행'을 엔티티 인스턴스라고 합니다.
+
+<br />
+
+### Repository와 요청 흐름
+
+Repository는 엔티티 객체와 함께 작동하며, 엔티티 찾기(Find), 삽입(Insert), 업데이트(Update), 삭제(Delete) 등을 처리합니다.
+
+NestJS에서의 요청 흐름을 다시 짚어보면 다음과 같습니다.
+
+```text
+Client Request
+  ↓
+Controller       → 요청 라우팅
+  ↓
+Service          → 비즈니스 로직
+  ↓
+Repository       → DB 작업 (Entity 기반)
+  ↓
+Service          → 처리된 결과
+  ↓
+Controller       → 응답 반환
+  ↓
+Client Response
+```
+
+TypeORM에서 모듈 설정 시 사용하는 두 가지 함수가 있습니다.
+
+- `forRoot()` — 데이터베이스와의 **연결 자체**를 담당합니다. 보통 애플리케이션의 뿌리인 `AppModule`에서 단 한 번만 호출합니다. DB 주소, 포트, 사용자 이름, 비밀번호 같은 접속 정보를 담고 있고, 앱 전체에서 공유됩니다
+- `forFeature()` — 특정 모듈에서 어떤 엔티티(테이블)를 사용할지 등록합니다
+
+<br />
+
+### <mark>ORM과 TypeORM</mark>
+
+<strong>ORM(Object Relational Mapping)</strong>은 객체와 관계형 데이터베이스의 데이터를 자동으로 변형 및 연결하는 작업입니다.
+
+객체지향 프로그래밍은 클래스를 사용하고, 관계형 데이터베이스는 테이블을 사용합니다. 객체 모델과 관계형 모델 간의 불일치가 존재하기 때문에, ORM은 객체와 데이터베이스의 변형에 유연하게 사용할 수 있도록 합니다.
+
+**TypeORM**은 Node.js에서 실행되고 TypeScript로 작성된 ORM 라이브러리입니다.
+
+- 모델을 기반으로 데이터베이스 테이블 체계를 자동으로 생성합니다
+- 데이터베이스에서 개체를 쉽게 삽입, 업데이트 및 삭제할 수 있습니다
+- 테이블 간의 매핑(일대일, 일대다, 다대다)을 만듭니다
+- 간단한 CLI 명령어를 제공합니다
+
+TypeORM 설정에서 주요 옵션은 다음과 같습니다.
+
+- `entities` — 엔티티를 이용해서 데이터베이스 테이블을 생성합니다. 엔티티 파일이 어디에 있는지 설정합니다
+- `synchronize` — `true`로 설정하면 애플리케이션을 다시 실행할 때 엔티티 안에서 수정된 컬럼의 길이, 타입, 변경값 등을 해당 테이블을 Drop한 후 다시 생성합니다
+
+---
+
+# 데이터베이스 연동 실습
+
+### DB 생성과 로케일 설정
+
+PostgreSQL에서 데이터베이스를 생성할 때, libc와 ICU 설정으로 인한 데이터 부정합 문제가 발생할 수 있습니다.
+
+<video controls width="100%">
+  <source src="/images/study-nodejs-3rd/1.mov" type="video/quicktime" />
+</video>
+
+<strong>로케일(Locale) 제공자</strong>인 libc와 ICU는 컴퓨터가 텍스트를 정렬(Sorting)하고, 대소문자를 구분하고, 날짜를 표시할 때 어떤 '사전'을 참조할지 결정하는 것입니다.
+
+- **libc** — 운영체제에 기본적으로 내재된 표준 C 라이브러리입니다. OS마다 결과가 다를 수 있지만, 가볍고 추가 설치가 필요 없습니다
+- <strong>ICU(International Components for Unicode)</strong> — 전 세계의 모든 언어와 유니코드를 완벽하게 지원하기 위해 만들어진 글로벌 표준 라이브러리입니다. OS와 상관없이 항상 동일한 결과를 보장하며,
+  이모지, 고어, 복잡한 다국어 등의 정렬에 강력합니다. 데이터의 일관성이 매우 높습니다
+
+![실행 결과](/images/study-nodejs-3rd/2.png)
+
+위 사진은 ICU와 libc가 충돌되어 생긴 문제입니다. '기본 도면을 최신식으로 쓸건데 왜 옛날 방식인 libc로 지으려고 해?'라고 시스템이 따지는 격의 경고 메시지입니다.
+
+앞서 말한 장점들을 바탕으로 ICU 로케일 제공자를 선택하기로 했습니다. 쿼리 툴에서 명령어를 통해 해결할 수 있습니다.
+
+```sql
+-- board-app이 이미 존재하면 삭제
+DROP DATABASE IF EXISTS "board-app";
+
+-- board-app 생성
+CREATE DATABASE "board-app"
+WITH
+    LOCALE_PROVIDER = 'icu'
+    ENCODING = 'UTF8';
+```
+
+<video controls width="100%">
+  <source src="/images/study-nodejs-3rd/3.mov" type="video/quicktime" />
+</video>
+
+<br />
+
+### 데이터베이스 연결
+
+TypeORM과 로컬에서 데이터베이스로 마이그레이션했기 때문에, 기존 2주차까지 진행했던 데이터 로컬 저장 과정의 프로세스를 바꿔야 합니다.
+
+데이터베이스 연동과 CRUD 구현을 위해 수정할 부분들은 다음과 같습니다.
+
+- 기존 Service와 Controller 파일의 로컬 저장 로직 제거
+- Service에서 선언했던 메모리 배열을 제거하고 서버로부터 불러올 엔티티를 사용
+- 게시물 데이터 정의는 엔티티를 이용하기 때문에 Board Model 파일에 있는 Board Interface 타입 제거
+
+먼저 TypeORM으로 위에서 생성한 `board-app` 데이터베이스에 연결합니다.
+
+```typescript
+export const typeORMConfig: TypeOrmModuleOptions = {
+  type: "postgres",
+  host: "localhost",
+  port: 5432,
+  username: "postgres",
+  password: "postgres",
+  database: "board-app",
+  entities: [__dirname + "/../**/*.entity{.ts,.js}"],
+  synchronize: true,
+};
+```
+
+<br />
+
+### Entity 클래스 생성
+
+Board 엔티티 클래스를 생성하여 `@Entity`, `@Column` 등 데코레이터로 DB 테이블 스키마를 정의합니다.
+
+```typescript
+@Entity()
+export class Board extends BaseEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  title: string;
+
+  @Column()
+  description: string;
+
+  @Column()
+  status: BoardStatus;
+}
+```
+
+ORM이 없던 시절, SQL문으로 직접 테이블을 생성할 때는 다음과 같이 작성했습니다.
+
+```sql
+CREATE TABLE board (
+  id INTEGER AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description VARCHAR(255) NOT NULL
+)
+```
+
+하지만 TypeORM을 사용할 때는 데이터베이스 테이블로 변환되는 클래스이기 때문에 SQL 쿼리를 직접 작성하지 않고, 클래스를 생성한 후 그 안에 컬럼들을 정의합니다. 이 과정은 데코레이터로 실행이 가능합니다.
+
+- `@Entity()` — Board 클래스가 엔티티임을 나타냅니다. 위 SQL에서 `CREATE TABLE board` 부분에 해당합니다
+- `@PrimaryGeneratedColumn()` — `id` 열이 Board 엔티티의 기본 키 열임을 나타냅니다
+- `@Column()` — Board 엔티티의 `title` 및 `description` 같은 다른 열을 나타냅니다
+
+<br />
+
+### Module과 Service 설정
+
+DTO를 생성하여 각 요청의 입력 형태와 검증 규칙을 정의합니다.
+
+```typescript
+export class CreateBoardDto {
+  @IsNotEmpty()
+  title: string;
+
+  @IsNotEmpty()
+  description: string;
+}
+```
+
+`BoardsModule`에서 `TypeOrmModule.forFeature([Board])`로 해당 모듈에서 사용할 엔티티를 등록합니다. 이를 해야 Service에서 `@InjectRepository(Board)`로 Repository를 주입받을 수 있습니다.
+
+```typescript
+@Module({
+  imports: [TypeOrmModule.forFeature([Board])],
+  controllers: [BoardsController],
+  providers: [BoardsService],
+})
+```
+
+Controller에서 Service를 불러오기 위해 `constructor`로 injection을 했던 것처럼, Repository를 Service에서 불러오기 위해 `constructor`로 Repository를 불러옵니다.
+
+```typescript
+export class BoardsService {
+  constructor(
+    @InjectRepository(BoardRepository)
+    private boardRepository: BoardRepository,
+  ) {}
+```
+
+여기서 `private`의 역할은 두 가지입니다.
+
+- **변수 자동 생성** — `private`을 붙이는 순간, 클래스 내부 어디서든 `this.boardRepository`로 접근할 수 있는 멤버 변수가 자동으로 생깁니다
+- <strong>캡슐화(보안)</strong> — `private`은 이 변수를 현재 클래스 내부에서만 쓰겠다고 선언합니다. 외부 Service나 Controller에서 `boardService.boardRepository`를 마음대로 건드리는 것을 방지합니다
+
+Service에서 `getBoardById` 메서드를 생성할 때는 TypeORM에서 제공하는 `findOne` 메서드를 사용하고, `async await`을 이용하여 데이터베이스 작업이 끝난 후 결과값을 받을 수 있도록 합니다.
+
+---
+
+# <mark>TypeORM 버전 호환성 이슈</mark>
+
+### findOne() vs findOneBy()
+
+구 버전(0.2.x)에서는 레포지토리에서 ID를 직접 전달하는 것이 허용되었습니다.
+
+```typescript
+async getBoardById(id: number): Promise<Board> {
+  const found = await this.boardRepository.findOne(id);
+  if (!found) {
+    throw new NotFoundException(`Board with ID ${id} not found`);
+  }
+  return found;
+}
+```
+
+하지만 TypeORM이 업데이트되면서 `findOne()` 메서드가 어떤 조건으로 ID를 찾을지 객체(`FindOneOptions`)를 요구하게 되었습니다.
+
+해결 방법은 두 가지가 있습니다.
+
+`where` 조건을 사용하여 `id`라는 컬럼의 값이 변수 `id`인 것을 찾도록 합니다.
+
+```typescript
+const board = await this.boardRepository.findOne({
+  where: { id: id },
+});
+```
+
+또는 ID나 특정 컬럼값으로만 찾을 때 쓰는 단축 함수인 `findOneBy()`를 사용합니다.
+
+```typescript
+const board = await this.boardRepository.findOneBy({ id: id });
+```
+
+가독성 측면에서 `findOneBy()` 함수를 사용하기로 했습니다.
+
+<br />
+
+### @EntityRepository 제거 (0.3.x)
+
+```typescript
+@EntityRepository(Board)
+export class BoardRepository extends Repository<Board> {}
+```
+
+![실행 결과](/images/study-nodejs-3rd/4.png)
+
+`EntityRepository is deprecated. (ts 6387)`이라는 오류 메시지가 생성되었습니다. TypeORM 버전이 올라감에 따라 `@EntityRepository`처럼 커스텀 레포지토리를 생성하는 방식이 삭제되었기 때문에, TypeORM 0.3.x 버전에서는 사용하지 말라는 경고 메시지가 출력된 것입니다.
+
+TypeORM 0.3.x부터 `@EntityRepository()` 데코레이터가 제거되면서 기존 커스텀 레포지토리 방식이 막혔습니다. `@InjectRepository(Board)`로 `Repository<Board>`를 직접 주입받으면 `find()`, `save()`, `remove()` 등은 그대로 쓸 수 있기 때문에, 굳이 `repository.ts` 파일을 따로 만들 필요가 없습니다.
+
+Repository를 분리하는 것이 의미 있는 경우는 QueryBuilder를 쓰거나 JOIN이 복잡해지는 경우인데, 지금은 간단한 CRUD 단계라 Service에서 Repository를 직접 주입받아 쓰는 것으로 충분합니다. 나중에 쿼리가 복잡해지면 그때 Repository로 분리 리팩토링하면 되고, 이 방식이 초기 오버엔지니어링을 방지합니다.
+
+```typescript
+@Injectable()
+export class BoardsService {
+  constructor(
+    @InjectRepository(Board)
+    private boardRepository: Repository<Board>,
+  ) {}
+}
+```
+
+<br />
+
+### 리팩토링 결과
+
+Service에서 직접 주입 후 리팩토링한 결과, 정상적으로 게시글 업로드 요청이 되었습니다.
+
+![실행 결과](/images/study-nodejs-3rd/5.png)
+
+데이터베이스에도 정상적으로 들어간 것을 확인할 수 있습니다.
+
+![실행 결과](/images/study-nodejs-3rd/6.png)
+
+---
+
+## 마치며
+
+서버와 데이터베이스의 기본 개념을 정리하고, TypeORM을 활용해 NestJS에 PostgreSQL을 연동한 과정을 정리했습니다.
+
+직접 구현하면서 두 가지가 확실히 와닿았습니다.
+
+- TypeORM의 엔티티 기반 접근은 SQL을 직접 작성하는 것보다 훨씬 직관적이지만, **버전별 API 변경**에 주의해야 합니다. 공식 문서를 항상 확인하는 습관이 중요합니다
+- 커스텀 레포지토리를 처음부터 분리하기보다, **간단한 CRUD 단계에서는 Service에 직접 주입**하고 필요할 때 분리하는 것이 오버엔지니어링을 방지합니다
+
+다음 글에서는 인증(Authentication)과 JWT를 활용한 사용자 인증 구현에 대해 정리할 예정입니다.
+
+---
+
+## 참고 자료
+
+- [따라하는 네스트 제이에스 — John Ahn (인프런)](https://www.inflearn.com/course/%EB%94%B0%EB%9D%BC%ED%95%98%EB%8A%94-%EB%84%A4%EC%8A%A4%ED%8A%B8-%EC%A0%9C%EC%9D%B4%EC%97%90%EC%8A%A4/dashboard?cid=327527)
+- [NestJS 공식 문서](https://docs.nestjs.com)
+- [TypeORM 공식 문서](https://typeorm.io)
