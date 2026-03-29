@@ -6,6 +6,8 @@ tags: ["Backend", "Nest.js", "TypeORM"]
 image: "./images/img-study-nodejs-3rd.jpg"
 ---
 
+import Video from "@/components/ui/Video.astro";
+
 NestJS로 CRUD API를 만들면서 로컬 메모리(배열)에 데이터를 저장하는 단계를 지나니 자연스럽게 두 가지 질문이 생겼습니다.
 
 > 서버와 데이터베이스는 정확히 어떤 관계이고, 어떻게 연결하지?
@@ -18,7 +20,7 @@ NestJS로 CRUD API를 만들면서 로컬 메모리(배열)에 데이터를 저�
 
 # 핵심 개념 정리
 
-### 서버란
+## <mark>서버란?</mark>
 
 서버(Server)는 클라이언트(브라우저, 앱 등)의 요청을 받아서, 처리하고, 응답을 돌려주는 컴퓨터 또는 프로그램입니다.
 
@@ -39,7 +41,7 @@ NestJS로 CRUD API를 만들면서 로컬 메모리(배열)에 데이터를 저�
 
 <br />
 
-### 데이터베이스란
+## <mark>데이터베이스란?</mark>
 
 데이터베이스(Database)는 구조화된 데이터를 효율적으로 저장하고, 검색하고, 수정하고, 관리하기 위해 조직화된 데이터의 집합입니다.
 
@@ -58,7 +60,7 @@ NestJS로 CRUD API를 만들면서 로컬 메모리(배열)에 데이터를 저�
 
 <br />
 
-### Entity란
+## <mark>Entity란?</mark>
 
 데이터베이스에 저장하고 관리해야 할 현실 세계의 중요한 대상(객체/개념)이며, 보통 하나의 테이블에 대응하는 개념입니다.
 
@@ -107,7 +109,7 @@ TypeORM에서 모듈 설정 시 사용하는 두 가지 함수가 있습니다.
 
 <br />
 
-### <mark>ORM과 TypeORM</mark>
+## <mark>ORM과 TypeORM</mark>
 
 <strong>ORM(Object Relational Mapping)</strong>은 객체와 관계형 데이터베이스의 데이터를 자동으로 변형 및 연결하는 작업입니다.
 
@@ -133,9 +135,7 @@ TypeORM 설정에서 주요 옵션은 다음과 같습니다.
 
 PostgreSQL에서 데이터베이스를 생성할 때, libc와 ICU 설정으로 인한 데이터 부정합 문제가 발생할 수 있습니다.
 
-<video controls width="100%">
-  <source src="/images/study-nodejs-3rd/1.mov" type="video/quicktime" />
-</video>
+<Video src="/videos/study-nodejs-3rd/1.mp4" />
 
 <strong>로케일(Locale) 제공자</strong>인 libc와 ICU는 컴퓨터가 텍스트를 정렬(Sorting)하고, 대소문자를 구분하고, 날짜를 표시할 때 어떤 '사전'을 참조할지 결정하는 것입니다.
 
@@ -145,7 +145,9 @@ PostgreSQL에서 데이터베이스를 생성할 때, libc와 ICU 설정으로 �
 
 ![실행 결과](/images/study-nodejs-3rd/2.png)
 
-위 사진은 ICU와 libc가 충돌되어 생긴 문제입니다. '기본 도면을 최신식으로 쓸건데 왜 옛날 방식인 libc로 지으려고 해?'라고 시스템이 따지는 격의 경고 메시지입니다.
+위 사진은 ICU와 libc가 충돌되어 생긴 문제입니다.
+
+'기본 도면을 최신식으로 쓸건데, 왜 옛날 방식인 libc로 지으려고 해?'라고 시스템이 따지는 격의 경고 메시지입니다.
 
 앞서 말한 장점들을 바탕으로 ICU 로케일 제공자를 선택하기로 했습니다. 쿼리 툴에서 명령어를 통해 해결할 수 있습니다.
 
@@ -160,9 +162,7 @@ WITH
     ENCODING = 'UTF8';
 ```
 
-<video controls width="100%">
-  <source src="/images/study-nodejs-3rd/3.mov" type="video/quicktime" />
-</video>
+<Video src="/videos/study-nodejs-3rd/3.mp4" />
 
 <br />
 

@@ -1,0 +1,30 @@
+---
+interface Props {
+  src: string;
+  poster?: string;
+}
+
+const { src, poster } = Astro.props;
+---
+
+<div class="video-wrapper">
+  <video controls preload="metadata" poster={poster}>
+    <source src={src} type="video/mp4" />
+  </video>
+</div>
+
+<style>
+  .video-wrapper {
+    width: 100%;
+    margin: 1rem 0;
+    border-radius: 0.5rem;
+    overflow: hidden;
+    background: transparent;
+  }
+
+  video {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>

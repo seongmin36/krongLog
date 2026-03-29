@@ -26,6 +26,9 @@ pnpm-debug.log*
 .env.*
 !.env.example
 
+# 원본 동영상 (.mov)
+raw-videos/
+
 # OS / 에디터
 .DS_Store
 Thumbs.db

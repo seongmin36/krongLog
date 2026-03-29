@@ -207,8 +207,24 @@ export const errorMiddleware = (
 **규칙**
 - 이미지 파일이 `public/images/` 에 없는 경우 `<!-- -->` HTML 주석으로 감싸서 주석 처리
 - 주석 처리된 이미지는 실제 파일이 추가된 후 주석을 해제
-- 동영상 첨부파일은 블로그에서 지원하지 않으므로 주석 처리 후 앞뒤 텍스트로 설명을 대체
 - 주석 처리된 이미지도 경로 규칙(`/images/게시글식별자/번호.png`)과 alt text 규칙은 동일하게 적용
+
+---
+
+### 동영상
+
+```mdx
+import Video from "@/components/ui/Video.astro";
+
+<Video src="/videos/게시글식별자/번호.mp4" />
+```
+
+**규칙**
+- 원본 `.mov` 파일은 `raw-videos/게시글식별자/` 폴더에 저장 (git-ignored)
+- `pnpm video:build` 또는 `pnpm build` 시 ffmpeg로 `public/videos/`에 `.mp4`로 자동 변환
+- MDX 상단에 `import Video from "@/components/ui/Video.astro"` 추가
+- `<Video>` 컴포넌트 사용 (런타임 JS 없음, `<video>` 태그만 렌더링)
+- `poster` prop으로 썸네일 지정 가능 (선택)
 
 ---
 
