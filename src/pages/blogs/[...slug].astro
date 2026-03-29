@@ -70,10 +70,8 @@ const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
           <Image
             src={image}
             alt={title}
-            width={720}
-            height={400}
             format="webp"
-            quality={85}
+            quality={90}
             class="h-auto w-full rounded-lg object-cover"
           />
         </div>

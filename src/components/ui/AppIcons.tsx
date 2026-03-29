@@ -16,9 +16,9 @@ type IconName = keyof typeof ICONS;
 type AppIconProps = SVGProps<SVGSVGElement> & {
   name: IconName;
   className?: string;
-}
+};
 
 export const AppIcon = ({ name, className, ...props }: AppIconProps) => {
   const Icon = ICONS[name];
   return <Icon className={className} focusable={false} {...props} />;
-}
+};
