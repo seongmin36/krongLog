@@ -65,6 +65,11 @@
   --color-tag-nextjs-bg-dark: rgba(255, 255, 255, 0.08);
   --color-tag-nextjs-text-dark: #e5e7eb;
 
+  --color-tag-vite-bg: rgba(100, 108, 255, 0.1);
+  --color-tag-vite-text: #5258e4;
+  --color-tag-vite-bg-dark: rgba(100, 108, 255, 0.15);
+  --color-tag-vite-text-dark: #a5b4fc;
+
   /* Astro 그라디언트 */
   --background-image-gradient-astro: linear-gradient(
     90deg,
