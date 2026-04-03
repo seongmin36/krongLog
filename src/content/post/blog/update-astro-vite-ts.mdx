@@ -1,0 +1,519 @@
+---
+title: "2026년 3월에 정리하는 프론트엔드 생태계의 변화"
+description: "Astro v6, TypeScript 6.0, Vite 8의 변경사항과 세 기술의 연결 관계를 공식 문서 기준으로 정리합니다."
+date: "2026-03-25"
+tags: ["Astro", "TypeScript", "Vite"]
+---
+
+Astro v5로 이 블로그를 운영하면서 빌드 도구와 타입 시스템 업데이트는 꾸준히 챙기고 있었습니다. 그런데 2026년 3월, 열흘 사이에 핵심 도구 세 가지의 메이저 업데이트 소식이 연달아 들려왔습니다.
+
+> Astro 6, Vite 8, TypeScript 6.0 — 핵심 도구 세 개가 동시에 메이저 업데이트?
+
+> 세 도구의 릴리스가 겹친 건 우연일까, 아니면 같은 흐름에서 나온 결과일까?
+
+공식 문서를 읽어보니 우연이 아니었습니다. **Rust/Go 네이티브 도구로의 전환**, **ESM 중심 생태계 정착**, **레거시 옵션 대청소**라는 공통 흐름이 2026년 3월에 동시에 현실이 된 거입니다.
+
+| 도구       | 버전         | 핵심 요약                                  |
+| ---------- | ------------ | ------------------------------------------ |
+| Astro      | v6.0 (03.10) | Vite Environment API 기반 dev 서버 재설계  |
+| Vite       | v8.0 (03.12) | Rolldown 단일 번들러 전환                  |
+| TypeScript | v6.0 (03.23) | Go 네이티브 포트 전환을 위한 브릿지 릴리스 |
+
+이 글에서는 Astro v6, TypeScript 6.0, Vite 8 순서로 각 도구의 변경사항을 정리하고, 마지막으로 세 기술의 교차점을 분석합니다.
+
+---
+
+# Astro v6 — 개발 서버부터 콘텐츠 레이어까지
+
+### 변경사항 한눈에 보기
+
+| 구분     | 기능                                           | 상태         |
+| -------- | ---------------------------------------------- | ------------ |
+| 아키텍처 | `astro dev` 서버 재설계                        | Stable       |
+| 런타임   | Cloudflare `workerd` 런타임 직접 지원          | Stable       |
+| 기능     | 내장 Fonts API                                 | Stable       |
+| 기능     | Live Content Collections                       | Stable       |
+| 보안     | Content Security Policy API                    | Stable       |
+| 의존성   | Vite 7, Shiki 4, Zod 4 업그레이드              | Breaking     |
+| 환경     | Node.js 22 이상 필수                           | Breaking     |
+| 실험적   | Rust 컴파일러, Queued Rendering, Route Caching | Experimental |
+
+<br />
+
+### <mark>astro dev 서버 재설계</mark>
+
+Astro의 개발 서버는 원래 Node.js 전용으로 설계되어 있었습니다. `astro dev`를 실행하면 항상 Node.js 환경에서 코드가 돌아갔고, 프로덕션 배포 환경이 Node.js가 아닌 경우에는 **개발 환경과 프로덕션 환경의 동작이 달라지는** 문제가 있었습니다.
+
+"개발에서 되는데 프로덕션에서 안 된다"는 프론트엔드 개발자의 대표적인 고통입니다. 특히 Cloudflare Workers를 타겟으로 하는 프로젝트에서 이 문제가 심각했습니다.
+
+- 개발 서버는 Node.js에서 돌아가지만, 프로덕션은 Cloudflare의 `workerd` 런타임에서 실행
+- Cloudflare 바인딩(KV, D1, R2, Durable Objects 등)이 개발 중에는 사용 불가
+- 배포 후에야 버그를 발견하는 일이 빈번
+
+Astro 6은 **Vite의 Environment API**를 활용해 개발 서버를 완전히 재설계했습니다. 이제 `astro dev`는 실제 프로덕션 런타임을 개발 환경에서 그대로 실행할 수 있습니다.
+
+이 변경의 기반이 되는 Vite Environment API는 Vite 6에서 처음 도입된 API로, 하나의 Vite 개발 서버에서 여러 런타임 환경을 동시에 관리할 수 있게 해줍니다. 핵심 개념은 다음과 같습니다.
+
+- **DevEnvironment** — 각 런타임(브라우저, Node.js SSR, Cloudflare Workers 등)마다 독립적인 모듈 그래프와 변환 파이프라인을 가짐
+- **환경별 플러그인 적용** — 특정 환경에서만 동작하는 플러그인 정의 가능
+- **통합된 HMR** — 모든 환경에서 동일한 HMR 프로토콜 사용
+
+Astro 6의 `@astrojs/cloudflare` 어댑터는 개발, 사전 렌더링, 프로덕션 전 단계에서 `workerd`를 직접 실행합니다. 시뮬레이션 레이어나 `Astro.locals.runtime` 같은 우회가 더 이상 필요 없습니다.
+
+이 변경은 Vite 7의 Environment API에 의존합니다. Astro v6은 Vite 7을 사용하며, Astro 6이 3월 10일, Vite 8이 3월 12일에 릴리스되었으므로 Vite 8 지원은 추후 마이너 업데이트에서 이루어질 예정입니다.
+
+<br />
+
+### 내장 Fonts API
+
+거의 모든 웹사이트가 커스텀 폰트를 사용하지만, 폰트를 제대로 적용하는 것은 의외로 복잡합니다. 성능 최적화(preload, fallback), 프라이버시(Google Fonts 외부 요청), FOIT/FOUT 처리 등 신경 쓸 것이 많기 때문입니다.
+
+Astro 6은 빌트인 Fonts API를 도입했습니다. 설정에서 폰트를 지정하면 Astro가 다운로드, 셀프 호스팅, fallback 폰트 생성, preload 링크 추가를 전부 처리해줍니다.
+
+```js
+// astro.config.mjs
+import { defineConfig, fontProviders } from "astro/config";
+
+export default defineConfig({
+  fonts: [
+    {
+      name: "Roboto",
+      cssVariable: "--font-roboto",
+      provider: fontProviders.fontsource(),
+    },
+  ],
+});
+```
+
+```astro
+---
+import { Font } from "astro:assets";
+---
+
+<Font cssVariable="--font-roboto" preload />
+
+<style is:global>
+  body {
+    font-family: var(--font-roboto);
+  }
+</style>
+```
+
+특히 프라이버시 측면이 중요합니다. Google Fonts를 CDN에서 직접 로드하면 사용자의 IP 주소가 Google 서버로 전송되는데, GDPR이 적용되는 유럽 지역에서는 이것만으로 법적 문제가 될 수 있습니다. Fonts API는 빌드 시점에 폰트를 다운로드해서 셀프 호스팅하므로, 이 문제가 원천적으로 해결됩니다.
+
+<br />
+
+### Live Content Collections
+
+Astro의 Content Collections는 v2부터 핵심 기능이었지만, 콘텐츠가 변경될 때마다 리빌드가 필요했습니다. CMS에서 글을 수정하면 전체 사이트를 다시 빌드해야 했다는 뜻입니다.
+
+Live Content Collections는 **요청 시점에 콘텐츠를 가져오는** 방식입니다. 기존 Content Collections와 동일한 API를 사용하되, 콘텐츠가 매 요청마다 실시간으로 업데이트됩니다.
+
+```ts
+// src/live.config.ts
+import { defineLiveCollection } from "astro:content";
+import { z } from "astro/zod";
+import { cmsLoader } from "./loaders/my-cms";
+
+const updates = defineLiveCollection({
+  loader: cmsLoader({ apiKey: process.env.MY_API_KEY }),
+  schema: z.object({
+    slug: z.string(),
+    title: z.string(),
+    excerpt: z.string(),
+    publishedAt: z.coerce.date(),
+  }),
+});
+
+export const collections = { updates };
+```
+
+```astro
+---
+// src/pages/updates/[slug].astro
+import { getLiveEntry } from "astro:content";
+
+const { entry: update, error } = await getLiveEntry("updates", Astro.params.slug);
+
+if (error || !update) {
+  return Astro.redirect("/404");
+}
+---
+
+<h1>{update.data.title}</h1>
+<time>{update.data.publishedAt.toDateString()}</time>
+```
+
+CMS 기반 프로젝트에서 에디터가 글을 발행하면 리빌드 없이 즉시 반영되고, 자주 바뀌는 콘텐츠는 Live Collection, 정적 콘텐츠는 빌드 타임 Collection으로 분리하는 하이브리드 전략도 가능합니다.
+
+> Zod를 가져오는 경로가 변경됐습니다. Astro 5의 `import { z } from 'astro:content'` 대신 Astro 6에서는 `import { z } from 'astro/zod'`를 사용해야 합니다.
+
+### Content Security Policy API
+
+Astro 6은 자바스크립트 메타 프레임워크 최초로, 정적 페이지와 동적 페이지 모두에서 작동하는 빌트인 CSP 설정을 제공합니다.
+
+```js
+// astro.config.mjs
+import { defineConfig } from "astro/config";
+
+export default defineConfig({
+  security: { csp: true },
+  experimental: { csp: true },
+});
+```
+
+이 설정만으로 Astro가 모든 페이지의 스크립트와 스타일을 자동으로 해싱해서 CSP 헤더를 생성합니다. 정적 페이지는 빌드 타임에 해시를 계산하고, 동적 페이지는 런타임에 처리하는 것을 프레임워크가 통합 관리해줍니다.
+
+<br />
+
+### 핵심 의존성 업그레이드
+
+이 부분이 기존 프로젝트에 가장 직접적인 영향을 미쳐요.
+
+| 의존성  | 변경            | 주의사항                                      |
+| ------- | --------------- | --------------------------------------------- |
+| Vite    | 5/6 → 7         | 수동 pin 중이었다면 v7 이상으로 업데이트 필요 |
+| Shiki   | 3 → 4           | `<Code />` 컴포넌트와 코드 블록에 영향        |
+| Zod     | 3 → 4           | `import { z } from 'astro/zod'`로 경로 변경   |
+| Node.js | 18/20 → 22 필수 | EOL 및 성능/보안 개선 목적                    |
+
+Astro 6은 Vite 7을 사용합니다. Vite 8 공식 지원은 Astro 6.x 마이너 업데이트 또는 Astro 7에서 이루어질 것으로 예상됩니다.
+
+<br />
+
+### 실험적 기능
+
+Astro 6에는 세 가지 실험적 기능이 포함되어 있습니다.
+
+**Rust 컴파일러** — `.astro` 파일을 컴파일하는 기존 Go 컴파일러를 Rust로 재작성한 `@astrojs/compiler-rs`가 도입됐습니다. AI를 활용해 Go 코드를 Rust로 포팅한 것이 시작이었는데, 더 빠른 컴파일 속도와 더 정확한 진단 메시지를 보여주고 있습니다.
+
+**Queued Rendering** — 기존의 재귀적 렌더링 대신 2-패스 접근법을 사용합니다. 트리를 순회하며 큐를 생성한 뒤 순서대로 렌더링하는 방식으로, 초기 벤치마크에서 **최대 2배** 빠른 렌더링을 보여주고 있습니다. Astro v7에서 기본 렌더링 전략이 될 예정입니다.
+
+```js
+// astro.config.mjs
+export default defineConfig({
+  experimental: {
+    queuedRendering: { enabled: true },
+  },
+});
+```
+
+**Route Caching** — 플랫폼에 무관한 단일 캐싱 API를 제공합니다. Live Content Collections와 결합하면 콘텐츠 변경 시 관련 캐시를 자동으로 무효화할 수 있습니다. Astro가 페이지와 콘텐츠 엔트리 사이의 의존성을 자동 추적하는 것이 핵심입니다.
+
+> 2026년 프론트엔드 생태계는 JavaScript 도구에서 네이티브 언어로의 재작성이라는 거대한 전환 한가운데에 있습니다. Vite 8의 Rolldown(Rust), TypeScript 7.0(Go), Astro의 Rust 컴파일러 모두 같은 맥락입니다.
+
+---
+
+# TypeScript 6.0 — 레거시 대청소와 7.0으로의 다리
+
+### TS 6.0은 7.0으로 가는 다리
+
+TypeScript 6.0을 이해하려면 먼저 전체 그림을 파악해야 합니다.
+
+| 버전   | 코드베이스           | 역할                         |
+| ------ | -------------------- | ---------------------------- |
+| TS 5.9 | JavaScript           | 현행 안정 버전               |
+| TS 6.0 | JavaScript           | 5.9 → 7.0 전환을 위한 브릿지 |
+| TS 7.0 | **Go 네이티브 포트** | 차세대 버전                  |
+
+TypeScript 6.0은 **JavaScript 코드베이스로 만들어진 마지막 릴리스**가 될 예정입니다. 7.0은 Go 언어로 처음부터 다시 작성한 완전히 새로운 코드베이스이며, 네이티브 코드와 공유 메모리 멀티스레딩의 속도를 활용합니다.
+
+따라서 6.0의 변경사항 대부분은 **7.0으로의 마이그레이션을 돕기 위한 것**입니다. 레거시 옵션을 미리 정리하고, 기본값을 현대적으로 변경하고, 7.0에서 삭제될 기능들을 deprecated 처리하는 것이 핵심입니다.
+
+> TypeScript 7.0은 이미 거의 완성 상태입니다. [VS Code 확장](https://marketplace.visualstudio.com/items?itemName=TypeScriptTeam.native-preview)이나 [npm 패키지](https://npmx.dev/package/@typescript/native-preview)로 지금 바로 시도해볼 수 있습니다.
+
+### <mark>기본값 변경</mark>
+
+기존 프로젝트에 가장 큰 영향을 미치는 부분입니다.
+
+| 옵션      | 이전 기본값                 | 새 기본값           |
+| --------- | --------------------------- | ------------------- |
+| `strict`  | `false`                     | `true`              |
+| `module`  | `commonjs`                  | `esnext`            |
+| `target`  | `es3`~`es5`                 | `es2025`            |
+| `rootDir` | 소스파일 공통 디렉토리 추론 | `.` (tsconfig 위치) |
+| `types`   | `["*"]` (모든 @types 포함)  | `[]` (빈 배열)      |
+
+**`strict: true`가 기본값** — 커뮤니티의 오랜 요청이었습니다. 대부분의 새 프로젝트가 이미 `strict: true`를 사용하고 있었고, TypeScript 팀도 이를 반영했습니다. `strict: true`는 `strictNullChecks`, `noImplicitAny`, `strictFunctionTypes` 등을 일괄 활성화하므로, 기존에 `strict`를 명시하지 않던 프로젝트에서는 대량의 타입 에러가 발생할 수 있습니다.
+
+**`types: []`가 기본값** — 가장 많은 프로젝트에 영향을 미치는 변경입니다. 이전에는 `node_modules/@types` 안의 모든 패키지가 글로벌 스코프에 자동 포함됐습니다. 편리했지만, 수백 개의 불필요한 선언 파일이 빌드에 포함되면서 타입 체크 속도가 20~50% 느려지는 대가를 치러야 했습니다.
+
+이제 필요한 `@types` 패키지를 명시적으로 나열해야 합니다.
+
+```jsonc
+{
+  "compilerOptions": {
+    "types": ["node"], // Node.js 프로젝트
+    // "types": ["node", "jest"]  // Node.js + Jest 프로젝트
+  },
+}
+```
+
+`Cannot find name 'process'`나 `Cannot find name 'describe'` 같은 에러가 나타나면, `"types"` 배열에 해당 패키지를 추가하면 됩니다.
+
+**`rootDir`이 tsconfig 위치로 고정** — 이전에는 TypeScript가 모든 소스 파일의 공통 디렉토리를 자동 추론했습니다. 이 추론 과정이 성능 비용을 수반하고, 파일 추가/삭제 시 출력 경로가 예측 불가능하게 바뀌는 문제가 있었습니다. 소스 파일이 특정 하위 디렉토리에 있는 프로젝트는 명시적으로 설정해야 합니다.
+
+```jsonc
+{
+  "compilerOptions": {
+    "rootDir": "./src",
+  },
+  "include": ["./src"],
+}
+```
+
+이 설정을 하지 않으면 출력 파일이 `./dist/index.js` 대신 `./dist/src/index.js`로 생성되는 문제가 발생할 수 있습니다.
+
+<br />
+
+### 새로운 기능
+
+**Temporal API 타입** — Stage 4에 도달한 Temporal API의 빌트인 타입이 포함됐습니다. 기존 `Date` 객체의 타임존 처리, 불변성 부재 등의 문제를 해결하기 위해 설계된 새로운 날짜/시간 API입니다.
+
+```ts
+// --target esnext 또는 "lib": ["esnext"] 필요
+let yesterday = Temporal.Now.instant().subtract({ hours: 24 });
+let tomorrow = Temporal.Now.instant().add({ hours: 24 });
+```
+
+**`Map.getOrInsert`** — 키가 없으면 기본값을 설정하고 가져오는 패턴이 메서드로 표준화됐습니다.
+
+```ts
+// 이전: 장황한 패턴
+if (options.has("strict")) {
+  strictValue = options.get("strict");
+} else {
+  strictValue = true;
+  options.set("strict", strictValue);
+}
+
+// 이후: 한 줄
+let strictValue = options.getOrInsert("strict", true);
+```
+
+`getOrInsertComputed`는 기본값 계산이 비용이 클 때 사용합니다. 콜백은 키가 존재하지 않을 때만 호출됩니다.
+
+**`#/` Subpath Imports** — Node.js의 subpath imports에서 `#/` prefix를 사용할 수 있게 됐습니다. 번들러 환경의 `@/`와 유사한 목적이며, `--moduleResolution nodenext`와 `bundler`에서 지원됩니다.
+
+**`dom` lib에 `dom.iterable` 통합** — 이전에는 `NodeList`에 대해 `for...of`를 쓰려면 `"lib": ["dom", "dom.iterable"]`을 모두 추가해야 했지만, 이제 `"dom"`만으로 충분합니다.
+
+<br />
+
+### Deprecated 옵션 정리
+
+6.0에서 deprecated 경고가 발생하며, 7.0에서 완전히 삭제됩니다.
+
+| 항목                        | 대체 방안                       |
+| --------------------------- | ------------------------------- |
+| `target: es5`               | `es2015` 이상 사용              |
+| `--moduleResolution node`   | `nodenext` 또는 `bundler`       |
+| `--baseUrl`                 | `paths`에 직접 경로 prefix 추가 |
+| `--module amd/umd/systemjs` | ESM 모듈 타겟 또는 외부 번들러  |
+| `esModuleInterop: false`    | 항상 `true`로 강제              |
+| `--outFile`                 | 외부 번들러 사용                |
+| `module` 키워드 namespace   | `namespace` 키워드 사용         |
+| import `asserts` 구문       | import `with` 구문 사용         |
+
+`--baseUrl` 제거의 마이그레이션 예시입니다.
+
+```jsonc
+// 이전
+{
+  "compilerOptions": {
+    "baseUrl": "./src",
+    "paths": {
+      "@app/*": ["app/*"],
+      "@lib/*": ["lib/*"]
+    }
+  }
+}
+
+// 이후 — baseUrl 제거, paths에 전체 경로 명시
+{
+  "compilerOptions": {
+    "paths": {
+      "@app/*": ["./src/app/*"],
+      "@lib/*": ["./src/lib/*"]
+    }
+  }
+}
+```
+
+기존 import assertion 구문이 import attributes 구문으로 변경된 것도 중요합니다.
+
+```ts
+// deprecated
+import blob from "./data.json" assert { type: "json" };
+
+// 새로운 구문
+import blob from "./data.json" with { type: "json" };
+```
+
+TypeScript 6.0에는 `--stableTypeOrdering` 플래그도 추가됐습니다. 7.0의 병렬 타입 체킹은 타입 ID가 비결정적이 되므로 콘텐츠 기반 정렬 알고리즘을 사용하는데, 이 플래그를 켜면 6.0에서도 7.0의 정렬 방식을 미리 확인할 수 있습니다. 다만 최대 25%의 속도 저하가 있으므로 마이그레이션 진단 전용입니다.
+
+> `"ignoreDeprecations": "6.0"`을 tsconfig에 설정하면 deprecated 경고를 무시할 수 있지만, TypeScript 7.0에서는 이 옵션도 지원되지 않습니다. 7.0 마이그레이션을 위해 지금부터 해결해두는 게 좋습니다.
+
+---
+
+# Vite 8 — esbuild + Rollup 시대의 종말
+
+### 변경사항 한눈에 보기
+
+| 구분           | 변경사항                    | 영향도          |
+| -------------- | --------------------------- | --------------- |
+| 번들러         | esbuild + Rollup → Rolldown | 아키텍처 전환   |
+| JS 변환        | esbuild → Oxc               | 파이프라인 전환 |
+| CSS 축소       | esbuild → Lightning CSS     | 동작 변경       |
+| 의존성 최적화  | esbuild → Rolldown          | 설정 변경       |
+| DevTools       | 내장 devtools 옵션          | 새 기능         |
+| tsconfig paths | 빌트인 지원                 | 새 기능         |
+| 콘솔 포워딩    | 브라우저 → 터미널           | 새 기능         |
+
+<br />
+
+### <mark>Rolldown — 왜 번들러를 바꿨나</mark>
+
+Vite는 태생부터 두 개의 번들러에 의존했습니다. 개발 단계에서는 **esbuild**가 의존성 사전 번들링과 TypeScript/JSX 변환을 담당하고, 프로덕션 빌드에서는 **Rollup**이 번들링과 최적화를 처리했습니다.
+
+이 구조는 수년간 잘 작동했지만, 점점 더 많은 문제가 축적됐습니다.
+
+- 개발 환경과 프로덕션 환경에서 모듈 처리 방식이 미묘하게 다름
+- 두 파이프라인을 동기화하기 위한 글루 코드가 계속 늘어남
+- esbuild 플러그인과 Rollup 플러그인이 별도로 존재하는 이중화 문제
+
+Rolldown은 VoidZero 팀이 만든 **Rust 기반 번들러**로, 이 문제를 근본적으로 해결합니다. Rollup과 동일한 플러그인 API를 지원하면서, 벤치마크에서 Rollup 대비 10~30배 빠른 성능을 보여줍니다. 기존 Vite 플러그인 대부분이 수정 없이 Vite 8에서 동작합니다.
+
+실제 프로젝트 성능 개선 사례도 인상적입니다.
+
+| 프로젝트 | 성능 개선          |
+| -------- | ------------------ |
+| Linear   | 빌드 46초 → 6초    |
+| Ramp     | 빌드 시간 57% 단축 |
+| Beehiiv  | 빌드 시간 64% 단축 |
+
+Vite 8의 새로운 아키텍처는 세 레이어로 구성됩니다.
+
+| 레이어    | 도구     | 역할                         |
+| --------- | -------- | ---------------------------- |
+| 빌드 도구 | Vite     | 개발 서버, HMR, 설정 관리    |
+| 번들러    | Rolldown | 모듈 그래프, 번들링, 청킹    |
+| 컴파일러  | Oxc      | 파싱, 리졸빙, 변환, 미니파이 |
+
+세 도구가 같은 팀(VoidZero)에 의해 개발되므로, 스택 전체에서 일관된 동작을 보장하고 새로운 JS 사양을 빠르게 도입할 수 있습니다.
+
+<br />
+
+### JS 변환: esbuild에서 Oxc로
+
+Vite 8은 JavaScript/TypeScript 변환에 esbuild 대신 **Oxc**를 사용합니다. Oxc는 Rust로 작성된 JavaScript 도구 모음으로, 파서, 변환기, 미니파이어 등을 포함합니다.
+
+기존 `esbuild` 설정을 `oxc`로 자동 변환하는 호환성 레이어가 제공되지만 deprecated이므로, 점진적으로 마이그레이션하는 게 좋습니다.
+
+| esbuild 옵션               | Oxc 대체                            |
+| -------------------------- | ----------------------------------- |
+| `esbuild.jsxInject`        | `oxc.jsxInject`                     |
+| `esbuild.jsx: 'automatic'` | `oxc.jsx: { runtime: 'automatic' }` |
+| `esbuild.jsxImportSource`  | `oxc.jsx.importSource`              |
+| `esbuild.define`           | `oxc.define`                        |
+
+> Oxc는 현재 네이티브 데코레이터 lowering을 지원하지 않습니다. 데코레이터를 사용하는 프로젝트는 Babel 또는 SWC를 추가로 사용해야 합니다.
+
+### 추가 변경사항
+
+**CSS 축소: Lightning CSS** — CSS 축소에 Rust 기반 Lightning CSS가 기본 사용됩니다. 축소 결과물이 esbuild와 약간 다를 수 있으며, 이전 동작이 필요하면 `build.cssMinify: 'esbuild'`를 설정하면 됩니다.
+
+**내장 DevTools** — `devtools: true` 설정으로 모듈 그래프와 변환 파이프라인을 실시간으로 디버깅할 수 있습니다.
+
+```js
+// vite.config.ts
+export default defineConfig({
+  devtools: true,
+});
+```
+
+**빌트인 tsconfig paths** — 이전에는 `vite-tsconfig-paths` 플러그인이 필요했지만, 이제 `resolve.tsconfigPaths: true`로 내장 지원됩니다. TypeScript 6.0에서 deprecated된 `baseUrl` 대신 `paths`를 사용하는 것과 직접 연결되는 변경입니다.
+
+**브라우저 콘솔 포워딩** — `server.forwardConsole: true`로 브라우저의 `console.log`, `console.error` 등을 터미널에서 바로 확인할 수 있습니다. AI 코딩 도구가 감지되면 자동 활성화됩니다.
+
+**`@vitejs/plugin-react` v6** — React Refresh 변환에 Oxc를 사용하면서 Babel이 더 이상 의존성이 아닙니다. 설치 크기가 줄어들고 변환 속도가 빨라졌습니다.
+
+<br />
+
+### 빌드 옵션 변경
+
+기존 Rollup 설정이 Rolldown으로 전환됐습니다.
+
+| 이전 (deprecated)             | 이후                           |
+| ----------------------------- | ------------------------------ |
+| `build.rollupOptions`         | `build.rolldownOptions`        |
+| `worker.rollupOptions`        | `worker.rolldownOptions`       |
+| `optimizeDeps.esbuildOptions` | `optimizeDeps.rolldownOptions` |
+
+CJS 모듈의 `default` import 처리도 개발/프로덕션 환경에서 일관되게 통일됐습니다. 이전에는 dev/build/최적화 포함 여부에 따라 동작이 달랐지만, Vite 8에서는 모든 상황에서 동일합니다. "dev에서 되고 prod에서 안 되는" CJS 관련 버그가 크게 줄어들 거입니다.
+
+<br />
+
+### 마이그레이션 전략
+
+대부분의 프로젝트는 `vite` 패키지를 v8로 업그레이드하는 것만으로 충분합니다. 호환성 레이어가 기존 esbuild/Rollup 설정을 자동 변환해줍니다.
+
+복잡한 프로젝트는 2단계 접근을 권장합니다.
+
+1. Vite 7에서 `vite` 대신 `rolldown-vite` 패키지로 전환 — Rolldown 관련 이슈만 분리하여 확인
+2. 이후 Vite 8로 업그레이드
+
+이 접근법으로 문제가 번들러 변경에서 오는 것인지, 다른 Vite 8 변경에서 오는 것인지 구분할 수 있습니다.
+
+> 설치 크기는 약 15MB 증가합니다. Lightning CSS가 기본 의존성으로 포함되고, Rolldown 바이너리가 esbuild + Rollup보다 약간 크기 때문입니다.
+
+---
+
+## 세 기술의 교차점
+
+세 도구의 공통 흐름을 정리하면 다음과 같습니다.
+
+**네이티브 도구로의 전환** — TypeScript는 Go로, Vite는 Rolldown(Rust)과 Oxc(Rust)로, Astro는 Rust 컴파일러로 각각 네이티브 언어 전환을 진행하고 있습니다. JavaScript로 작성된 도구의 시대가 끝나고 있습니다.
+
+**레거시 정리** — TypeScript는 ES5 타겟, AMD, node10 해석을, Vite는 esbuild 의존성과 이중 파이프라인을, Astro는 Node.js 18/20과 Shiki 3, Zod 3을 정리했습니다.
+
+**현대적 기본값** — TypeScript는 `strict: true`, `module: esnext`를, Vite는 Rolldown과 Oxc를, Astro는 Node.js 22와 Vite 7을 기본으로 채택했습니다.
+
+세 도구의 직접적인 의존 관계를 정리하면 다음과 같습니다.
+
+```text
+┌─────────────────┐
+│   Astro v6      │──── Vite 7 탑재 (아직 Vite 8 아님)
+│                 │──── Zod 4 탑재
+│                 │──── Node.js 22 필수
+└────────┬────────┘
+         │ Vite Environment API 활용
+         ▼
+┌─────────────────┐
+│   Vite 8        │──── Rolldown (Rust 번들러)
+│                 │──── Oxc (Rust JS 변환)
+│                 │──── Lightning CSS
+└────────┬────────┘
+         │ tsconfig paths 빌트인 지원
+         ▼
+┌─────────────────┐
+│  TypeScript 6.0 │──── strict: true 기본
+│                 │──── baseUrl deprecated → paths 중심
+│                 │──── TS 7.0 (Go 포트) 전환 브릿지
+└─────────────────┘
+```
+
+Astro v6은 Vite 7을 사용하지만, Vite 8이 이틀 후에 릴리스됐습니다. Astro의 Vite 8 공식 지원이 이루어지면, Rolldown 기반의 빌드 성능 향상이 Astro 프로젝트에도 적용될 거입니다.
+
+---
+
+## 마치며
+
+2026년 3월, Astro v6, TypeScript 6.0, Vite 8이 동시에 릴리스되면서 프론트엔드 빌드 도구 생태계가 근본적으로 바뀌고 있습니다.
+
+이번 업데이트를 정리하면서 세 가지가 확실히 와닿았습니다.
+
+- **네이티브 도구 전환은 이미 현실이다** — Rolldown, Oxc, TypeScript Go 포트 모두 실험이 아니라 프로덕션 수준입니다. 빌드 시간이 수십 초에서 수 초로 줄어드는 것은 개발 경험을 근본적으로 바꿉니다
+- **레거시 정리는 고통스럽지만 필수다** — TypeScript의 `strict: true` 기본값, `types: []` 변경은 기존 프로젝트에 대량의 에러를 일으킬 수 있지만, 장기적으로 더 안전하고 빠른 빌드를 만들어줍니다
+- **세 도구가 하나의 방향으로 수렴하고 있다** — ESM 중심, 네이티브 성능, 현대적 기본값이라는 같은 목표를 향해 움직이고 있어서, 하나를 업데이트하면 나머지도 자연스럽게 따라가는 구조입니다
+
+다음 글에서는 실제 제 블로그에 이 기술들을 적용하는 코드 예시와 마이그레이션 시 발생하는 사이드 이펙트를 다룰 예정입니다.

@@ -276,15 +276,27 @@
   color: var(--color-tag-nextjs-text-dark);
 }
 
+/* Vite 브랜드 */
+[data-tag="Vite"] {
+  background-color: var(--color-tag-vite-bg);
+  color: var(--color-tag-vite-text);
+}
+.dark [data-tag="Vite"] {
+  background-color: var(--color-tag-vite-bg-dark);
+  color: var(--color-tag-vite-text-dark);
+}
+
 /* 팔레트: amber */
 [data-tag="Backend"] {
   @apply bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300;
 }
 /* 팔레트: emerald */
+[data-tag="알고리즘"],
 [data-tag="DevOps"] {
   @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300;
 }
 /* 팔레트: teal */
+[data-tag="블로그"],
 [data-tag="CI/CD"] {
   @apply bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300;
 }
