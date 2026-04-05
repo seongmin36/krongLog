@@ -362,7 +362,8 @@ JWT는 `.`으로 구분된 세 부분으로 이루어져 있습니다.
 
 <mark style="background:rgba(214,58,255,0.12);color:#d63aff;font-weight:700;">Payload</mark> : 유저 정보(issuer), 만료 기간(expiration time), 주제(subject), ...
 
-<mark style="background:rgba(35,165,255,0.12);color:#23a5ff;font-weight:700;">Verify Signature</mark> : JWT의 마지막 세그먼트는 토큰이 보낸 사람에 의해 서명되었으며, 어떤 식으로든 변경되지 않았는지 확인하는 데 사용되는 서명이다. 서명은 헤더 및 페이로드 세그먼트, 서명 알고리즘, 비밀 또는 공개 키를 사용하여 생성된다.
+<mark style="background:rgba(35,165,255,0.12);color:#23a5ff;font-weight:700;">Verify Signature</mark> : JWT의 마지막 세그먼트는 토큰이 보낸 사람에 의해 서명되었으며, 어떤 식으로든 변경되지 않았는지
+확인하는 데 사용되는 서명이다. 서명은 헤더 및 페이로드 세그먼트, 서명 알고리즘, 비밀 또는 공개 키를 사용하여 생성된다.
 
 **Header**와 **Payload**는 Base64로 인코딩될 뿐, 암호화되지 않습니다. 누구나 디코딩해서 내용을 읽을 수 있습니다. 그래서 Payload에 **비밀번호, 주민번호 같은 민감정보를 절대 넣으면 안 됩니다.** 필요한 최소 정보(예: username)만 담습니다.
 
@@ -603,5 +604,3 @@ Client Response
 - 에러 핸들링에서 `instanceof QueryFailedError`를 사용하면, catch의 `any` 타입 문제를 타입 레벨에서 해결할 수 있다. 수동으로 만든 interface에 의존하는 것은 추측이고, `instanceof`는 확인이다.
 - 비밀번호 보안은 "해시를 쓴다"가 아니라 "salt + 해시를 쓴다"가 올바른 기준이다. salt가 없으면 같은 비밀번호는 같은 해시를 생성하고, 레인보우 테이블 한 장이면 다수의 유저 비밀번호가 한 번에 뚫린다.
 - NestJS의 미들웨어 실행 순서(Middleware → Guard → Interceptor → Pipe)를 모르면, "왜 내 Pipe가 동작하지 않는가" 같은 상황에서 엉뚱한 곳을 디버깅하게 된다.
-
-다음 글에서는 게시물과 유저의 관계 설정 및 권한 기반 접근 제어에 대해 정리할 예정입니다.
