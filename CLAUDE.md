@@ -9,15 +9,16 @@ pnpm dev          # 개발 서버 실행 (localhost:4321)
 pnpm build        # 동영상 변환 + ./dist/ 로 빌드 (Vercel 정적 출력)
 pnpm preview      # 프로덕션 빌드 로컬 미리보기
 pnpm video:build  # raw-videos/*.mov → public/videos/*.mp4 변환만 실행
+pnpm typecheck    # astro check (Astro + TypeScript 진단)
 ```
 
-테스트 및 린트 스크립트는 별도로 설정되어 있지 않습니다.
+`package.json`의 `engines.node`는 `>=22.0.0`입니다. 린트 스크립트는 별도로 없습니다.
 
 ## 아키텍처
 
-`https://blog.kronglog.dev` 에 Vercel로 배포된 **Astro v5 정적 블로그**입니다. 콘텐츠는 한국어 합쇼체(`~합니다`, `~입니다`)로 작성됩니다.
+`https://blog.kronglog.dev` 에 Vercel로 배포된 **Astro v6 정적 블로그**입니다. 콘텐츠는 한국어 합쇼체(`~합니다`, `~입니다`)로 작성됩니다.
 
-**스택:** Astro (SSG) + React 19 (인터랙티브 아일랜드 전용) + Tailwind CSS v4 + MDX + Nanostores
+**스택:** Astro 6 (SSG) + TypeScript 6 + Vite 7 (pnpm `overrides`로 고정) + React 19 (인터랙티브 아일랜드 전용) + Tailwind CSS v4 + MDX + Nanostores
 
 **콘텐츠 컬렉션:** 블로그 포스트는 `src/content/post/blog/**/*.{md,mdx}` 경로에 위치하며, `src/content.config.ts`에서 glob으로 로드됩니다. 스키마 필수 필드는 `title`과 `date`이며, 선택 필드는 `description`, `updatedDate`, `tags`입니다. `image`는 스키마상 선택이지만 모든 포스트에 포함하는 것을 원칙으로 합니다.
 

@@ -1,10 +1,7 @@
-import { useStore } from "@nanostores/react";
-import { $theme, toggleTheme } from "@/lib/stores/theme";
+import { toggleTheme } from "@/lib/stores/theme";
 import { AppIcon } from "@/components/ui/AppIcons";
 
 export function ThemeToggle() {
-  const theme = useStore($theme);
-
   return (
     <button
       type="button"
