@@ -48,7 +48,7 @@ export class Board {
 
 **외래 키(FK)는 `@ManyToOne` 쪽 테이블에만 실제로 생성됩니다.** Board 테이블에 `userId` 컬럼이 만들어지고, User 테이블에는 아무 컬럼도 추가되지 않습니다. Board 테이블 스키마의 외래 키 `userId`로 인해 '이 board가 누구 것인지'를 표현합니다.
 
-User의 Boards 필드는 DB 컬럼이 아니라 TypeORM이 조회 시점에 채워주는 가상의 필드입니다. 양쪽 엔티티에 필드를 선언하는 이유는 **양방향 탐색(`user.boards`, `board.user` 둘 다 가능)**을 위해서입니다. 단방향만 필요하면 한쪽만 선언해도 됩니다.
+User의 boards 필드는 DB 컬럼이 아니라 TypeORM이 조회 시점에 채워주는 가상의 필드입니다. 양쪽 엔티티에 필드를 선언하는 이유는 <strong>양방향 탐색(`user.boards`, `board.user` 둘 다 가능)</strong>을 위해서입니다. 단방향만 필요하면 한쪽만 선언해도 됩니다.
 
 즉, '유저가 작성한 글', '글을 작성한 유저'를 파악하기 위해 양방향으로 선언합니다.
 
@@ -75,7 +75,7 @@ for (const board of boards) {
 
 실제로 User 테이블에는 Boards가 들어있지 않습니다. Boards는 TypeORM이 생성한 가상 필드이기 때문입니다. 따라서 `users.find()`를 하더라도 user가 작성한 Board에 대한 정보는 들어있지 않고, user 정보만 들어있습니다.
 
-그래서 유저가 작성한 Board를 조회하기 위해 총 10명의 user Board의 쿼리를 10번 요청합니다. 이것이 N+1 문제입니다.
+그래서 유저가 작성한 boards를 조회하기 위해 총 10명의 user boards의 쿼리를 10번 요청합니다. 이것이 'N+1 문제'입니다.
 
 지금은 10명을 예시로 들었지만, user의 수가 점점 늘어날 때마다 수많은 쿼리 요청을 날리게 됩니다. 따라서 명시적으로 요청하여 가상 필드를 채워줘야 합니다.
 
@@ -117,11 +117,7 @@ const boards = await boardRepository.find({
 복잡한 조건이 필요하거나, 특정 컬럼만 선택적으로 가져오고 싶을 때 사용합니다.
 
 ```typescript
-const boards = await boardRepository
-  .createQueryBuilder('board')
-  .leftJoinAndSelect('board.user', 'user')
-  .where('board.status = :status', { status: 'PUBLIC' })
-  .getMany();
+const boards = await boardRepository.createQueryBuilder("board").leftJoinAndSelect("board.user", "user").where("board.status = :status", { status: "PUBLIC" }).getMany();
 ```
 
 조건부 `JOIN`, 부분 `SELECT`, 페이지네이션 같은 복잡한 시나리오에서는 이 방식이 거의 필수입니다.
@@ -232,14 +228,12 @@ password: string;
 
 ```typescript
 // main.ts
-import { ClassSerializerInterceptor } from '@nestjs/common';
-import { Reflector } from '@nestjs/core';
+import { ClassSerializerInterceptor } from "@nestjs/common";
+import { Reflector } from "@nestjs/core";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalInterceptors(
-    new ClassSerializerInterceptor(app.get(Reflector)),
-  );
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   await app.listen(3000);
 }
 ```
