@@ -1,0 +1,342 @@
+---
+title: "NestJS 게시물에 작성자 붙이기 — 관계 설정과 N+1, 응답 보안"
+description: "TypeORM에서 User와 Board의 관계를 설정하고, N+1 문제를 피하며, 응답에서 민감 정보를 제거하는 흐름까지 직접 구현하며 정리합니다."
+date: "2026-04-12"
+tags: ["Backend", "Nest.js", "TypeORM"]
+image: "./images/img-study-nodejs-5th-1.jpg"
+---
+
+import Tooltip from "@/components/ui/Tooltip.astro";
+
+NestJS 게시판에 작성자를 붙이면서 자연스럽게 다음 질문이 생겼습니다.
+
+> 유저와 게시물 데이터는 서로 어떤 관계로 묶어야 할까요?
+
+> 조회할 때 쿼리가 한꺼번에 너무 많이 나가지는 않을까요?
+
+이 글에서는 User ↔ Board 관계 설정, N+1 문제와 해결 방법, 그리고 응답에서 민감 정보를 다루는 방법까지 **직접 구현한 흐름**을 바탕으로 정리합니다.
+
+---
+
+# 게시물에 접근하는 권한 처리
+
+### 유저와 게시물 데이터의 관계 형성
+
+User ↔ Board 관계에서 User 입장에서 Boards는 `@OneToMany`, Board 입장에서 User는 `@ManyToOne` 관계입니다.
+
+```typescript
+// user.entity.ts
+@Entity()
+export class User {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @OneToMany(() => Board, (board) => board.user)
+  boards: Board[];
+}
+
+// board.entity.ts
+@Entity()
+export class Board {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @ManyToOne(() => User, (user) => user.boards)
+  user: User;
+}
+```
+
+**외래 키(FK)는 `@ManyToOne` 쪽 테이블에만 실제로 생성됩니다.** Board 테이블에 `userId` 컬럼이 만들어지고, User 테이블에는 아무 컬럼도 추가되지 않습니다. Board 테이블 스키마의 외래 키 `userId`로 인해 '이 board가 누구 것인지'를 표현합니다.
+
+User의 Boards 필드는 DB 컬럼이 아니라 TypeORM이 조회 시점에 채워주는 가상의 필드입니다. 양쪽 엔티티에 필드를 선언하는 이유는 **양방향 탐색(`user.boards`, `board.user` 둘 다 가능)**을 위해서입니다. 단방향만 필요하면 한쪽만 선언해도 됩니다.
+
+즉, '유저가 작성한 글', '글을 작성한 유저'를 파악하기 위해 양방향으로 선언합니다.
+
+User ↔ Board 데이터 관계를 형성한 뒤 구현 시에 주의할 점이 있는데, 바로 **N+1 문제**입니다. 우리가 사용하는 **TypeORM**은 자동으로 쿼리를 생성하기 때문에, 의식하여 개발하지 않으면 비효율적인 쿼리가 발생할 수 있습니다. 그중 하나가 N+1 문제입니다.
+
+<br />
+
+### N+1 문제
+
+N+1 문제는 `@OneToMany`나 `@ManyToOne`의 '1쪽'에서 시작해서 'N쪽'을 조회할 때 발생합니다.
+
+```typescript
+// 게시물 10개를 조회하고, 각 게시물에 작성자 이름도 같이 보여주고 싶다
+const boards = await boardRepository.find();
+// 쿼리 1번: SELECT * FROM board
+
+for (const board of boards) {
+  // board.user는 undefined — 가상 필드가 채워지지 않았기 때문
+  const user = await userRepository.findOneBy({ id: board.userId });
+  console.log(`${board.title} - ${user.username}`);
+}
+// 총 1 + 10 = 11번 = N+1번 쿼리
+```
+
+실제로 User 테이블에는 Boards가 들어있지 않습니다. Boards는 TypeORM이 생성한 가상 필드이기 때문입니다. 따라서 `users.find()`를 하더라도 user가 작성한 Board에 대한 정보는 들어있지 않고, user 정보만 들어있습니다.
+
+그래서 유저가 작성한 Board를 조회하기 위해 총 10명의 user Board의 쿼리를 10번 요청합니다. 이것이 N+1 문제입니다.
+
+지금은 10명을 예시로 들었지만, user의 수가 점점 늘어날 때마다 수많은 쿼리 요청을 날리게 됩니다. 따라서 명시적으로 요청하여 가상 필드를 채워줘야 합니다.
+
+## <mark>N+1 해결 방법</mark>
+
+TypeORM에서 N+1 문제를 해결하는 방법은 세 가지가 있습니다.
+
+### 1. Eager Loading(자동)
+
+엔티티 정의 시점에 `eager: true`를 설정하면, 해당 엔티티를 조회할 때마다 관계 데이터를 무조건 함께 가져옵니다.
+
+```typescript
+// board.entity.ts
+@ManyToOne(() => User, (user: User) => user.boards, { eager: true })
+user: User;
+```
+
+이 방식의 문제점은 '**항상**' 함께 가져온다는 점입니다. Board가 필요 없는 조회에서도 무조건 `JOIN`이 발생해서 불필요한 쿼리 비용이 생깁니다.
+
+<br />
+
+### 2. Relations 옵션 (수동)
+
+조회할 때마다 필요한 관계를 명시적으로 지정합니다.
+
+```typescript
+const boards = await boardRepository.find({
+  relations: { user: true },
+});
+// 단일 쿼리로 LEFT JOIN해서 한 번에 가져옴
+```
+
+조회 시점에 필요한 관계만 가져오므로 가장 유연하고 안전합니다. 가장 일반적인 방식입니다.
+
+<br />
+
+### 3. QueryBuilder로 명시적 JOIN
+
+복잡한 조건이 필요하거나, 특정 컬럼만 선택적으로 가져오고 싶을 때 사용합니다.
+
+```typescript
+const boards = await boardRepository
+  .createQueryBuilder('board')
+  .leftJoinAndSelect('board.user', 'user')
+  .where('board.status = :status', { status: 'PUBLIC' })
+  .getMany();
+```
+
+조건부 `JOIN`, 부분 `SELECT`, 페이지네이션 같은 복잡한 시나리오에서는 이 방식이 거의 필수입니다.
+
+<br />
+
+### 추가로 알아야 할 것 : Lazy Loading
+
+TypeORM에는 `Promise<Board[]>` 타입으로 선언하는 **Lazy Loading**도 있습니다. 필드에 접근하는 순간 자동으로 쿼리가 실행되는 방식인데, 이것이 오히려 N+1 문제를 무의식적으로 만드는 원인이라 거의 쓰지 않습니다. 명시성이 떨어져서 어디서 쿼리가 발생하는지 추적하기 어렵기 때문입니다.
+
+```typescript
+@OneToMany(() => Board, (board) => board.user)
+boards: Promise<Board[]>;
+```
+
+---
+
+# 게시물 생성 시 유저 정보 넣어주기
+
+유저와 게시물의 관계를 엔티티를 이용해서 형성해 주었습니다. 이제는 실제로 게시물을 생성할 때 유저 정보를 게시물에 넣는 작업을 합니다.
+
+이때 `@GetUser` 커스텀 데코레이터를 사용하는데, JWT Guard가 토큰을 검증하고 `req.user`에 심어 놓은 user 객체를 꺼내오는 역할을 합니다.
+
+<br />
+
+### 다시 짚어보는 `@GetUser` 요청 흐름
+
+```text
+1. 클라이언트가 Authorization: Bearer <token> 헤더와 함께 요청
+   ↓
+2. @UseGuards(AuthGuard())가 토큰을 검증 → JwtStrategy.validate()가 호출됨
+   ↓
+3. validate()에서 반환한 user 객체가 자동으로 req.user에 주입됨
+   ↓
+4. @GetUser() 커스텀 데코레이터가 req.user를 꺼내서 컨트롤러 파라미터로 전달
+```
+
+이렇게 보면 `@GetUser`가 되게 복잡한 일을 하는 것 같지만, 오히려 데코레이터를 사용해서 추상화한 것뿐입니다.
+
+<br />
+
+### 요청 흐름
+
+1. 우선 클라이언트에서 게시물 생성 요청을 보냅니다.
+2. (지난번에 설정했던) 요청 헤더 안에 JWT 토큰을 통해 유저 정보를 확인하는 객체가 담겨 있습니다. 그 정보를 바탕으로 `@GetUser` 커스텀 데코레이터로 사용자의 정보를 가져옵니다.
+3. 가져온 user 정보를 `createBoard(createBoardDto, user)` 메서드로 board를 생성하면서 같이 user 정보를 넣어 줍니다.
+
+```typescript
+// boards.controller.ts
+@Post()
+@UsePipes(ValidationPipe)
+createBoard(
+  @Body() createBoardDto: CreateBoardDto,
+  @GetUser() user: User,
+): Promise<Board> {
+  return this.boardsService.createBoard(createBoardDto, user);
+}
+
+// boards.service.ts
+async createBoard(
+  createBoardDto: CreateBoardDto,
+  user: User,
+): Promise<Board> {
+  const { title, description } = createBoardDto;
+
+  const board = this.boardRepository.create({
+    title,
+    description,
+    status: BoardStatus.PUBLIC,
+    user,
+  });
+
+  await this.boardRepository.save(board);
+  return board;
+}
+```
+
+**Unauthorized 상태에서 게시물 생성**
+
+![실행 결과](/images/study-nodejs-5th/1.png)
+
+**Authorized 상태에서 게시물 생성**
+
+![실행 결과](/images/study-nodejs-5th/2.png)
+
+게시물을 성공적으로 생성하게 되면, `createBoard(boardDto, user)` 메서드로 인해서 user 객체까지 들어가는 것을 확인할 수 있습니다.
+
+## <mark>응답 보안 — 비밀번호 노출 문제</mark>
+
+⚠️ **현재 응답에서 user 객체에 비밀번호가 노출됩니다.**
+
+위 스크린샷에서 치명적인 보안 이슈가 있습니다. Response Body에서 user 객체(id, username, password)가 전부 반환되었습니다. 아무리 password에 해시가 걸렸다고 해도, 응답에 포함시키면 안 됩니다. 따라서 위 보안 이슈를 리팩토링하여 해결합니다.
+
+### `@Exclude()` + `ClassSerializerInterceptor` 방식
+
+1. 우선 Entity 레벨에서 `@Exclude()` 데코레이터를 사용하여 password를 응답에 노출되지 않는 필드로 정의합니다.
+
+```typescript
+// user.entity.ts
+import { Exclude } from "class-transformer";
+
+@Column()
+@Exclude()
+password: string;
+```
+
+2. `ClassSerializerInterceptor`를 `main.ts`에서 글로벌로 적용합니다.
+
+```typescript
+// main.ts
+import { ClassSerializerInterceptor } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalInterceptors(
+    new ClassSerializerInterceptor(app.get(Reflector)),
+  );
+  await app.listen(3000);
+}
+```
+
+**세부 동작 원리**
+
+`ClassSerializerInterceptor`는 컨트롤러가 응답으로 반환하는 <Tooltip note="특정 클래스(User)로 만들어진 객체입니다. plain object는 어떤 클래스에도 속하지 않은 JS 객체입니다.">클래스 인스턴스 객체</Tooltip>를 가로채서 <Tooltip note="plain object ↔ 클래스 인스턴스 변환을 처리하는 라이브러리입니다. 외부에서 들어오는 데이터(HTTP body, DB query) 대부분은 plain object 형태이기 때문에 class instance로 변환해 줍니다.">class-transformer</Tooltip>의 <Tooltip note="@Exclude() 처리된 필드를 제외해 주는 함수입니다. 주로 응답 출구에서 사용합니다.">instanceToPlain()</Tooltip> 함수로 변환합니다. 서버 내부 로직에서는 여전히 `user.password`로 접근 가능하고, HTTP 응답으로 나갈 때만 제거됩니다.
+
+**주의해야 할 점**
+
+응답 객체는 **클래스 인스턴스일 때만 작동**합니다. 또한 raw query를 쓰면 직접 <Tooltip note="HTTP 요청 body를 DTO로 변환할 때 사용하는데, NestJS의 ValidationPipe가 내부적으로 이 메서드를 호출합니다. 따라서 주로 요청 입구에서 사용하고, 데코레이터 기반 검증을 가능하게 합니다.">plainToInstance(User, result)</Tooltip> 메서드를 사용해서 plain object → class instance로 변환해 줘야 합니다.
+
+우선 지금은 `@Exclude()` 데코레이터와 `ClassSerializerInterceptor`로 해결했지만, 가장 좋은 방식은 **응답 DTO 패턴**입니다. 이 방법이 가장 명시적이고, 안전한 방식입니다. 앞으로 계속 만들게 될 **TodoList**에서는 DTO로 분리하는 패턴을 사용해 보겠습니다.
+
+<br />
+
+### ➕ 사실 user_id만 넘겨줘도 됩니다
+
+기존 `createBoard()` 메서드에서 user 정보를 넘겨줄 때 **user 객체 전부**를 넘겨주었기 때문에 Response Body에서 user 객체(id, username, password)가 전부 반환되었습니다.
+
+```typescript
+const board = this.boardRepository.create({
+  title,
+  description,
+  status: BoardStatus.PUBLIC,
+  user,
+});
+```
+
+그런데, 실제 DB에서는 `userId`라는 외래 키(FK)만 저장되고, TypeORM은 `@ManyToOne` 관계를 보고 user 객체에서 PK(id)만 꺼내서 FK 컬럼에 저장합니다. 그래서 `user: { id: user.id }`처럼 id만 담긴 객체를 넘겨도 동일하게 동작합니다.
+
+```typescript
+const board = this.boardRepository.create({
+  title,
+  description,
+  status: BoardStatus.PUBLIC,
+  user: { id: user.id } as User,
+});
+```
+
+![실행 결과](/images/study-nodejs-5th/3.png)
+
+하지만, user 객체 전체를 넘기는 것이 가독성도 좋고, 타입 안정성도 가져갑니다. `as User`로 강제 타입 캐스팅할 필요도 없기 때문에 기존 user 객체를 전부 넘겨주는 방식을 유지하는 것이 좋습니다.
+
+---
+
+# 해당 유저의 게시물만 조회
+
+현재는 게시물을 가져올 때 어떠한 유저인지에 상관없이 모든 게시물을 가져옵니다. 이 방식을 확장한다면, 특정 유저가 생성한 게시물만 가져오는 기능을 구현합니다. 예를 들어 어떤 유저의 프로필에 해당 유저가 작성한 게시글을 볼 수 있는 기능입니다.
+
+구현 방식은 마찬가지로 게시물을 생성했던 것과 동일하게 `findAllBoards()` 메서드에 user를 넣어 주면 됩니다.
+
+단순 쿼리를 찾는 방식은 `find()` 메서드로도 충분합니다.
+
+```typescript
+// boards.service.ts
+async findAllBoards(user: User): Promise<Board[]> {
+  return this.boardRepository.find({
+    relations: { user: true },
+    where: { user: { id: user.id } },
+  });
+}
+```
+
+하지만 강의 영상에서는 다양한 방식으로 해 보기 위해서 Query Builder로 구현합니다.
+
+```typescript
+// boards.service.ts
+async findAllBoards(user: User): Promise<Board[]> {
+  const query = this.boardRepository.createQueryBuilder('board');
+
+  query
+    .leftJoinAndSelect('board.user', 'user') // user 관계 JOIN (기존 find 메서드의 relations 옵션 대체)
+    .where('board.userId = :userId', { userId: user.id });
+
+  const boards = await query.getMany();
+  return boards;
+}
+```
+
+```typescript
+// boards.controller.ts
+@Get()
+getAllBoards(@GetUser() user: User): Promise<Board[]> {
+  return this.boardsService.findAllBoards(user);
+}
+```
+
+![실행 결과](/images/study-nodejs-5th/4.png)
+
+---
+
+## 마치며
+
+User ↔ Board 관계를 엔티티로 연결하고, N+1을 피하는 조회와 응답에서의 민감 정보 처리까지 직접 구현하면서 두 가지가 확실히 와닿았습니다.
+
+- TypeORM의 가상 필드는 명시적으로 채워 주지 않으면 N+1 쿼리가 발생합니다. `relations` 옵션이나 QueryBuilder로 의식적으로 JOIN을 명시해야 합니다.
+- 엔티티를 그대로 응답으로 반환하면 민감 정보가 노출될 수 있습니다. `@Exclude()`와 인터셉터는 한 방편이며, 근본적으로는 응답 DTO 패턴이 필요합니다.
+
+다음 글에서는 NestJS 운영 준비를 위해 로그 레벨 설계와 환경 변수 분리에 대해 정리할 예정입니다.
