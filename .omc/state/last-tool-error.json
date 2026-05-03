@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ls /Users/josengmin/Desktop/Project/krongLog/src/content/post/blog/study-nestjs-6th* /Users/josengmin/Desktop/Project/krongLog/src/content/post/blog/study-nodejs-6th* 2>/dev/null\",\"descrip...",
+  "error": "Exit code 1\n(eval):1: no matches found: /Users/josengmin/Desktop/Project/krongLog/src/content/post/blog/study-nestjs-6th*",
+  "timestamp": "2026-05-03T12:16:16.061Z",
+  "retry_count": 1
+}

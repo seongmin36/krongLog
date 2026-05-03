@@ -1,0 +1,203 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1777716994637,
+  "projectRoot": "/Users/josengmin/Desktop/Project/krongLog",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": ">=22.0.0",
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "astro",
+        "version": "6.1.3",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "19.2.4",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "19.2.4",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "pnpm",
+    "runtime": "Node.js 22.0.0"
+  },
+  "build": {
+    "buildCommand": "pnpm build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "pnpm dev",
+    "scripts": {
+      "dev": "astro dev",
+      "video:build": "node scripts/process-videos.mjs",
+      "build": "node scripts/process-videos.mjs && astro build",
+      "preview": "astro preview",
+      "astro": "astro",
+      "typecheck": "astro check"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": "ES modules",
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "public",
+      "scripts",
+      "src"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 7,
+      "lastAccessed": 1777716994630,
+      "keyFiles": [
+        "favicon.ico",
+        "favicon.svg",
+        "googleba2b3a8dda7e7039.html",
+        "index.html",
+        "robots.txt"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 4,
+      "lastAccessed": 1777716994631,
+      "keyFiles": [
+        "favicon.ico",
+        "favicon.svg",
+        "googleba2b3a8dda7e7039.html",
+        "robots.txt"
+      ]
+    },
+    "raw-videos": {
+      "path": "raw-videos",
+      "purpose": null,
+      "fileCount": 0,
+      "lastAccessed": 1777716994633,
+      "keyFiles": []
+    },
+    "scripts": {
+      "path": "scripts",
+      "purpose": "Build/utility scripts",
+      "fileCount": 1,
+      "lastAccessed": 1777716994633,
+      "keyFiles": [
+        "process-videos.mjs"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 1,
+      "lastAccessed": 1777716994634,
+      "keyFiles": [
+        "content.config.ts"
+      ]
+    },
+    "src/assets": {
+      "path": "src/assets",
+      "purpose": "Static assets",
+      "fileCount": 3,
+      "lastAccessed": 1777716994634,
+      "keyFiles": [
+        "astro.svg",
+        "background.svg",
+        "img-default.png"
+      ]
+    },
+    "src/components": {
+      "path": "src/components",
+      "purpose": "UI components",
+      "fileCount": 1,
+      "lastAccessed": 1777716994634,
+      "keyFiles": [
+        "Header.astro"
+      ]
+    },
+    "src/lib": {
+      "path": "src/lib",
+      "purpose": "Library code",
+      "fileCount": 0,
+      "lastAccessed": 1777716994634,
+      "keyFiles": []
+    },
+    "src/pages": {
+      "path": "src/pages",
+      "purpose": "Page components",
+      "fileCount": 1,
+      "lastAccessed": 1777716994634,
+      "keyFiles": [
+        "index.astro"
+      ]
+    },
+    "src/types": {
+      "path": "src/types",
+      "purpose": "Type definitions",
+      "fileCount": 2,
+      "lastAccessed": 1777716994635,
+      "keyFiles": [
+        "index.ts",
+        "seo.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "src/content/post/blog/study-nestjs-6th-todolist.mdx",
+      "accessCount": 11,
+      "lastAccessed": 1777807688953,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog/study-nodejs-6th.mdx",
+      "accessCount": 3,
+      "lastAccessed": 1777810605323,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog-template.md",
+      "accessCount": 1,
+      "lastAccessed": 1777717104884,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog/study-nodejs-5th.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1777717105077,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
