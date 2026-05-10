@@ -189,10 +189,14 @@ secure: process.env.NODE_ENV === 'production',
 
 > SameSite 쿠키는 서버가 크로스 사이트 요청과 함께 쿠키가 전송되는 것을 제한할 수 있게 해줍니다. <br />- 출처: <a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value" target="_blank">MDN</a>
 
-<strong>CSRF(Cross-Site Request Forgery)</strong>는 악성 사이트(evil.com)에서 사용자의 브라우저를 통해 myapp.com으로 요청을 보내는 공격입니다. 브라우저는 myapp.com의 쿠키를 요청에 자동으로 실어 보내기
-때문에, 서버 입장에서는 정상 요청처럼 보입니다. `SameSite: lax`는 외부 사이트에서 링크를 클릭해서 오는 GET 탐색은 허용하지만, 외부 사이트의 form POST나 fetch 요청에는 쿠키를 포함하지 않습니다.
+<strong>CSRF(Cross-Site Request Forgery)</strong>는 악성 사이트(evil.com)에서 사용자의 브라우저를 통해 myapp.com으로 요청을 보내는 공격입니다.<br />
+브라우저는 myapp.com의 쿠키를 요청에 자동으로 실어 보내기 때문에, 서버 입장에서는 정상 요청처럼 보입니다.
+
+`SameSite: lax`는 외부 사이트에서 링크를 클릭해서 오는 GET 탐색은 허용하지만, 외부 사이트의 form POST나 fetch 요청에는 쿠키를 포함하지 않습니다.<br />
 대부분의 <Tooltip note="Cross-Site Request Forgery. 사용자가 의도하지 않은 요청을 외부 사이트에서 강제로 실행시키는 공격.">CSRF</Tooltip> 공격이 POST 방식이라 `lax`만으로 실용적인 방어가 됩니다.
-`strict`는 외부 사이트에서의 GET 탐색도 막아서 일반 서비스에서는 사용성이 너무 떨어집니다. `none`은 크로스 사이트 요청 전체에 쿠키를 허용하되, 반드시 `Secure`와 함께 써야 합니다.
+
+`strict`는 외부 사이트에서의 GET 탐색도 막아서 일반 서비스에서는 사용성이 너무 떨어집니다.<br />
+`none`은 크로스 사이트 요청 전체에 쿠키를 허용하되, 반드시 `Secure`와 함께 써야 합니다.
 
 | 값       | GET (링크) | POST (폼/fetch) |
 | -------- | ---------- | --------------- |
@@ -212,11 +216,16 @@ sameSite: 'lax',
 
 ### <mark>CORS + credentials</mark> - 허용된 출처에서만 쿠키 포함 요청을 받는다
 
-브라우저는 기본적으로 다른 출처(origin)로의 요청에 쿠키를 포함하지 않습니다.
+브라우저는 기본적으로 다른 출처(origin)로의 요청에 쿠키를 포함하지 않습니다.<br />
 프론트엔드(localhost:5173)에서 백엔드(localhost:3000)로 요청할 때 쿠키가 안 가는 게 기본 동작입니다.
+
 서버에 `credentials: true`, 클라이언트에 `withCredentials: true` 한 쌍이 있어야 쿠키가 요청에 실려 갑니다.
-`credentials: true`를 설정하면 CORS의 `origin`에 와일드카드(`*`)를 쓸 수 없습니다. 반드시 허용할 출처를 명시해야 합니다. "아무 출처에서나 쿠키 포함 요청을 허용"하면 보안이 없는 것이기 때문입니다.
-`cookie-parser` 미들웨어 등록도 필수입니다. 요청의 Cookie 헤더를 `req.cookies`로 파싱해야 JwtStrategy가 쿠키를 읽을 수 있습니다.
+
+`credentials: true`를 설정하면 CORS의 `origin`에 와일드카드(`*`)를 쓸 수 없기 때문에 반드시 허용할 출처를 명시해야 합니다.<br />
+"아무 출처에서나 쿠키 포함 요청을 허용"하면 보안이 없는 것이기 때문입니다.
+
+`cookie-parser` 미들웨어 등록도 필수입니다.<br />
+요청의 Cookie 헤더를 `req.cookies`로 파싱해야 JwtStrategy가 쿠키를 읽을 수 있습니다.
 
 서버 CORS 설정 — 허용 출처를 명시하고 credentials를 활성화합니다.
 
