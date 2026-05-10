@@ -42,4 +42,8 @@ pnpm typecheck    # astro check (Astro + TypeScript 진단)
 
 **괄호 포함 볼드:** 괄호가 포함된 강조 텍스트(예: `ORM(Object Relational Mapping)`)는 `**...**` 대신 `<strong>...</strong>` 태그를 사용합니다. `**...()**` 형태는 MDX 렌더링이 깨질 수 있습니다.
 
+**MDX 본문 줄바꿈:** 여러 문장이 한 호흡으로 이어지면 가독성이 떨어집니다. **논리 덩어리**(정의와 전제, 규칙과 이유, 서로 다른 주제)마다 **빈 줄**로 단락을 나누고, 같은 덩어리 안에서는 문장 끝에 **`<br />`**만 넣어 줄을 넘깁니다(HTML의 부드러운 줄바꿈, 에디터에서 Shift+Enter에 가깝습니다). Markdown에서 빈 줄 한 번은 새 `<p>`라 **세로 여백이 크게** 벌어지므로, “조금만 띄우기”에는 빈 줄 대신 `<br />`를 사용합니다. CommonMark의 “줄 끝 공백 두 칸 + 줄바꿈” 하드 브레이크는 소스에 잘 보이지 않아 유지보수에 불리하므로 이 저장소의 MDX에서는 쓰지 않습니다.
+
+**블로그 본문 작성·리라이트 시 에이전트 지시문(복사용):** `MDX 본문에서 긴 연속 서술은 한 단락으로 붙이지 말 것. 논리 덩어리마다 빈 줄로 구간을 나누고, 같은 덩어리 안에서는 문장마다 끝에 <br />로 줄만 바꿀 것(큰 단락 여백 없이 읽기 호흡).`
+
 **동영상 파이프라인:** 원본 `.mov` 파일은 `raw-videos/` 폴더에 저장하며(git-ignored), `pnpm video:build` 또는 `pnpm build` 시 `scripts/process-videos.mjs`가 ffmpeg로 `public/videos/`에 `.mp4`로 자동 변환합니다. 이미 변환된 파일은 스킵됩니다. MDX에서는 `<Video src="/videos/폴더명/파일.mp4" />` 컴포넌트(`src/components/ui/Video.astro`)로 사용하며, 런타임 JS 없이 `<video>` 태그만 렌더링됩니다.
