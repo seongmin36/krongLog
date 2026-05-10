@@ -1,9 +1,9 @@
 ---
 title: "NestJS 스터디 7주차 회고 — localStorage에서 HttpOnly 쿠키로"
-description: "프론트엔드 연동 과정에서 발견한 로그인 보안 설계의 허점과, HttpOnly 쿠키 기반으로 전환하면서 Secure·SameSite·CORS 세 레이어를 직접 구현한 흐름을 정리합니다."
+description: "프론트엔드 연동 과정에서 발견한 로그인 보안 설계의 허점과, HttpOnly 쿠키 기반으로 전환하면서 Secure, SameSite, CORS 세 레이어를 직접 구현한 흐름을 정리합니다."
 date: "2026-05-10"
-tags: ["NestJS", "Security", "Cookie"]
-image: "./images/study-nestjs-7th-cookie-security.jpg"
+tags: ["Backend", "Nest.js", "Security", "Cookie"]
+image: "./images/img-study-nodejs-7th.jpg"
 ---
 
 import Tooltip from "@/components/ui/Tooltip.astro";
@@ -19,7 +19,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 가장 처음 맞닥뜨렸을 때, 문제의 원인은 단순해 보였습니다. 쿠키를 요청에 포함하는 옵션이 빠져있었습니다.
 
-<!-- ![실행 결과](/images/study-nestjs-7th-cookie-security/1.png) -->
+![실행 결과](/images/study-nodejs-7th/1.png)
 
 수정 전 코드입니다. 토큰 값이 localStorage에 그대로 저장되고, 요청 인터셉터에서 Authorization 헤더로 직접 붙여 보내는 구조입니다.
 
@@ -28,7 +28,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 export const apiClient = axios.create({
   baseURL: (import.meta.env.VITE_API_URL as string | undefined) ?? "/api/v1",
   headers: { "Content-Type": "application/json" },
-  // withCredentials 없음 → 브라우저가 Set-Cookie 무시
+  // withCredentials 없음 -> 브라우저가 Set-Cookie 무시
 });
 
 apiClient.interceptors.request.use((config) => {
@@ -49,7 +49,7 @@ export const apiClient = axios.create({
   headers: { "Content-Type": "application/json" },
   withCredentials: true, // 크로스 오리진 요청에서도 쿠키 전송
 });
-// request interceptor 자체가 사라짐 — 쿠키는 브라우저가 알아서 붙임
+// request interceptor 자체가 사라짐 -> 쿠키는 브라우저가 알아서 붙임
 ```
 
 `withCredentials: true`만 추가하면 끝인 줄 알았는데, 그게 아니었습니다.
@@ -67,16 +67,18 @@ HttpOnly 쿠키로 전환하면서 세 가지 보안 레이어를 직접 구현�
 ### localStorage가 왜 문제인가
 
 기존 코드에서는 로그인 성공 시 액세스 토큰을 localStorage에 저장하고, 매 요청마다 Authorization 헤더에 직접 붙여서 보내는 구조였습니다.
-localStorage는 JavaScript로 읽을 수 있어서 <Tooltip note="Cross-Site Scripting. 악성 스크립트를 페이지에 삽입하여 사용자의 브라우저에서 실행시키는 공격.">XSS</Tooltip> 공격에 취약합니다.
-<strong>XSS(Cross-Site Scripting)</strong>는 악성 스크립트를 페이지에 심어서 `localStorage.getItem()`을 호출하는 공격으로, localStorage는 이런 공격에 대한 방어 수단이 없습니다.
-XSS가 발생하면 localStorage의 토큰은 무조건 탈취됩니다.
 
-수정 전 코드입니다. 토큰 값이 localStorage에 그대로 저장됩니다.
+하지만, localStorage는 JavaScript로 읽을 수 있어서 <Tooltip note="Cross-Site Scripting. 악성 스크립트를 페이지에 삽입하여 사용자의 브라우저에서 실행시키는 공격.">XSS</Tooltip> 공격에 취약합니다.
+
+<strong>XSS(Cross-Site Scripting)</strong>는 악성 스크립트를 페이지에 심어서 `localStorage.getItem()`을 호출하는 공격으로, localStorage는 이런 공격에 대한 방어 수단이 없습니다. XSS가 발생하면
+localStorage의 토큰은 무조건 탈취됩니다.
+
+<mark>수정 전</mark> : 토큰 값이 localStorage에 그대로 저장됩니다.
 
 ```typescript
 // apps/web/src/shared/stores/authStore.ts (수정 전)
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({
-  accessToken: localStorage.getItem("accessToken"), // JS로 읽기 가능 → XSS 취약
+  accessToken: localStorage.getItem("accessToken"), // JS로 읽기 가능 -> XSS 취약
   setToken: (token) => {
     localStorage.setItem("accessToken", token);
     set({ accessToken: token });
@@ -93,21 +95,20 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
 ### HttpOnly 쿠키로 전환
 
 <Tooltip note="쿠키에 설정하는 플래그. 이 플래그가 붙은 쿠키는 JavaScript에서 접근할 수 없고 HTTP 요청에만 포함된다.">HttpOnly</Tooltip> 플래그가 붙은 쿠키는 JavaScript에서 읽을 수 없습니다.
-`document.cookie`로 접근하려 해도 해당 쿠키는 보이지 않습니다. 브라우저가 HTTP 요청을 보낼 때 자동으로 실어 보낼 뿐입니다.
-토큰 값 자체를 클라이언트 스토어에 보관할 필요가 없어집니다. "로그인 상태인가/아닌가"만 클라이언트가 알면 충분합니다.
-서버는 로그인 성공 시 토큰을 응답 body에 포함하지 않고, Set-Cookie 헤더로 HttpOnly 쿠키를 내려보냅니다.
+`document.cookie`로 접근하려 해도 해당 쿠키는 보이지 않습니다. 브라우저가 HTTP 요청을 보낼 때 자동으로 실어 보낼 뿐입니다. 토큰 값 자체를 클라이언트 스토어에 보관할 필요가 없어집니다. "로그인
+상태인가/아닌가"만 클라이언트가 알면 충분합니다. 서버는 로그인 성공 시 토큰을 응답 body에 포함하지 않고, Set-Cookie 헤더로 HttpOnly 쿠키를 내려보냅니다.
 
-수정 후 클라이언트 스토어 — 토큰 값 자체는 저장하지 않습니다.
+<mark>수정 후</mark> : 클라이언트 스토어는 토큰 값 자체는 저장하지 않습니다.
 
 ```typescript
 // apps/web/src/shared/stores/authStore.ts (수정 후)
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({
-  isLoggedIn: false, // 토큰 값 자체는 저장 안 함
+  isLoggedIn: false, // 토큰 값 자체는 저장 안 함 -> XSS 취약
   setLoggedIn: (value) => set({ isLoggedIn: value }),
 }));
 ```
 
-서버 — 로그인 시 HttpOnly 쿠키로 토큰을 발급합니다. 응답 body에는 토큰이 없습니다.
+<mark>로그인 시</mark> : HttpOnly 쿠키로 토큰을 발급합니다. 응답 body에는 토큰이 없습니다.
 
 ```typescript
 // apps/server/src/auth-accounts/auth-accounts.controller.ts
@@ -126,11 +127,11 @@ async login(
     path: '/',
     maxAge: 1000 * 60 * 60 * 24,                     // 24시간
   });
-  return { ok: true }; // 토큰을 응답 body에 포함하지 않음
+  return { ok: true }; // 토큰을 응답 body에 포함하지 않음 -> XSS 취약
 }
 ```
 
-서버 — JWT를 Authorization 헤더가 아닌 쿠키에서 추출합니다.
+<mark>서버</mark> : JWT를 Authorization 헤더가 아닌 쿠키에서 추출합니다.
 
 ```typescript
 // apps/server/src/auth-accounts/jwt.strategy.ts
@@ -156,12 +157,16 @@ async validate(payload: JwtPayload) {
 쿠키로 전환하고 나니, 클라이언트는 토큰의 존재를 모르는 상태가 됐습니다.
 인증은 브라우저와 서버 사이에서 자동으로 처리되고, 클라이언트는 로그인 상태만 알면 충분해졌습니다.
 
-# 쿠키 하나로 끝이 아니다 — 세 가지 레이어
+<br />
+
+# 쿠키 하나로 끝이 아니다
+
+## 세 가지 레이어 설정
 
 HttpOnly 쿠키로 XSS 공격의 토큰 탈취는 막았습니다.
 하지만 쿠키는 그 자체로 다른 공격 경로가 있어서, 세 가지 설정을 추가로 적용해야 했습니다.
 
-### Secure — HTTPS에서만 쿠키를 전송한다
+### <mark>Secure</mark> - HTTPS에서만 쿠키를 전송한다
 
 쿠키는 기본적으로 HTTP 요청에도 실려 갑니다. 공용 와이파이처럼 암호화되지 않은 네트워크에서 패킷이 탈취되면 쿠키가 그대로 노출됩니다.
 `Secure` 플래그를 달면 HTTPS 연결에서만 쿠키가 전송됩니다.
@@ -174,39 +179,38 @@ HttpOnly 쿠키로 XSS 공격의 토큰 탈취는 막았습니다.
 secure: process.env.NODE_ENV === 'production',
 ```
 
-<!-- ![실행 결과](/images/study-nestjs-7th-cookie-security/2.png) -->
+![실행 결과](/images/study-nodejs-7th/2.png)
 
 브라우저 DevTools Application 탭에서 `access_token` 쿠키에 HttpOnly(Ht...) 체크와 SameSite: Lax 설정이 찍힌 것을 직접 확인할 수 있습니다.
 
 <br />
 
-### SameSite: lax — 외부 사이트의 요청을 제한한다
+### <mark>SameSite: lax</mark> - 외부 사이트의 요청을 제한한다
 
-> SameSite 쿠키는 서버가 크로스 사이트 요청과 함께 쿠키가 전송되는 것을 제한할 수 있게 해줍니다. — MDN
+> SameSite 쿠키는 서버가 크로스 사이트 요청과 함께 쿠키가 전송되는 것을 제한할 수 있게 해줍니다. <br />- 출처: <a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value" target="_blank">MDN</a>
 
-<strong>CSRF(Cross-Site Request Forgery)</strong>는 악성 사이트(evil.com)에서 사용자의 브라우저를 통해 myapp.com으로 요청을 보내는 공격입니다.
-브라우저는 myapp.com의 쿠키를 요청에 자동으로 실어 보내기 때문에, 서버 입장에서는 정상 요청처럼 보입니다.
-`SameSite: lax`는 외부 사이트에서 링크를 클릭해서 오는 GET 탐색은 허용하지만, 외부 사이트의 form POST나 fetch 요청에는 쿠키를 포함하지 않습니다.
+<strong>CSRF(Cross-Site Request Forgery)</strong>는 악성 사이트(evil.com)에서 사용자의 브라우저를 통해 myapp.com으로 요청을 보내는 공격입니다. 브라우저는 myapp.com의 쿠키를 요청에 자동으로 실어 보내기
+때문에, 서버 입장에서는 정상 요청처럼 보입니다. `SameSite: lax`는 외부 사이트에서 링크를 클릭해서 오는 GET 탐색은 허용하지만, 외부 사이트의 form POST나 fetch 요청에는 쿠키를 포함하지 않습니다.
 대부분의 <Tooltip note="Cross-Site Request Forgery. 사용자가 의도하지 않은 요청을 외부 사이트에서 강제로 실행시키는 공격.">CSRF</Tooltip> 공격이 POST 방식이라 `lax`만으로 실용적인 방어가 됩니다.
 `strict`는 외부 사이트에서의 GET 탐색도 막아서 일반 서비스에서는 사용성이 너무 떨어집니다. `none`은 크로스 사이트 요청 전체에 쿠키를 허용하되, 반드시 `Secure`와 함께 써야 합니다.
 
-| 값 | GET (링크) | POST (폼/fetch) |
-|----|-----------|----------------|
-| `strict` | X | X |
-| `lax` | O | X |
-| `none` | O | O (Secure 필수) |
+| 값       | GET (링크) | POST (폼/fetch) |
+| -------- | ---------- | --------------- |
+| `strict` | X          | X               |
+| `lax`    | O          | X               |
+| `none`   | O          | O (Secure 필수) |
 
 현재 프로젝트에 적용한 설정입니다.
 
 ```typescript
-// 외부 사이트에서 링크 클릭 → 쿠키 전송 O
-// 외부 사이트 form POST, fetch → 쿠키 전송 X (CSRF 기본 차단)
+// 외부 사이트에서 링크 클릭 -> 쿠키 전송 O
+// 외부 사이트 form POST, fetch -> 쿠키 전송 X (CSRF 기본 차단)
 sameSite: 'lax',
 ```
 
 <br />
 
-### CORS + credentials — 허용된 출처에서만 쿠키 포함 요청을 받는다
+### <mark>CORS + credentials</mark> - 허용된 출처에서만 쿠키 포함 요청을 받는다
 
 브라우저는 기본적으로 다른 출처(origin)로의 요청에 쿠키를 포함하지 않습니다.
 프론트엔드(localhost:5173)에서 백엔드(localhost:3000)로 요청할 때 쿠키가 안 가는 게 기본 동작입니다.
@@ -219,13 +223,13 @@ sameSite: 'lax',
 ```typescript
 // apps/server/src/main.ts
 app.enableCors({
-  origin: ['http://localhost:5173'], // 와일드카드(*) 불가 — credentials와 함께 쓸 수 없음
-  credentials: true,                // Set-Cookie 헤더 허용
+  origin: ["http://localhost:5173"], // 와일드카드(*) 불가 -> credentials와 함께 쓸 수 없음
+  credentials: true, // Set-Cookie 헤더 허용
 });
 app.use(cookieParser()); // 요청의 Cookie 헤더를 req.cookies로 파싱
 ```
 
-클라이언트 — withCredentials: true로 쿠키 포함 요청을 활성화합니다.
+클라이언트 — `withCredentials: true`로 쿠키 포함 요청을 활성화합니다.
 
 ```typescript
 // apps/web/src/lib/api/client.ts
@@ -237,9 +241,11 @@ export const apiClient = axios.create({
 
 <br />
 
-### 글로벌 가드와 @Public() 패턴 — 보호할 엔드포인트와 공개 엔드포인트를 나눈다
+### 글로벌 가드와 @Public() 패턴 - 보호할 엔드포인트와 공개 엔드포인트를 나눈다
 
-쿠키 기반 인증이 완성되면, 모든 엔드포인트에 JWT 가드를 적용하는 게 자연스럽습니다. 하지만 로그인과 회원가입 엔드포인트 자체는 인증 없이 접근 가능해야 합니다.
+쿠키 기반 인증이 완성되면, 모든 엔드포인트에 JWT 가드를 적용하는 게 자연스럽습니다.
+
+하지만 로그인과 회원가입 엔드포인트 자체는 인증 없이 접근 가능해야 합니다.
 글로벌 가드를 등록하되, 특정 엔드포인트에만 `@Public()` 데코레이터를 달아서 인증을 건너뛰는 패턴이 깔끔합니다.
 가드 내부에서 `Reflector`로 `@Public()` 여부를 확인하고, 붙어있으면 검증 없이 통과시킵니다.
 
@@ -252,8 +258,8 @@ canActivate(context: ExecutionContext) {
     context.getHandler(),
     context.getClass(),
   ]);
-  if (isPublic) return true;          // @Public() → 인증 건너뜀
-  return super.canActivate(context);  // 나머지 → JWT 검증
+  if (isPublic) return true;          // @Public() -> 인증 건너뜀
+  return super.canActivate(context);  // 나머지 -> JWT 검증
 }
 ```
 
@@ -271,17 +277,19 @@ export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 
 지금까지 적용된 보안 설정을 정리하면 다음과 같습니다.
 
-| 항목 | 상태 | 비고 |
-|------|------|------|
-| HttpOnly 쿠키로 토큰 저장 | ✅ | `access_token` 쿠키 |
-| Secure (HTTPS only) | ✅ | `NODE_ENV === 'production'` 조건부 |
-| SameSite | ✅ | `lax` |
-| Path | ✅ | `/` |
-| MaxAge | ✅ | 24시간 |
-| CORS credentials | ✅ | `credentials: true`, origin 화이트리스트 |
-| cookie-parser | ✅ | 미들웨어 등록됨 |
-| 로그아웃 (쿠키 제거) | ✅ | `clearCookie` |
-| 프론트 `withCredentials: true` | ✅ | 연동 완료 |
+| 항목                           | 상태 | 비고                                     |
+| ------------------------------ | ---- | ---------------------------------------- |
+| HttpOnly 쿠키로 토큰 저장      | ✅   | `access_token` 쿠키                      |
+| Secure (HTTPS only)            | ✅   | `NODE_ENV === 'production'` 조건부       |
+| SameSite                       | ✅   | `lax`                                    |
+| Path                           | ✅   | `/`                                      |
+| MaxAge                         | ✅   | 24시간                                   |
+| CORS credentials               | ✅   | `credentials: true`, origin 화이트리스트 |
+| cookie-parser                  | ✅   | 미들웨어 등록됨                          |
+| 로그아웃 (쿠키 제거)           | ✅   | `clearCookie`                            |
+| 프론트 `withCredentials: true` | ✅   | 연동 완료                                |
+
+<br />
 
 # 지금 구조로 막을 수 없는 것들
 
@@ -291,8 +299,8 @@ export const Public = () => SetMetadata(IS_PUBLIC_KEY, true);
 ### 리프레시 토큰 없음 — 토큰 수명이 24시간 고정
 
 현재 구조는 액세스 토큰 하나만 있고 수명이 24시간입니다. 토큰이 탈취되면 24시간 동안 공격자가 API를 호출할 수 있습니다.
-실무에서는 액세스 토큰 수명을 15분~1시간으로 짧게 가져가고, 리프레시 토큰(7~30일)으로 만료 시 자동 재발급하는 구조가 일반적입니다.
-리프레시 토큰은 액세스 토큰보다 훨씬 좁은 경로(path: /auth/refresh)에만 전송되도록 쿠키를 분리해서 노출 범위를 최소화합니다.
+실무에서는 액세스 토큰 수명을 15분~30일까지 짧게 가져가고, 만료 시 자동 재발급하는 구조가 일반적입니다.
+리프레시 토큰은 액세스 토큰보다 훨씬 좁은 경로(path: `/auth/refresh`)에만 전송되도록 쿠키를 분리해서 노출 범위를 최소화합니다.
 
 현재 단일 토큰, 단일 수명 구조입니다.
 
@@ -305,10 +313,10 @@ signOptions: {
 // ...
 ```
 
-| 토큰 | 수명 | 저장 위치 | 용도 |
-|------|------|----------|------|
-| 액세스 | 15분~1시간 | HttpOnly 쿠키 or 메모리 | API 인증 |
-| 리프레시 | 7~30일 | HttpOnly 쿠키 (path: /auth/refresh) | 액세스 토큰 재발급만 |
+| 토큰     | 수명       | 저장 위치                           | 용도                 |
+| -------- | ---------- | ----------------------------------- | -------------------- |
+| 액세스   | 15분~1시간 | HttpOnly 쿠키 or 메모리             | API 인증             |
+| 리프레시 | 7~30일     | HttpOnly 쿠키 (path: /auth/refresh) | 액세스 토큰 재발급만 |
 
 <br />
 
@@ -326,7 +334,7 @@ logout(@Res({ passthrough: true }) res: Response): { ok: true } {
   res.clearCookie('access_token', { ... }); // 클라이언트 쿠키만 삭제
   return { ok: true };
   // 서버에는 아무 기록도 남지 않음
-  // → 탈취된 토큰은 만료 전까지 여전히 유효
+  // -> 탈취된 토큰은 만료 전까지 여전히 유효
 }
 ```
 
