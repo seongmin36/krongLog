@@ -1,0 +1,447 @@
+---
+title: "NestJS 스터디 8주차 회고 — 서버 에러를 프론트가 읽을 수 있게"
+description: "NestJS 기본 예외 처리부터 커스텀 필터, 응답 인터셉터까지 — 서버 응답을 한 가지 규칙으로 통일한 구현 기록입니다."
+date: "2026-05-17"
+tags: ["Backend", "Nest.js", "Error"]
+image: "./images/img-study-nodejs-8th.jpg"
+---
+
+import Tooltip from "@/components/ui/Tooltip.astro";
+ 
+[지난 글](https://blog.kronglog.dev/blogs/study-nodejs-7th-cookie-security)에서는 localStorage 기반 토큰 저장의 구조적 문제를 발견하고 HttpOnly 쿠키로 전환한 흐름을 정리했습니다. 이번 주는 한 단계 더 들어가서, 서버가 클라이언트에게 어떤 모양으로 응답해야 하는지에 대한 얘기를 풀어보려 합니다.
+ 
+처음 로그인 API를 만들고 비밀번호를 틀린 요청을 보냈을 때, 서버가 돌려준 메시지는 다음과 같았습니다.
+ 
+![실행 결과](/images/study-nodejs-8th/1.png)
+ 
+"**유효하지 않은 자격 증명입니다.**" 문법적으로는 맞는 메시지지만, 프론트엔드 입장에서는 비밀번호가 틀렸는지, 이메일이 없는지, 토큰이 만료됐는지 전혀 알 수 없습니다. 사용자에게는 더더욱 의미가 없는 문구입니다.
+
+<figure>
+  <img src="/images/study-nodejs-8th/2.png" alt="실행 결과" />
+  <figcaption>에러 처리를 하지 않는 것은 위 사진에서의 상황과 유사하다고 볼 수 있다.</figcaption>
+</figure>
+
+> 서버는 무엇이 잘못됐는지 정확히 알면서, 왜 그 정보를 클라이언트에게 전달하지 못할까?
+
+> 응답 형식이 매번 다르면 프론트엔드는 어떻게 일관되게 처리할 수 있을까?
+
+이 글에서는 NestJS 기본 예외 처리에서 시작해서 커스텀 필터, 응답 인터셉터까지 — 서버 응답을 한 가지 규칙으로 통일한 구현 기록을 정리합니다.
+
+---
+
+# 의미 있는 에러 메시지 던지기
+
+### NestJS가 제공하는 예외 클래스
+
+NestJS는 `@nestjs/common`에서 HTTP 상태 코드별 예외 클래스를 제공합니다. 본문에서 다룰 `UnauthorizedException`을 포함해 주요 클래스는 다음과 같습니다.
+
+| 예외 클래스                    | HTTP 상태 | 사용 시나리오                |
+| ------------------------------ | --------- | ---------------------------- |
+| `BadRequestException`          | 400       | 입력값 검증 실패             |
+| `UnauthorizedException`        | 401       | 인증 실패 (토큰 없음/만료)   |
+| `ForbiddenException`           | 403       | 권한 없음 (남의 리소스 접근) |
+| `NotFoundException`            | 404       | 리소스 없음                  |
+| `ConflictException`            | 409       | 중복 (이메일 등)             |
+| `InternalServerErrorException` | 500       | 서버 내부 오류               |
+
+각 예외 클래스의 생성자에 메시지를 넘기면, 그 메시지가 응답 body의 `message` 필드로 들어갑니다.
+
+<br />
+### Service Layer에서 던지기
+ 
+비밀번호 검증 로직에서 `UnauthorizedException`을 던지도록 수정했습니다.
+ 
+```typescript
+// auth-accounts.service.ts
+import { UnauthorizedException } from '@nestjs/common';
+ 
+const isValid = await bcrypt.compare(plainPassword, passwordHash);
+ 
+if (!isValid) {
+  throw new UnauthorizedException('비밀번호가 일치하지 않습니다.');
+}
+```
+ 
+`bcrypt.compare`로 평문 비밀번호와 저장된 해시를 비교하고, 일치하지 않으면 `UnauthorizedException`을 던집니다. 이 예외는 NestJS의 기본 예외 필터가 자동으로 잡아서 HTTP 401 응답으로 변환합니다.
+ 
+![실행 결과](/images/study-nodejs-8th/3.png)
+ 
+```json
+{
+  "message": "비밀번호가 일치하지 않습니다.",
+  "error": "Unauthorized",
+  "statusCode": 401
+}
+```
+ 
+클라이언트는 이 메시지를 보자마자 "**비밀번호가 틀렸구나**"를 직관적으로 알 수 있게 됐습니다. 같은 401이라도 토큰 만료와 비밀번호 불일치를 메시지로 구분할 수 있어서, 프론트엔드는 이를 기반으로 다른 UI를 보여줄 수 있습니다.
+ 
+---
+ 
+# 응답 형식을 한 가지 규칙으로 통일하기
+ 
+기본 예외 처리만으로도 메시지는 명확해졌지만, 응답 구조에는 여전히 한계가 있습니다.
+ 
+### <mark>프론트엔드는 일관된 응답 구조를 원한다.</mark>
+ 
+프론트엔드는 서버로부터 오는 에러를 보통 다음 순서로 처리합니다.
+ 
+```text
+1. 상태 코드로 분기      →  401이면 로그인 페이지로, 404면 안내 페이지로
+2. message를 사용자에게  →  화면에 에러 메시지 표시
+3. 공통 필드 로깅        →  path, timestamp 등 디버깅용
+```
+ 
+이 흐름이 깔끔하려면 **모든 에러가 같은 모양**이어야 합니다. 그런데 NestJS의 기본 응답은 예외 종류에 따라 message 구조가 달라집니다. 단일 문자열일 때도 있고, `ValidationPipe`가 던지는 경우에는 배열일 때도 있습니다. 프론트엔드가 매번 분기 처리를 해야 한다는 뜻입니다.
+ 
+```typescript
+// 일반 예외
+{ 
+  "message": "해당 투두를 찾을 수 없습니다.", 
+  "error": "Not Found", 
+  "statusCode": 404 
+}
+ 
+// ValidationPipe 예외
+{ 
+  "message": ["제목은 비어있을 수 없습니다.", "..."], 
+  "error": "Bad Request", 
+  "statusCode": 400
+}
+```
+ 
+게다가 성공 응답과 실패 응답의 구조가 완전히 다릅니다. 프론트엔드는 사실상 **두 종류의 응답 타입을 따로 관리해야 합니다.**
+ 
+<br />
+### 목표하는 응답 shape
+ 
+성공이든 실패든 동일한 4개 필드로 통일하면, 프론트엔드는 하나의 타입으로 모든 응답을 처리할 수 있습니다.
+ 
+```json
+{
+  "success": false,
+  "statusCode": 404,
+  "message": "해당 투두를 찾을 수 없습니다.",
+  "data": null
+}
+```
+ 
+- `success` — 성공/실패를 boolean으로 명시
+- `statusCode` — HTTP 상태 코드
+- `message` — 사용자/개발자가 읽을 수 있는 메시지
+- `data` — 성공 시 실제 데이터, 실패 시 `null`
+이 구조를 만들려면 두 가지가 필요합니다. **에러 응답을 가공할 예외 필터**, 그리고 **성공 응답을 가공할 인터셉터**입니다.
+ 
+---
+ 
+# 커스텀 예외 필터로 에러 응답 통일하기
+ 
+### 필터를 두 개로 나눈 이유
+ 
+예외 필터를 두 개로 나눴습니다. `HttpExceptionFilter`와 `AllExceptionsFilter`입니다.
+ 
+NestJS의 예외 처리는 **구체적인 필터 우선** 원칙으로 동작합니다. `@Catch(HttpException)`처럼 특정 타입을 지정한 필터가 먼저 시도되고, 거기서 잡히지 않은 예외는 `@Catch()` (catch-all)로 떨어집니다. 즉 두 필터는 다음과 같이 책임이 분리됩니다.
+ 
+```text
+HttpExceptionFilter   →  NestJS HTTP 예외 전용 (NotFound, Unauthorized 등)
+AllExceptionsFilter   →  그 외 모든 예외의 안전망 (DB 에러, 알 수 없는 런타임 에러)
+```
+ 
+DB 레벨에서 TypeORM이 던지는 `QueryFailedError`나, 코드에서 발생한 예측 못 한 런타임 에러는 NestJS의 HTTP 예외가 아닙니다. 이런 예외들이 잡히지 않은 채 클라이언트에 노출되면 스택 트레이스가 그대로 응답에 실려 가는 사고가 납니다. `AllExceptionsFilter`가 안전망 역할을 합니다.
+ 
+<br />
+### HttpExceptionFilter 구현
+ 
+```typescript
+// src/common/filters/http-exception.filter.ts
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  Logger,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+ 
+@Catch(HttpException)
+export class HttpExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpExceptionFilter.name);
+ 
+  catch(exception: HttpException, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
+    const status = exception.getStatus();
+    const message = exception.message;
+ 
+    const exceptionResponse = exception.getResponse();
+    const errorMessage =
+      typeof exceptionResponse === 'string'
+        ? exceptionResponse
+        : (exceptionResponse as Record<string, string>).message;
+ 
+    if (status >= 500) {
+      this.logger.error(`[${request.method}] ${request.url} -> ${status}`);
+    } else {
+      this.logger.warn(
+        `[${request.method}] ${request.url} -> ${status}: ${message}`,
+      );
+    }
+ 
+    response.status(status).json({
+      success: false,
+      statusCode: status,
+      message: errorMessage,
+      data: null,
+    });
+  }
+}
+```
+ 
+이 필터에서 짚어둘 두 가지가 있습니다.
+ 
+**첫째, 로그 레벨을 상태 코드로 분기합니다.** <br/>5xx는 `logger.error`, 4xx는 `logger.warn`으로 나눠 찍습니다. [운영 준비 편](https://blog.kronglog.dev/blogs/study-nodejs-5th-2)에서 정리한 로그 레벨 기준 그대로입니다. 5xx는 서버 자체의 문제라 즉시 조치가 필요한 반면, 4xx는 클라이언트 입력 문제라 경고 수준에서 추적만 하면 충분하기 때문입니다.
+ 
+**둘째, `exception.getResponse()`로 메시지를 추출합니다.** <br/>`exception.message`로 직접 접근하면 NestJS가 만든 기본 메시지가 나올 수 있는데, `getResponse()`는 개발자가 `throw new UnauthorizedException('비밀번호가 일치하지 않습니다.')`처럼 전달한 실제 메시지를 반환합니다. 문자열일 때와 객체일 때를 분기 처리해서 두 경우 모두 올바른 메시지가 추출되도록 했습니다.
+ 
+<br />
+### AllExceptionsFilter 구현
+ 
+```typescript
+// src/common/filters/all-exceptions.filter.ts
+import {
+  Catch,
+  ExceptionFilter,
+  ArgumentsHost,
+  Logger,
+  HttpStatus,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+ 
+@Catch()
+export class AllExceptionsFilter implements ExceptionFilter {
+  private readonly logger = new Logger(AllExceptionsFilter.name);
+ 
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const request = ctx.getRequest<Request>();
+    const response = ctx.getResponse<Response>();
+ 
+    this.logger.error(
+      `[${request.method}] ${request.url} -> Unhandled exception`,
+      exception instanceof Error ? exception.stack : String(exception),
+    );
+ 
+    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+      message: '서버 내부 오류가 발생했습니다.',
+      data: null,
+    });
+  }
+}
+```
+ 
+`AllExceptionsFilter`는 예측하지 못한 예외를 잡는 자리입니다. 클라이언트에게는 일관된 "서버 내부 오류" 메시지만 노출하고, 실제 스택 트레이스는 서버 로그로만 남깁니다. 보안과 디버깅 두 가지를 동시에 챙기는 패턴입니다.
+ 
+<br />
+### 필터 등록과 동작 흐름
+ 
+두 필터를 `main.ts`의 `useGlobalFilters`로 등록합니다. **등록 순서가 중요합니다.**
+ 
+```typescript
+// src/main.ts
+app.useGlobalFilters(
+  new AllExceptionsFilter(),  // 안전망 (catch-all)
+  new HttpExceptionFilter(),  // HTTP 예외 전용
+);
+```
+ 
+NestJS는 등록된 필터를 역순으로 적용합니다. 즉 위 코드는 다음 순서로 동작합니다.
+ 
+```text
+예외 발생
+  ↓
+HttpExceptionFilter 시도  →  HttpException이면 처리
+  ↓ (잡지 못함)
+AllExceptionsFilter      →  그 외 모든 예외 catch
+```
+ 
+이렇게 등록하면 모든 에러 응답이 동일한 4개 필드 shape로 통일됩니다.
+ 
+![실행 결과](/images/study-nodejs-8th/4.png)
+ 
+---
+ 
+# 인터셉터로 성공 응답까지 통일하기
+ 
+### 필터는 에러에만 동작한다
+ 
+여기까지 했는데도 한 가지 문제가 남습니다. 성공 응답입니다.
+ 
+```json
+// 에러 응답 (필터가 가공)
+{ 
+  "success": false, 
+  "statusCode": 404,
+  "message": "...",
+  "data": null 
+}
+ 
+// 성공 응답 (필터가 동작하지 않음)
+{ 
+  "userId": 1, 
+  "email": "test@test.com" // 그냥 엔티티가 그대로 반환됨
+}  
+```
+ 
+예외 필터는 이름 그대로 **예외가 발생했을 때만** 동작합니다. 성공한 응답은 컨트롤러가 반환한 값이 그대로 클라이언트에 전달됩니다. 프론트엔드가 한 가지 규칙으로 응답을 처리하려면, 성공 응답도 같은 4개 필드로 감싸 줘야 합니다.
+ 
+이때 사용하는 것이 <Tooltip note="요청과 응답의 정상 흐름을 가로채서 가공하는 NestJS의 미들웨어 레이어. 필터가 예외 흐름을 다룬다면, 인터셉터는 정상 흐름을 다룬다.">인터셉터</Tooltip>입니다. 필터가 예외 흐름을 가로챈다면, 인터셉터는 정상 흐름을 가로챕니다. 둘이 짝을 이루어 성공/실패 응답을 모두 같은 모양으로 만듭니다.
+ 
+<br />
+### 초안: success / statusCode / data 세 필드
+ 
+처음에는 단순하게 세 필드만 통일했습니다.
+ 
+```typescript
+interface ApiResponse<T> {
+  success: true;
+  statusCode: number;
+  data: T | null;
+}
+```
+ 
+이걸로 프론트엔드는 공통 타입을 만들 수 있게 됐습니다. 하지만 실제 API를 더 만들어 보니, **단순히 데이터 형태를 맞추는 것만으로는 각 엔드포인트의 의도를 충분히 드러내기 어렵다**는 판단이 들었습니다. 회원가입과 투두 생성이 모두 같은 shape인 건 좋지만, 사용자에게 보여줄 수 있는 메시지가 응답에 없으면 프론트엔드가 다시 매핑 테이블을 따로 만들어야 합니다.
+ 
+그래서 `message` 필드를 추가해서 4필드로 확장하기로 했습니다. 에러 응답과 완전히 동일한 shape이 됩니다.
+ 
+<br />
+### 확장: 자동 메시지 + 커스텀 메시지
+ 
+`message`를 어떻게 채울지가 다음 고민이었습니다. 두 가지를 동시에 만족시켜야 했습니다.
+ 
+- 대부분의 엔드포인트는 메시지를 자동으로 생성 (보일러플레이트 줄이기)
+- 특별한 의도가 있는 엔드포인트는 메시지를 직접 지정 (의미 강화)
+자동 생성은 HTTP method와 status code 조합으로 처리하고, 커스텀 메시지는 데코레이터로 선언하기로 했습니다.
+ 
+```typescript
+// src/common/decorators/response-message.decorator.ts
+import { SetMetadata } from '@nestjs/common';
+ 
+export const RESPONSE_MESSAGE_KEY = 'responseMessage';
+ 
+export const ResponseMessage = (message: string) =>
+  SetMetadata(RESPONSE_MESSAGE_KEY, message);
+```
+ 
+`SetMetadata`로 핸들러에 메타데이터를 붙이는 패턴입니다. 인터셉터가 `Reflector`로 이 메타데이터를 읽어서 메시지를 결정합니다.
+ 
+<br />
+### TransformInterceptor 구현
+ 
+```typescript
+// src/common/interceptors/transform.interceptor.ts
+export interface ApiResponse<T> {
+  success: true;
+  statusCode: number;
+  message: string;
+  data: T | null;
+}
+
+@Injectable()
+export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+  constructor(private readonly reflector: Reflector) {}
+
+  intercept(
+    context: ExecutionContext,
+    next: CallHandler<T>,
+  ): Observable<ApiResponse<T>> {
+    const req = context.switchToHttp().getRequest<{ method: string }>();
+    const response = context
+      .switchToHttp()
+      .getResponse<{ statusCode: number }>();
+
+    const customMessage = this.reflector.getAllAndOverride<string>(
+      RESPONSE_MESSAGE_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    return next.handle().pipe(
+      map(
+        (data): ApiResponse<T> => ({
+          success: true,
+          statusCode: response.statusCode,
+          message:
+            customMessage ??
+            this.resolveMessage(req.method, response.statusCode),
+          data: data ?? null,
+        }),
+      ),
+    );
+  }
+
+  private resolveMessage(method: string, statusCode: number): string {
+    if (statusCode === 204) {
+      return '처리가 완료되었습니다.';
+    }
+
+    const messages: Record<string, string> = {
+      GET: '조회에 성공했습니다.',
+      POST: '생성에 성공했습니다.',
+      ...
+    }
+    return messages[method.toUpperCase()] ?? '처리에 성공했습니다.';
+  }
+}
+```
+
+핵심 로직은 `message` 필드를 채우는 부분입니다.
+
+```typescript
+message: customMessage ?? this.resolveMessage(req.method, response.statusCode),
+```
+
+`@ResponseMessage()`가 붙어있으면 그 메시지를, 없으면 자동 생성한 메시지를 사용합니다. 컨트롤러에서는 다음과 같이 씁니다.
+
+```typescript
+@Post('signup')
+@ResponseMessage('회원가입이 완료되었습니다.')
+async signup(@Body() dto: SignupRequestDto) {
+  return this.authAccountsService.signup(dto);
+}
+
+@Get('todos')
+async getTodos(@GetUser() user: User) {
+  return this.todosService.findAll(user);
+  // 메시지 자동 생성: "요청을 성공적으로 처리했습니다."
+}
+```
+
+회원가입처럼 사용자에게 직접 보여줄 메시지는 데코레이터로 선언하고, 단순 조회처럼 일반적인 응답은 자동 생성에 맡깁니다. **응답 shape는 전역적으로 일관되게 유지하면서, 메시지는 엔드포인트별로 세밀하게 표현**할 수 있는 구조가 됐습니다.
+
+![실행 결과](/images/study-nodejs-8th/6.png)
+
+```json
+{
+  "success": true,
+  "statusCode": 201,
+  "message": "회원가입이 완료되었습니다.",
+  "data": {
+    "userId": 1,
+    "email": "test@test.com"
+  }
+}
+```
+
+---
+
+## 마치며
+
+NestJS 기본 예외 응답에서 시작해서, 두 개의 예외 필터로 모든 에러를 같은 모양으로 가공하고, 인터셉터로 성공 응답까지 동일한 shape로 만들었습니다. 결과적으로 프론트엔드는 응답이 성공이든 실패든 항상 `success / statusCode / message / data` 4개 필드만 다루면 됩니다.
+
+직접 구현하면서 세 가지가 확실히 와닿았습니다.
+
+- 예외 필터와 인터셉터는 짝을 이루는 메커니즘이다. 필터는 예외 흐름, 인터셉터는 정상 흐름을 다룬다. 둘 다 있어야 응답 shape이 완전히 통일된다.
+- 응답 shape는 전역으로 통일하고, 의미(message)는 엔드포인트별로 표현한다. `@ResponseMessage()` 데코레이터 패턴은 공통 규칙과 개별 요구사항을 동시에 만족시키는 방법이었다.
+- 두 개의 필터로 책임을 나눠야 한다. `HttpExceptionFilter`는 NestJS 예외 전용, `AllExceptionsFilter`는 그 외 모든 예외의 안전망. 한 개로 합치면 DB 에러나 알 수 없는 런타임 에러를 놓친다.
