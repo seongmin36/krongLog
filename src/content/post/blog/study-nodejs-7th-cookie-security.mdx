@@ -189,7 +189,8 @@ secure: process.env.NODE_ENV === 'production',
 
 > SameSite 쿠키는 서버가 크로스 사이트 요청과 함께 쿠키가 전송되는 것을 제한할 수 있게 해줍니다. <br />- 출처: <a href="https://developer.mozilla.org/ko/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value" target="_blank">MDN</a>
 
-<strong>CSRF(Cross-Site Request Forgery)</strong>는 악성 사이트(evil.com)에서 사용자의 브라우저를 통해 myapp.com으로 요청을 보내는 공격입니다.<br />
+<strong>CSRF(Cross-Site Request Forgery)</strong>는 악성 사이트(evil.com)에서 사용자의 브라우저를 통해 myapp.com으로 요청을 보내는 공격입니다.
+<br />
 브라우저는 myapp.com의 쿠키를 요청에 자동으로 실어 보내기 때문에, 서버 입장에서는 정상 요청처럼 보입니다.
 
 `SameSite: lax`는 외부 사이트에서 링크를 클릭해서 오는 GET 탐색은 허용하지만, 외부 사이트의 form POST나 fetch 요청에는 쿠키를 포함하지 않습니다.<br />
@@ -392,4 +393,4 @@ HttpOnly 쿠키로 전환하면서 Secure·SameSite·CORS 세 가지 레이어�
 - 현재 구조로 막을 수 없는 것들(리프레시 토큰, 토큰 무효화, CSRF 완전 대응)을 알고 있는 것과
   모르는 것은 다릅니다. 다음 단계가 보이는 상태로 멈추는 게, 모르고 멈추는 것보다 낫습니다.
 
-다음 글에서는 TodoList 프로젝트에 Winston 로그 연동과 Zod 기반 환경 변수 검증을 적용하는 과정을 정리할 예정입니다.
+다음 글에서는 다음 글에서는 서버 에러를 프론트가 읽을 수 있게 — 예외 처리, 커스텀 필터, 공통 응답 설계 과정을 정리할 예정입니다.

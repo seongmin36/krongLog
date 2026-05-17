@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1778419963996,
+  "lastScanned": 1779024823040,
   "projectRoot": "/Users/josengmin/Desktop/Project/krongLog",
   "techStack": {
     "languages": [
@@ -80,7 +80,7 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 7,
-      "lastAccessed": 1778419963956,
+      "lastAccessed": 1779024823034,
       "keyFiles": [
         "favicon.ico",
         "favicon.svg",
@@ -93,7 +93,7 @@
       "path": "public",
       "purpose": "Public files",
       "fileCount": 4,
-      "lastAccessed": 1778419963959,
+      "lastAccessed": 1779024823036,
       "keyFiles": [
         "favicon.ico",
         "favicon.svg",
@@ -105,14 +105,14 @@
       "path": "raw-videos",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1778419963961,
+      "lastAccessed": 1779024823037,
       "keyFiles": []
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 1,
-      "lastAccessed": 1778419963975,
+      "lastAccessed": 1779024823037,
       "keyFiles": [
         "process-videos.mjs"
       ]
@@ -121,7 +121,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 1,
-      "lastAccessed": 1778419963987,
+      "lastAccessed": 1779024823037,
       "keyFiles": [
         "content.config.ts"
       ]
@@ -130,7 +130,7 @@
       "path": "src/assets",
       "purpose": "Static assets",
       "fileCount": 3,
-      "lastAccessed": 1778419963990,
+      "lastAccessed": 1779024823038,
       "keyFiles": [
         "astro.svg",
         "background.svg",
@@ -141,7 +141,7 @@
       "path": "src/components",
       "purpose": "UI components",
       "fileCount": 1,
-      "lastAccessed": 1778419963991,
+      "lastAccessed": 1779024823038,
       "keyFiles": [
         "Header.astro"
       ]
@@ -150,14 +150,14 @@
       "path": "src/lib",
       "purpose": "Library code",
       "fileCount": 0,
-      "lastAccessed": 1778419963992,
+      "lastAccessed": 1779024823038,
       "keyFiles": []
     },
     "src/pages": {
       "path": "src/pages",
       "purpose": "Page components",
       "fileCount": 1,
-      "lastAccessed": 1778419963992,
+      "lastAccessed": 1779024823038,
       "keyFiles": [
         "index.astro"
       ]
@@ -166,7 +166,7 @@
       "path": "src/types",
       "purpose": "Type definitions",
       "fileCount": 2,
-      "lastAccessed": 1778419963993,
+      "lastAccessed": 1779024823038,
       "keyFiles": [
         "index.ts",
         "seo.ts"
