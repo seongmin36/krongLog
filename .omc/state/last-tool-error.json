@@ -1,0 +1,7 @@
+{
+  "tool_name": "Edit",
+  "tool_input_preview": "{\"file_path\":\"/Users/josengmin/Desktop/Project/krongLog/src/content/post/blog/study-nodejs-8th.mdx\",\"old_string\":\"image: \\\"./images/study-nestjs-8th-error-response.jpg\\\"\",\"new_string\":\"image: \\\"./imag...",
+  "error": "File content has changed since it was last read. This commonly happens when a linter or formatter run via Bash rewrites the file. Call Read on this file to refresh, then retry the edit.",
+  "timestamp": "2026-05-17T14:31:27.507Z",
+  "retry_count": 1
+}
