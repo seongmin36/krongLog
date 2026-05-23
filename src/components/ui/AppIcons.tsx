@@ -3,12 +3,14 @@ import SunIcon from "@/assets/icons/icon-sun.svg?react";
 import MoonIcon from "@/assets/icons/icon-moon.svg?react";
 import GithubIcon from "@/assets/icons/icon-github.svg?react";
 import LinkedinIcon from "@/assets/icons/icon-linkedin.svg?react";
+import RssIcon from "@/assets/icons/icon-rss.svg?react";
 
 const ICONS = {
   sun: SunIcon,
   moon: MoonIcon,
   github: GithubIcon,
   linkedin: LinkedinIcon,
+  rss: RssIcon,
 } as const;
 
 type IconName = keyof typeof ICONS;
