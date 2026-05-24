@@ -1,12 +1,14 @@
 ---
 title: "NestJS 스터디 9주차 회고 — 로그는 사람도 읽고, 시스템도 읽는다"
-description: "NestJS Built-in Logger의 운영 환경 한계를 직시하고, Pino로 전환하는 과정을 정리했습니다. 구조화 로깅 설계부터 ExceptionFilter DI 연동, APP_FILTER 등록 방식까지 — 로그가 사람도 읽고 시스템도 읽는 형태가 되기까지의 구현 기록입니다."
+description: "NestJS Built-in Logger의 운영 환경 한계를 직시하고, Pino로 전환하는 과정을 정리했습니다. 구조화 로깅 설계부터 ExceptionFilter DI 연동, APP_FILTER 등록 방식까지의 형태가 되기까지의 구현 기록입니다."
 date: "2026-05-24"
-tags: ["Backend", "Nest.js", "Logging", "Pino"]
+tags: ["Backend", "Nest.js", "Logging"]
 image: "./images/img-study-nodejs-9th.jpg"
 ---
 
-[지난 글](https://blog.kronglog.dev/blogs/study-nodejs-8th)에서 `HttpExceptionFilter`와 `AllExceptionsFilter`를 만들면서, <br/>필터 내부에 `new Logger(HttpExceptionFilter.name)`으로 NestJS의 기본 로거를 직접 생성해서 썼습니다. 그때는 '로그가 찍히면 됐지'라고 생각하고 넘어갔는데, [5주차 운영 준비 편](https://blog.kronglog.dev/blogs/study-nodejs-5th-2)을 다시 떠올리면서 의문이 생겼습니다.
+import Tooltip from "@/components/ui/Tooltip.astro";
+
+[지난 글](https://blog.kronglog.dev/blogs/study-nodejs-8th)에서 `HttpExceptionFilter`와 `AllExceptionsFilter`를 만들면서, <br/>필터 내부에 `new Logger(HttpExceptionFilter.name)`으로 NestJS의 기본 로거를 직접 생성해서 썼습니다. <br/>그때는 '로그가 찍히면 됐지'라고 생각하고 넘어갔는데, [5주차 운영 준비 편](https://blog.kronglog.dev/blogs/study-nodejs-5th-2)을 다시 떠올리면서 의문이 생겼습니다.
 
 > Built-in Logger로 찍은 문자열 로그를, Datadog 같은 로그 수집 시스템이 제대로 파싱할 수 있을까?
 
@@ -100,7 +102,7 @@ this.logger.info({ userId: 5, action: "login", ip: "1.2.3.4" }, "User logged in"
 | 설정 자유도      | ✅ 높음        | 중간                        |
 | 운영 환경 적합성 | 좋음           | ✅ 더 좋음                  |
 
-이 프로젝트는 **Pino를 선택**했습니다.<br />
+이 프로젝트는 <mark>**Pino를 선택**</mark>했습니다.<br />
 장기적으로 운영 환경까지 보고 있고, JSON 출력과 HTTP 자동 로깅이 처음부터 되는 게 유리합니다.<br />
 한국어 자료가 없어서 직접 부딪혀야 하는 과정 자체가 학습이 된다는 판단도 있었습니다.
 
@@ -154,6 +156,11 @@ export class AppModule {}
 `pino-http`는 HTTP 요청이 들어오면 `req`, `res` 객체를 **통째로 직렬화해서** 로그에 찍습니다.<br />
 설정 없이 두면 헤더, 파라미터, 소켓 정보까지 전부 포함된 긴 JSON이 됩니다.
 
+<figure>
+  <img src="/images/study-nodejs-9th-1/1.png" alt="실행 결과" />
+  <figcaption>무차별 JSON 직렬화 공격</figcaption>
+</figure>
+
 `serializers`는 "이 객체를 로그에 찍을 때 이렇게 변환해라"를 직접 정의하는 함수입니다.
 
 ```text
@@ -190,6 +197,8 @@ async function bootstrap() {
 `bufferLogs: true`를 쓰는 이유가 있습니다.<br />
 NestJS 부팅 초반에 발생하는 로그(모듈 초기화 등)가 Pino가 준비되기 전에 출력되면 포맷이 섞입니다.<br />
 이 옵션을 켜두면 그 로그들을 버퍼에 모아뒀다가 Pino가 준비된 시점에 한꺼번에 출력합니다.
+
+![실행 결과](/images/study-nodejs-9th-1/2.png)
 
 ## Service와 Controller에서 Logger 쓰기
 
@@ -318,7 +327,7 @@ Filter에서 생성자 주입을 쓰기 때문에, 기존처럼 `useGlobalFilter
 app.useGlobalFilters(new HttpExceptionFilter());
 ```
 
-`new HttpExceptionFilter()`는 NestJS **DI 컨테이너를 완전히 우회**합니다.<br />
+`new HttpExceptionFilter()`는 NestJS <strong>DI 컨테이너를 완전히 우회</strong>합니다.<br />
 Node.js가 직접 메모리에 인스턴스를 올리기 때문에 NestJS는 이 객체의 존재 자체를 모릅니다.<br />
 생성자에 선언된 `PinoLogger`를 어디서 가져와야 하는지 알 방법이 없으니, `logger`는 `undefined`가 되고 런타임에서 터집니다.
 
@@ -337,7 +346,7 @@ import { APP_FILTER } from "@nestjs/core";
 export class AppModule {}
 ```
 
-`APP_FILTER`는 NestJS에 "이 클래스를 DI 컨테이너 안에서 전역 필터로 등록해라"라는 의미입니다.<br />
+`APP_FILTER`는 NestJS에 "이 클래스를 <Tooltip note="NestJS 애플리케이션이 부팅될 때 만들어지는 클래스들의 등록소"><strong>DI 컨테이너</strong></Tooltip> 안에서 전역 필터로 등록해라"라는 의미입니다.<br />
 NestJS가 직접 인스턴스를 만들고, 생성자에 필요한 `PinoLogger`를 주입합니다.
 
 **등록 순서가 중요합니다.** `APP_FILTER`는 등록 순서의 **역순**으로 실행됩니다.<br />
@@ -351,6 +360,8 @@ NestJS가 직접 인스턴스를 만들고, 생성자에 필요한 `PinoLogger`�
 
 개발 환경에서는 `pino-pretty`가 JSON을 사람이 읽기 좋은 형태로 변환합니다.<br />
 레벨별 색상, 타임스탬프, `context` 이름이 한눈에 들어옵니다.
+
+![실행 결과](/images/study-nodejs-9th-1/3.png)
 
 운영 환경에서는 `transport`를 `undefined`로 두면 Pino의 기본 JSON 출력이 그대로 나옵니다.<br />
 이 형태가 Datadog, CloudWatch, ELK Stack 같은 로그 수집 시스템에서 바로 파싱 가능합니다.
@@ -369,8 +380,10 @@ NestJS가 직접 인스턴스를 만들고, 생성자에 필요한 `PinoLogger`�
 }
 ```
 
+![실행 결과](/images/study-nodejs-9th-1/4.png)
+
 Built-in Logger의 문자열 출력은 이 수준의 파싱이 불가능합니다.<br />
-Pino로 전환하면 추가 설정 없이 이 포맷으로 찍힙니다.
+**Pino로 전환**하면 추가 설정 없이 이 포맷으로 찍힙니다.
 
 ## <mark>무엇을, 어떻게 남길까</mark>
 
@@ -461,7 +474,9 @@ this.logger.error(
 
 <br />
 
-### 구조화 객체를 짤 때 지켜야 할 3가지 규칙
+## 구조화 객체를 짤 때 지켜야 할 3가지 규칙
+
+구조화 객체를 짤 때 지켜야 할 **3가지 규칙**은 다음과 같습니다.
 
 **1. Key 이름은 프로젝트 전체에서 통일**
 
@@ -534,4 +549,4 @@ Built-in Logger의 한계를 확인하고 Pino로 전환했습니다. `nestjs-pi
 - 구조화 로깅은 형식이 아니라 설계다. Key 이름을 통일하고, 민감 정보를 제거하고, 타입을 일치시키는 세 가지 규칙을 지켜야 로그가 운영에서 실제로 쓸모 있어진다.
 - `new Logger()` 대신 `@InjectPinoLogger()`를 쓰는 순간, Filter도 `useGlobalFilters`에서 `APP_FILTER`로 등록 방식을 바꿔야 한다. 이 둘은 함께 바뀐다.
 
-다음 글에서는 Zod 기반 환경 변수 검증을 적용하는 과정을 정리할 예정입니다.
+다음 글에서는 E2E와 단위 테스트로 검증 실패 및 XSS 등 방어 라인을 직접 깨 보고 테스트의 효과를 체감하는 과정을 정리할 예정입니다.

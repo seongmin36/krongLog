@@ -190,6 +190,12 @@
       "type": "file"
     },
     {
+      "path": "src/content/post/blog/study-nodejs-9th-1.mdx",
+      "accessCount": 7,
+      "lastAccessed": 1779621008845,
+      "type": "file"
+    },
+    {
       "path": "src/content/post/blog/study-nodejs-8th.mdx",
       "accessCount": 6,
       "lastAccessed": 1779612787831,
@@ -235,12 +241,6 @@
       "path": "src/content.config.ts",
       "accessCount": 2,
       "lastAccessed": 1779612899482,
-      "type": "file"
-    },
-    {
-      "path": "src/content/post/blog/study-nodejs-9th-1.mdx",
-      "accessCount": 2,
-      "lastAccessed": 1779620220535,
       "type": "file"
     },
     {
