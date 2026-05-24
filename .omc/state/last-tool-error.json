@@ -1,7 +1,7 @@
 {
-  "tool_name": "Edit",
-  "tool_input_preview": "{\"file_path\":\"/Users/josengmin/Desktop/Project/krongLog/src/content/post/blog/study-nodejs-8th.mdx\",\"old_string\":\"image: \\\"./images/study-nestjs-8th-error-response.jpg\\\"\",\"new_string\":\"image: \\\"./imag...",
-  "error": "File content has changed since it was last read. This commonly happens when a linter or formatter run via Bash rewrites the file. Call Read on this file to refresh, then retry the edit.",
-  "timestamp": "2026-05-17T14:31:27.507Z",
-  "retry_count": 1
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /Users/josengmin/Desktop/Project/seongmin36 && git pull && git push\"}",
+  "error": "Exit code 128\nhttps://github.com/seongmin36/seongmin36 URL에서\n   7bff48c..a3e98d3  main       -> origin/main\nhint: You have divergent branches and need to specify how to reconcile them.\nhint: You can do so by running one of the following commands sometime before\nhint: your next pull:\nhint:\nhint:   git config pull.rebase false  # merge\nhint:   git config pull.rebase true   # rebase\nhint:   git config pull.ff only       # fast-forward only\nhint:\nhint: You can replace \"git config\" with \"git config -...",
+  "timestamp": "2026-05-23T13:05:19.081Z",
+  "retry_count": 2
 }

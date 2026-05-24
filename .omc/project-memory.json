@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779024823040,
+  "lastScanned": 1779612421026,
   "projectRoot": "/Users/josengmin/Desktop/Project/krongLog",
   "techStack": {
     "languages": [
@@ -65,6 +65,7 @@
     "isMonorepo": false,
     "workspaces": [],
     "mainDirectories": [
+      "docs",
       "public",
       "scripts",
       "src"
@@ -79,8 +80,8 @@
     "dist": {
       "path": "dist",
       "purpose": "Distribution/build output",
-      "fileCount": 7,
-      "lastAccessed": 1779024823034,
+      "fileCount": 8,
+      "lastAccessed": 1779612421005,
       "keyFiles": [
         "favicon.ico",
         "favicon.svg",
@@ -89,11 +90,18 @@
         "robots.txt"
       ]
     },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 0,
+      "lastAccessed": 1779612421009,
+      "keyFiles": []
+    },
     "public": {
       "path": "public",
       "purpose": "Public files",
       "fileCount": 4,
-      "lastAccessed": 1779024823036,
+      "lastAccessed": 1779612421009,
       "keyFiles": [
         "favicon.ico",
         "favicon.svg",
@@ -105,14 +113,14 @@
       "path": "raw-videos",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779024823037,
+      "lastAccessed": 1779612421018,
       "keyFiles": []
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
       "fileCount": 1,
-      "lastAccessed": 1779024823037,
+      "lastAccessed": 1779612421018,
       "keyFiles": [
         "process-videos.mjs"
       ]
@@ -121,7 +129,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 1,
-      "lastAccessed": 1779024823037,
+      "lastAccessed": 1779612421019,
       "keyFiles": [
         "content.config.ts"
       ]
@@ -130,7 +138,7 @@
       "path": "src/assets",
       "purpose": "Static assets",
       "fileCount": 3,
-      "lastAccessed": 1779024823038,
+      "lastAccessed": 1779612421020,
       "keyFiles": [
         "astro.svg",
         "background.svg",
@@ -141,7 +149,7 @@
       "path": "src/components",
       "purpose": "UI components",
       "fileCount": 1,
-      "lastAccessed": 1779024823038,
+      "lastAccessed": 1779612421021,
       "keyFiles": [
         "Header.astro"
       ]
@@ -150,23 +158,24 @@
       "path": "src/lib",
       "purpose": "Library code",
       "fileCount": 0,
-      "lastAccessed": 1779024823038,
+      "lastAccessed": 1779612421022,
       "keyFiles": []
     },
     "src/pages": {
       "path": "src/pages",
       "purpose": "Page components",
-      "fileCount": 1,
-      "lastAccessed": 1779024823038,
+      "fileCount": 2,
+      "lastAccessed": 1779612421023,
       "keyFiles": [
-        "index.astro"
+        "index.astro",
+        "rss.xml.ts"
       ]
     },
     "src/types": {
       "path": "src/types",
       "purpose": "Type definitions",
       "fileCount": 2,
-      "lastAccessed": 1779024823038,
+      "lastAccessed": 1779612421025,
       "keyFiles": [
         "index.ts",
         "seo.ts"
@@ -182,8 +191,32 @@
     },
     {
       "path": "src/content/post/blog/study-nodejs-8th.mdx",
+      "accessCount": 6,
+      "lastAccessed": 1779612787831,
+      "type": "file"
+    },
+    {
+      "path": "src/components/Header.astro",
       "accessCount": 5,
-      "lastAccessed": 1779028478866,
+      "lastAccessed": 1779523995088,
+      "type": "file"
+    },
+    {
+      "path": "src/components/ui/AppIcons.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1779524006960,
+      "type": "file"
+    },
+    {
+      "path": "src/assets/icons/icon-rss.svg",
+      "accessCount": 4,
+      "lastAccessed": 1779524021504,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog-template.md",
+      "accessCount": 4,
+      "lastAccessed": 1779619915727,
       "type": "file"
     },
     {
@@ -193,9 +226,21 @@
       "type": "file"
     },
     {
-      "path": "src/content/post/blog-template.md",
-      "accessCount": 3,
-      "lastAccessed": 1779028253604,
+      "path": ".claude/settings.local.json",
+      "accessCount": 2,
+      "lastAccessed": 1779523149179,
+      "type": "file"
+    },
+    {
+      "path": "src/content.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1779612899482,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog/study-nodejs-9th-1.mdx",
+      "accessCount": 2,
+      "lastAccessed": 1779620220535,
       "type": "file"
     },
     {
@@ -208,6 +253,72 @@
       "path": "src/content/post/blog/study-nestjs-7th-cookie-security.mdx",
       "accessCount": 1,
       "lastAccessed": 1778420342811,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/rss.xml.ts",
+      "accessCount": 1,
+      "lastAccessed": 1779508665576,
+      "type": "file"
+    },
+    {
+      "path": "docs/superpowers/plans/2026-05-22-rss-feed-github-card.md",
+      "accessCount": 1,
+      "lastAccessed": 1779522911693,
+      "type": "file"
+    },
+    {
+      "path": "src/assets/icons/icon-github.svg",
+      "accessCount": 1,
+      "lastAccessed": 1779523868128,
+      "type": "file"
+    },
+    {
+      "path": "src/assets/icons/icon-linkedin.svg",
+      "accessCount": 1,
+      "lastAccessed": 1779523868607,
+      "type": "file"
+    },
+    {
+      "path": "src/assets/icons/icon-sun.svg",
+      "accessCount": 1,
+      "lastAccessed": 1779523869116,
+      "type": "file"
+    },
+    {
+      "path": "src/assets/icons/icon-moon.svg",
+      "accessCount": 1,
+      "lastAccessed": 1779523869566,
+      "type": "file"
+    },
+    {
+      "path": "src/components/sections/NavLink.astro",
+      "accessCount": 1,
+      "lastAccessed": 1779524006547,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog/study-nodejs-7th-cookie-security.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1779612788173,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog/study-nodejs-5th-2.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1779612903291,
+      "type": "file"
+    },
+    {
+      "path": "src/pages/blogs/[...slug].astro",
+      "accessCount": 1,
+      "lastAccessed": 1779613146878,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog/study-nodejs-9th-pino.mdx",
+      "accessCount": 1,
+      "lastAccessed": 1779613522375,
       "type": "file"
     }
   ],
