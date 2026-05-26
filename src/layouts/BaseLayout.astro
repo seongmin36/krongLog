@@ -6,15 +6,17 @@ interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
+  ogType?: "website" | "article";
 }
 
 const {
   title = "Krong Dev.",
   description = "개발하면서 배운 것들을 기록합니다.",
   ogImage,
+  ogType = "website",
 } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
 const resolvedOgImage =
   ogImage ?? new URL("/images/og-default.png", Astro.site).href;
 ---
@@ -27,6 +29,7 @@ const resolvedOgImage =
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
     <meta name="generator" content={Astro.generator} />
+    <meta name="robots" content="index, follow" />
 
     <!-- SEO -->
     <title>{title}</title>
@@ -35,7 +38,7 @@ const resolvedOgImage =
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <meta property="og:type" content={ogType} />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />

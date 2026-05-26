@@ -25,6 +25,7 @@ const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
   title={`${title} | Krong Dev.`}
   description={description}
   ogImage={ogImage}
+  ogType="article"
 >
   <article class="mx-auto max-w-[720px] pt-12 pb-20 sm:pt-16">
     <!-- 글 헤더 -->
