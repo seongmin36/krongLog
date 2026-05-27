@@ -37,6 +37,9 @@ Thumbs.db
 !.vscode/extensions.json
 !.vscode/settings.json
 
+# 폰트 subset 스캔 결과(생성물)
+public/fonts/subset-chars.txt
+
 # 테스트 / 도구 캐시
 coverage/
 .turbo/

@@ -85,7 +85,7 @@
 
 @font-face {
   font-family: "KaKaO Small";
-  src: url("/fonts/KakaoSmallSans-Light.woff2") format("woff2");
+  src: url("/fonts/KakaoSmallSans-Light.subset.woff2") format("woff2");
   font-weight: 300;
   font-style: normal;
   font-display: swap;
@@ -93,7 +93,7 @@
 
 @font-face {
   font-family: "KaKao Big";
-  src: url("/fonts/KakaoBigSans-Regular.woff2") format("woff2");
+  src: url("/fonts/KakaoBigSans-Regular.subset.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -101,7 +101,7 @@
 
 @font-face {
   font-family: "KaKao Big";
-  src: url("/fonts/KakaoBigSans-Bold.woff2") format("woff2");
+  src: url("/fonts/KakaoBigSans-Bold.subset.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
@@ -109,7 +109,7 @@
 
 @font-face {
   font-family: "KaKao Big";
-  src: url("/fonts/KakaoBigSans-ExtraBold.woff2") format("woff2");
+  src: url("/fonts/KakaoBigSans-ExtraBold.subset.woff2") format("woff2");
   font-weight: 800;
   font-style: normal;
   font-display: swap;
