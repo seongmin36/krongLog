@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1779612421026,
+  "lastScanned": 1780023091099,
   "projectRoot": "/Users/josengmin/Desktop/Project/krongLog",
   "techStack": {
     "languages": [
@@ -52,7 +52,8 @@
       "build": "node scripts/process-videos.mjs && astro build",
       "preview": "astro preview",
       "astro": "astro",
-      "typecheck": "astro check"
+      "typecheck": "astro check",
+      "font:subset": "node scripts/font-subset.mjs"
     }
   },
   "conventions": {
@@ -81,7 +82,7 @@
       "path": "dist",
       "purpose": "Distribution/build output",
       "fileCount": 8,
-      "lastAccessed": 1779612421005,
+      "lastAccessed": 1780023091094,
       "keyFiles": [
         "favicon.ico",
         "favicon.svg",
@@ -94,18 +95,19 @@
       "path": "docs",
       "purpose": "Documentation",
       "fileCount": 0,
-      "lastAccessed": 1779612421009,
+      "lastAccessed": 1780023091094,
       "keyFiles": []
     },
     "public": {
       "path": "public",
       "purpose": "Public files",
-      "fileCount": 4,
-      "lastAccessed": 1779612421009,
+      "fileCount": 5,
+      "lastAccessed": 1780023091096,
       "keyFiles": [
         "favicon.ico",
         "favicon.svg",
         "googleba2b3a8dda7e7039.html",
+        "llms.txt",
         "robots.txt"
       ]
     },
@@ -113,15 +115,17 @@
       "path": "raw-videos",
       "purpose": null,
       "fileCount": 0,
-      "lastAccessed": 1779612421018,
+      "lastAccessed": 1780023091096,
       "keyFiles": []
     },
     "scripts": {
       "path": "scripts",
       "purpose": "Build/utility scripts",
-      "fileCount": 1,
-      "lastAccessed": 1779612421018,
+      "fileCount": 3,
+      "lastAccessed": 1780023091096,
       "keyFiles": [
+        "font-subset.mjs",
+        "generate-font-subset-text.mjs",
         "process-videos.mjs"
       ]
     },
@@ -129,7 +133,7 @@
       "path": "src",
       "purpose": "Source code",
       "fileCount": 1,
-      "lastAccessed": 1779612421019,
+      "lastAccessed": 1780023091096,
       "keyFiles": [
         "content.config.ts"
       ]
@@ -138,7 +142,7 @@
       "path": "src/assets",
       "purpose": "Static assets",
       "fileCount": 3,
-      "lastAccessed": 1779612421020,
+      "lastAccessed": 1780023091096,
       "keyFiles": [
         "astro.svg",
         "background.svg",
@@ -149,7 +153,7 @@
       "path": "src/components",
       "purpose": "UI components",
       "fileCount": 1,
-      "lastAccessed": 1779612421021,
+      "lastAccessed": 1780023091096,
       "keyFiles": [
         "Header.astro"
       ]
@@ -158,14 +162,14 @@
       "path": "src/lib",
       "purpose": "Library code",
       "fileCount": 0,
-      "lastAccessed": 1779612421022,
+      "lastAccessed": 1780023091096,
       "keyFiles": []
     },
     "src/pages": {
       "path": "src/pages",
       "purpose": "Page components",
       "fileCount": 2,
-      "lastAccessed": 1779612421023,
+      "lastAccessed": 1780023091097,
       "keyFiles": [
         "index.astro",
         "rss.xml.ts"
@@ -175,7 +179,7 @@
       "path": "src/types",
       "purpose": "Type definitions",
       "fileCount": 2,
-      "lastAccessed": 1779612421025,
+      "lastAccessed": 1780023091097,
       "keyFiles": [
         "index.ts",
         "seo.ts"
@@ -229,6 +233,12 @@
       "path": "src/content/post/blog/study-nodejs-6th.mdx",
       "accessCount": 3,
       "lastAccessed": 1777810605323,
+      "type": "file"
+    },
+    {
+      "path": "src/content/post/blog/blog-font-optimization.mdx",
+      "accessCount": 3,
+      "lastAccessed": 1780022988317,
       "type": "file"
     },
     {
