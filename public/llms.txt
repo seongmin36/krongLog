@@ -1,0 +1,56 @@
+# KrongLog
+
+> KrongLog는 NestJS · Node.js · HTTP 등 백엔드 개발 학습과 스터디 회고를 기록하는 한국어 개발 블로그입니다.
+> This file helps large language models (LLMs) find the most important
+> resources on KrongLog and answer questions accurately.
+
+Generated for language model processing.
+Last-Updated: 2026-05-29
+
+Important notes:
+
+- This llms.txt file is a non-standard, best-effort guide for LLMs.
+- It does not control crawling or access. robots.txt and server settings
+  always take precedence.
+- Only public, non-sensitive URLs should be listed here.
+- Keep links and descriptions concise, and update this file when key
+  docs or URLs change.
+
+## Sitemaps
+
+- [XML Sitemap](https://blog.kronglog.dev/sitemap-index.xml): Includes all crawlable and indexable pages.
+
+## Blog
+
+- [All Articles](https://blog.kronglog.dev/blogs/): 백엔드 개발 학습 기록 전체 목록. NestJS 스터디 시리즈, HTTP 기초, Node.js 실험 등을 다룹니다.
+
+### NestJS 스터디 시리즈 (Node.js → NestJS 실습 회고)
+
+- [1주차 — Express 미들웨어와 Node.js 이벤트 루프](https://blog.kronglog.dev/blogs/study-nodejs-1st/): Express 미들웨어 체인 구조와 Node.js 싱글 스레드 모델의 동작 원리를 실험으로 검증합니다.
+- [2주차 — TypeORM으로 NestJS 데이터베이스 연동](https://blog.kronglog.dev/blogs/study-nodejs-2nd/): 서버-데이터베이스 기본 개념부터 TypeORM 연동과 버전 호환성 이슈 해결까지 정리합니다.
+- [3주차 — NestJS 핵심 아키텍처와 Pipe 유효성 검사](https://blog.kronglog.dev/blogs/study-nodejs-3rd/): Module-Controller-Service 구조, Dependency Injection, Pipe 유효성 검사를 직접 구현합니다.
+- [4주차 — NestJS 인증 구현 (회원가입 · JWT · Passport Guard)](https://blog.kronglog.dev/blogs/study-nodejs-4th/): 회원가입, 로그인, JWT 발급, Passport Guard를 이용한 인증 파이프라인을 구현합니다.
+- [5주차-1 — NestJS 게시물에 작성자 붙이기 (관계 설정 · N+1 · 응답 보안)](https://blog.kronglog.dev/blogs/study-nodejs-5th-1/): TypeORM 관계 설정, N+1 문제 회피, 응답에서 민감 정보 제거를 다룹니다.
+- [5주차-2 — NestJS 운영 준비 (로그 레벨 설계 · 환경 변수 분리)](https://blog.kronglog.dev/blogs/study-nodejs-5th-2/): Built-in Logger 로그 레벨 설계와 @nestjs/config 환경 변수 분리를 정리합니다.
+- [6주차 — TodoList를 만들며 부딪힌 설계의 벽](https://blog.kronglog.dev/blogs/study-nodejs-6th/): DTO 분리·Update API 분리 고민과 명세 우선 워크플로우로 전환한 과정을 정리합니다.
+- [7주차 — localStorage에서 HttpOnly 쿠키로](https://blog.kronglog.dev/blogs/study-nodejs-7th-cookie-security/): 로그인 보안 설계의 허점을 발견하고 HttpOnly 쿠키, Secure, SameSite, CORS를 직접 구현합니다.
+- [8주차 — 서버 에러를 프론트가 읽을 수 있게 (ExceptionFilter · Interceptor)](https://blog.kronglog.dev/blogs/study-nodejs-8th/): 커스텀 예외 필터와 응답 인터셉터로 서버 응답을 단일 shape으로 통일한 구현 기록입니다.
+- [9주차 — 로그는 사람도 읽고, 시스템도 읽는다 (Pino 전환 · 구조화 로깅)](https://blog.kronglog.dev/blogs/study-nodejs-9th-1/): Built-in Logger 한계를 확인하고 Pino로 전환, ExceptionFilter DI 연동과 구조화 로깅 설계를 정리합니다.
+
+### HTTP 기초
+
+- [HTTP 메서드, 상태 코드, Header와 Body](https://blog.kronglog.dev/blogs/study-http-basic/): HTTP 통신의 기본 구성 요소인 메서드, 상태 코드, 헤더와 바디의 역할과 구조를 정리합니다.
+- [HTTP 콘텐츠 협상과 Vary 헤더](https://blog.kronglog.dev/blogs/http-content-negotiation/): 서버 주도 협상과 에이전트 주도 협상 원리, Vary 헤더의 캐시 정합성 보장 방식을 정리합니다.
+
+### 블로그 개발 · 생태계
+
+- [Astro 프레임워크로 나만의 블로그 개발하기](https://blog.kronglog.dev/blogs/blog-astro-impl/): 플랫폼 블로그 대신 Astro로 직접 블로그를 만든 이유와 초기 세팅을 정리합니다.
+- [Astro v6 · TypeScript 6 · Vite 8 변경사항 정리](https://blog.kronglog.dev/blogs/update-astro-vite-ts/): 프론트엔드 생태계 주요 버전 변경사항과 세 기술의 연결 관계를 공식 문서 기준으로 정리합니다.
+
+### 회고
+
+- [2025년 회고: 시작을 위한 기반을 다지는 해](https://blog.kronglog.dev/blogs/reflection-2025/): 멘토멘티, UMC, 프로젝트, AI, 여행 — 2025년 한 해를 돌아보는 회고 기록입니다.
+
+## Optional
+
+- [About](https://blog.kronglog.dev/about/): 블로그 운영자 소개와 블로그의 목적 및 방향을 설명합니다.
