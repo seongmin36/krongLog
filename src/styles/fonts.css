@@ -1,0 +1,36 @@
+@font-face {
+  font-family: "KaKao Big Fallback";
+  src:
+    local("Apple SD Gothic Neo"), local("Malgun Gothic"), local("Noto Sans KR");
+  size-adjust: 100%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "KaKao Big";
+  src: url("/fonts/KakaoBigSans-Regular.subset.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KaKao Big";
+  src: url("/fonts/KakaoBigSans-Bold.subset.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+html {
+  font-family: "KaKao Big", "KaKao Big Fallback", sans-serif;
+  font-synthesis: none;
+}
+
+/* 첫 페인트: transition으로 색·레이아웃이 흔들려 보이는 것 방지 */
+html.no-transitions,
+html.no-transitions * {
+  transition: none !important;
+}

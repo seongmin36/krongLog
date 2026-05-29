@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * 단일 진입점: 문자 스캔 → public/fonts/subset-chars.txt → pyftsubset 4종 실행
  *
