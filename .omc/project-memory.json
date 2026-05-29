@@ -320,6 +320,12 @@
       "accessCount": 1,
       "lastAccessed": 1779613522375,
       "type": "file"
+    },
+    {
+      "path": "public/llms.txt",
+      "accessCount": 1,
+      "lastAccessed": 1780020298861,
+      "type": "file"
     }
   ],
   "userDirectives": []

@@ -11,7 +11,8 @@
     "build": "node scripts/process-videos.mjs && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "typecheck": "astro check"
+    "typecheck": "astro check",
+    "font:subset": "node scripts/font-subset.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^5.0.3",

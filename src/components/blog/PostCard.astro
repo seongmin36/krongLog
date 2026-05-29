@@ -5,6 +5,7 @@ import type { ImageMetadata } from "astro";
 import placeholderImage from "@/assets/img-default.png";
 
 interface Props {
+  priorityLcp?: boolean;
   post: {
     id: string;
     data: {
@@ -17,10 +18,14 @@ interface Props {
   };
 }
 
-const { post } = Astro.props;
+const { post, priorityLcp = false } = Astro.props;
 const { title, description, date, tags, image } = post.data;
 
 const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+
+const cardImageSizes =
+  "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, min(400px, 33vw)";
+const cardWidths = [400, 560, 720, 840, 960, 1120] as const;
 ---
 
 <a
@@ -37,20 +42,22 @@ const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padSt
           src={image}
           alt={title}
           format="webp"
-          quality={90}
+          quality={75}
+          widths={[...cardWidths]}
+          sizes={cardImageSizes}
           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
+          priority={priorityLcp}
         />
       ) : (
         <Image
           src={placeholderImage}
           alt="placeholder"
           format="webp"
-          quality={90}
+          quality={75}
+          widths={[...cardWidths]}
+          sizes={cardImageSizes}
           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-          loading="lazy"
-          decoding="async"
+          priority={priorityLcp}
         />
       )
     }

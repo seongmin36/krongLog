@@ -30,7 +30,11 @@ const sortedPosts = allPosts.sort(
   <!-- 포스트 카드 섹션 -->
   <section class="pb-16 sm:pb-20">
     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-      {sortedPosts.map((post) => <PostCard post={post} />)}
+      {
+        sortedPosts.map((post, i) => (
+          <PostCard post={post} priorityLcp={i === 0} />
+        ))
+      }
     </div>
   </section>
 </BaseLayout>
