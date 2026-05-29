@@ -46,6 +46,6 @@ coverage/
 .cache/
 *.tsbuildinfo
 
-.omc/*
+.omc/
 .worktrees/
 .claude/
