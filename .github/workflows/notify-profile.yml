@@ -1,0 +1,16 @@
+name: Notify Profile
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger profile SVG update
+        run: |
+          gh workflow run update-blog-card.yml \
+            --repo seongmin36/seongmin36
+        env:
+          GH_TOKEN: ${{ secrets.PROFILE_REPO_TOKEN }}
