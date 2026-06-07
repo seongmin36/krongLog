@@ -3,7 +3,7 @@ title: "NestJS 백엔드를 AWS EC2에 올리기 — 클라우드와 EC2를 처�
 description: "AWS와 EC2의 기초 개념부터 인스턴스 생성, 보안 그룹, SSH 접속, RDS 대신 Docker로 DB를 올린 이유까지 정리합니다."
 date: "2026-06-07"
 tags: ["NestJS", "AWS", "EC2", "DevOps"]
-# image: "./images/img-study-nodejs-10th-aws-ec2.jpg"
+image: "./images/img-study-nodejs-10th-aws-ec2.jpg"
 ---
 
 NestJS로 서버를 만들었습니다.
@@ -57,8 +57,10 @@ AWS(Amazon Web Services)는 현재 가장 많이 쓰이는 클라우드 플랫�
 
 ## <mark>EC2의 핵심 개념들</mark>
 
-<strong>EC2(Elastic Compute Cloud)</strong>는 AWS에서 제공하는 가상 서버 서비스입니다.<br />
-물리 서버를 데이터센터에 두고, 그 위에 가상화 기술로 여러 개의 서버를 나눠서 제공합니다.<br />
+<strong>EC2(Elastic Compute Cloud)</strong>는 AWS에서 제공하는 가상 서버 서비스입니다.
+<br />
+물리 서버를 데이터센터에 두고, 그 위에 가상화 기술로 여러 개의 서버를 나눠서 제공합니다.
+<br />
 "Elastic(탄력적)"이라는 이름처럼 필요에 따라 서버 사양을 올리거나 내릴 수 있습니다.
 
 ### 인스턴스 (Instance)
@@ -126,11 +128,11 @@ EC2 인스턴스에 드나드는 트래픽을 제어하는 방화벽이 **보안
 
 이번 프로젝트에서 설정한 인바운드 규칙입니다.
 
-| 유형 | 포트 | 소스 | 용도 |
-|------|------|------|------|
-| SSH | 22 | 내 IP | 서버 직접 접속 |
-| HTTP | 80 | 0.0.0.0/0 | 웹 트래픽 (추후 사용) |
-| 사용자 정의 TCP | 8080 | 0.0.0.0/0 | NestJS API 서버 |
+| 유형            | 포트 | 소스      | 용도                  |
+| --------------- | ---- | --------- | --------------------- |
+| SSH             | 22   | 내 IP     | 서버 직접 접속        |
+| HTTP            | 80   | 0.0.0.0/0 | 웹 트래픽 (추후 사용) |
+| 사용자 정의 TCP | 8080 | 0.0.0.0/0 | NestJS API 서버       |
 
 > SSH 포트(22)는 모든 IP(`0.0.0.0/0`)에 열어두지 않는 것이 좋습니다. 내 IP만 허용하거나 필요할 때만 임시로 열고 닫는 방식이 안전합니다.
 
@@ -162,7 +164,7 @@ AWS 콘솔(console.aws.amazon.com)에 로그인한 뒤 EC2 대시보드로 이�
 AMI는 **Ubuntu Server 24.04 LTS (HVM), SSD Volume Type**을 선택합니다.<br />
 아키텍처는 반드시 **64비트(Arm)**를 선택합니다.
 
-<!-- ![AMI 선택 화면](/images/study-nodejs-10th-aws-ec2/1.png) -->
+{/* <!-- ![AMI 선택 화면](/images/study-nodejs-10th-aws-ec2/1.png) --> */}
 
 <br />
 
@@ -171,7 +173,7 @@ AMI는 **Ubuntu Server 24.04 LTS (HVM), SSD Volume Type**을 선택합니다.<br
 `t4g.micro`를 선택합니다.<br />
 vCPU 2개, 메모리 1GB 사양의 프리티어 대상 인스턴스입니다.
 
-<!-- ![인스턴스 유형 선택](/images/study-nodejs-10th-aws-ec2/2.png) -->
+{/* <!-- ![인스턴스 유형 선택](/images/study-nodejs-10th-aws-ec2/2.png) --> */}
 
 <br />
 
@@ -197,7 +199,7 @@ chmod 400 ~/.ssh/my-key.pem
 - HTTP (80): 위치 무관
 - 사용자 정의 TCP 8080: 위치 무관
 
-<!-- ![보안 그룹 설정](/images/study-nodejs-10th-aws-ec2/3.png) -->
+{/* <!-- ![보안 그룹 설정](/images/study-nodejs-10th-aws-ec2/3.png) --> */}
 
 <br />
 
@@ -214,7 +216,7 @@ chmod 400 ~/.ssh/my-key.pem
 **탄력적 IP 주소 할당** → **할당**으로 고정 IP를 발급받습니다.<br />
 발급된 IP를 선택 후 **탄력적 IP 주소 연결** → 방금 만든 인스턴스를 선택합니다.
 
-<!-- ![탄력적 IP 연결](/images/study-nodejs-10th-aws-ec2/4.png) -->
+{/* <!-- ![탄력적 IP 연결](/images/study-nodejs-10th-aws-ec2/4.png) --> */}
 
 ---
 
@@ -235,7 +237,7 @@ Amazon Linux라면 `ec2-user`, CentOS라면 `centos`입니다.
 ubuntu@ip-172-xx-xx-xx:~$
 ```
 
-<!-- ![SSH 접속 성공](/images/study-nodejs-10th-aws-ec2/5.png) -->
+{/* <!-- ![SSH 접속 성공](/images/study-nodejs-10th-aws-ec2/5.png) --> */}
 
 처음 접속 후 시스템 패키지를 최신 상태로 업데이트합니다.
 
@@ -268,7 +270,7 @@ RDS는 AWS가 관리해주는 관계형 DB 서비스로, 백업·패치·고가�
 그런데 RDS 인스턴스를 생성하려고 콘솔을 열었을 때 문제가 생겼습니다.<br />
 **프리티어 대상인 `db.t3.micro`나 `db.t4g.micro` 인스턴스 유형 선택이 되지 않았습니다.**
 
-<!-- ![RDS 인스턴스 유형 선택 불가](/images/study-nodejs-10th-aws-ec2/6.png) -->
+{/* <!-- ![RDS 인스턴스 유형 선택 불가](/images/study-nodejs-10th-aws-ec2/6.png) --> */}
 
 계정 리전 설정이나 프리티어 조건 문제일 수도 있었습니다.<br />
 당장 원인 파악에 시간을 쓰기보다, 다른 방법을 택하기로 했습니다.
@@ -277,12 +279,12 @@ RDS는 AWS가 관리해주는 관계형 DB 서비스로, 백업·패치·고가�
 
 이 방식의 장단점을 정리하면 다음과 같습니다.
 
-| 항목 | EC2 + Docker | RDS |
-|------|-------------|-----|
-| 추가 비용 | 없음 (EC2 요금에 포함) | 별도 DB 인스턴스 요금 발생 |
-| 관리 | 백업·패치를 직접 처리 | AWS가 자동 관리 |
-| 학습 측면 | Docker·컨테이너 실습 가능 | 추상화된 서비스, 내부 숨겨짐 |
-| 복잡도 | 네트워크·볼륨 직접 설정 필요 | 연결 문자열만 알면 됨 |
+| 항목      | EC2 + Docker                 | RDS                          |
+| --------- | ---------------------------- | ---------------------------- |
+| 추가 비용 | 없음 (EC2 요금에 포함)       | 별도 DB 인스턴스 요금 발생   |
+| 관리      | 백업·패치를 직접 처리        | AWS가 자동 관리              |
+| 학습 측면 | Docker·컨테이너 실습 가능    | 추상화된 서비스, 내부 숨겨짐 |
+| 복잡도    | 네트워크·볼륨 직접 설정 필요 | 연결 문자열만 알면 됨        |
 
 학습 목적의 프로젝트에서는 Docker로 직접 PostgreSQL을 올리는 것이 오히려 더 많은 것을 배울 수 있는 선택이었습니다.<br />
 Docker 네트워크, 볼륨, 컨테이너 생명주기까지 직접 다뤄볼 수 있습니다.

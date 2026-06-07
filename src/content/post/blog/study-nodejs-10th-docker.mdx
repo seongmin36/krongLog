@@ -3,7 +3,7 @@ title: "Docker로 NestJS와 PostgreSQL 배포하기 — 컨테이너가 필요�
 description: "Docker와 Docker Compose의 기초 개념부터 pnpm 모노레포 NestJS 이미지 빌드, EC2에 실제 배포하는 과정까지 정리합니다."
 date: "2026-06-07"
 tags: ["NestJS", "Docker", "PostgreSQL", "DevOps"]
-# image: "./images/img-study-nodejs-10th-docker.jpg"
+image: "./images/img-study-nodejs-10th-docker.jpg"
 ---
 
 [이전 글](/blogs/study-nodejs-10th-aws-ec2)에서 AWS EC2 인스턴스를 생성하고 SSH 접속까지 마쳤습니다.<br />
@@ -168,7 +168,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: todo_db
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data   # 데이터 영속화
+      - ./postgres-data:/var/lib/postgresql/data # 데이터 영속화
     ports:
       - "5432:5432"
 ```
@@ -431,7 +431,7 @@ docker info
 # 정상이면 서버 정보 출력
 ```
 
-<!-- ![Docker 설치 완료](/images/study-nodejs-10th-docker/1.png) -->
+{/* <!-- ![Docker 설치 완료](/images/study-nodejs-10th-docker/1.png) --> */}
 
 <br />
 
@@ -479,19 +479,19 @@ services:
     restart: unless-stopped
     container_name: postgres
     ports:
-      - "15432:5432"       # 호스트 포트 15432 → 컨테이너 5432
+      - "15432:5432" # 호스트 포트 15432 → 컨테이너 5432
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: your-db-password
       POSTGRES_DB: todo_db
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data   # 데이터 영속화
+      - ./postgres-data:/var/lib/postgresql/data # 데이터 영속화
     networks:
       - todo-network
 
 networks:
   todo-network:
-    name: todo-network    # 이름을 고정해야 docker run --network todo-network 로 참조 가능
+    name: todo-network # 이름을 고정해야 docker run --network todo-network 로 참조 가능
 ```
 
 `name: todo-network`로 네트워크 이름을 고정하는 것이 중요합니다.<br />
@@ -519,7 +519,7 @@ docker logs postgres
 # database system is ready to accept connections
 ```
 
-<!-- ![PostgreSQL 컨테이너 기동 확인](/images/study-nodejs-10th-docker/2.png) -->
+{/* <!-- ![PostgreSQL 컨테이너 기동 확인](/images/study-nodejs-10th-docker/2.png) --> */}
 
 <br />
 
@@ -543,12 +543,12 @@ docker run -d \
 
 주요 옵션을 정리합니다.
 
-| 옵션 | 설명 |
-|------|------|
-| `--network todo-network` | Compose가 만든 네트워크에 합류. `DB_HOST=postgresql` DNS 해석 가능 |
-| `-p 8080:3000` | 호스트 8080포트로 들어온 트래픽을 컨테이너 3000포트로 전달 |
-| `--env-file` | .env 파일의 키-값을 환경 변수로 주입 |
-| `-e NODE_ENV=production` | --env-file보다 우선 적용. pino-pretty 등 dev-only 모듈 비활성화 |
+| 옵션                       | 설명                                                                         |
+| -------------------------- | ---------------------------------------------------------------------------- |
+| `--network todo-network`   | Compose가 만든 네트워크에 합류. `DB_HOST=postgresql` DNS 해석 가능           |
+| `-p 8080:3000`             | 호스트 8080포트로 들어온 트래픽을 컨테이너 3000포트로 전달                   |
+| `--env-file`               | .env 파일의 키-값을 환경 변수로 주입                                         |
+| `-e NODE_ENV=production`   | --env-file보다 우선 적용. pino-pretty 등 dev-only 모듈 비활성화              |
 | `--restart unless-stopped` | 컨테이너 크래시 시 자동 재시작. `docker stop`으로 명시 중지하면 재시작 안 함 |
 
 <br />
@@ -569,11 +569,11 @@ docker logs -f todo-server
 [Nest] LOG [NestApplication] Nest application successfully started +Xms
 ```
 
-<!-- ![Nest 기동 성공 로그](/images/study-nodejs-10th-docker/3.png) -->
+{/* <!-- ![Nest 기동 성공 로그](/images/study-nodejs-10th-docker/3.png) --> */}
 
 브라우저에서 `http://[탄력적-IP]:8080/api`로 접속해 응답을 확인합니다.
 
-<!-- ![API 응답 확인](/images/study-nodejs-10th-docker/4.png) -->
+{/* <!-- ![API 응답 확인](/images/study-nodejs-10th-docker/4.png) --> */}
 
 <br />
 
