@@ -8,6 +8,9 @@ jobs:
   trigger:
     runs-on: ubuntu-latest
     steps:
+      - name: Wait for Vercel deployment
+        run: sleep 180
+
       - name: Trigger profile SVG update
         run: |
           gh workflow run update-blog-card.yml \
