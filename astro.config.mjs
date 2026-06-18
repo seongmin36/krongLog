@@ -18,6 +18,7 @@ export default defineConfig({
   output: "static",
   adapter: vercel(),
   site: "https://blog.kronglog.dev",
+  trailingSlash: "always",
   prefetch: {
     prefetchAll: true,
     defaultStrategy: "viewport",
