@@ -2,12 +2,18 @@
 import Header from "@/components/Header.astro";
 import fontsCss from "@/styles/fonts.css?raw";
 import "@/styles/global.css";
+import {
+  buildBlogPostingJsonLd,
+  buildWebsiteJsonLd,
+} from "@/lib/json-ld";
 
 interface Props {
   title?: string;
   description?: string;
   ogImage?: string;
   ogType?: "website" | "article";
+  articlePublished?: Date;
+  articleModified?: Date;
 }
 
 const {
@@ -15,11 +21,39 @@ const {
   description = "개발하면서 배운 것들을 기록합니다.",
   ogImage,
   ogType = "website",
+  articlePublished,
+  articleModified,
 } = Astro.props;
 
+const siteUrl = Astro.site!.href;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
 const resolvedOgImage =
   ogImage ?? new URL("/images/og-default.png", Astro.site).href;
+
+const jsonLdGraph = [
+  buildWebsiteJsonLd(siteUrl),
+  ...(ogType === "article" && articlePublished
+    ? [
+        buildBlogPostingJsonLd({
+          siteUrl,
+          headline: title.replace(/ \| Krong Dev\.$/, ""),
+          description,
+          datePublished: articlePublished,
+          dateModified: articleModified,
+          url: canonicalURL,
+          image: resolvedOgImage,
+        }),
+      ]
+    : []),
+];
+
+const jsonLd =
+  jsonLdGraph.length === 1
+    ? jsonLdGraph[0]
+    : {
+        "@context": "https://schema.org",
+        "@graph": jsonLdGraph.map(({ ["@context"]: _context, ...node }) => node),
+      };
 ---
 
 <!doctype html>
@@ -27,7 +61,6 @@ const resolvedOgImage =
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <style is:inline set:html={fontsCss}></style>
     <link
       rel="preload"
       href="/fonts/KakaoBigSans-Regular.subset.woff2"
@@ -54,9 +87,17 @@ const resolvedOgImage =
     <meta name="description" content={description} />
     <link rel="canonical" href={canonicalURL} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title="Krong Dev. RSS"
+      href="/rss.xml"
+    />
 
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />
+    <meta property="og:site_name" content="Krong Dev." />
+    <meta property="og:locale" content="ko_KR" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -67,6 +108,8 @@ const resolvedOgImage =
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={resolvedOgImage} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <!-- 다크모드 FOUC 방지: 페인트 전에 테마 적용 -->
     <script is:inline>
