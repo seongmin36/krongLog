@@ -1,2 +1,6 @@
 overrides:
   vite: "^7"
+
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
