@@ -1,5 +1,6 @@
 ---
 import Header from "@/components/Header.astro";
+import CodeBlock from "@/components/ui/CodeBlock.astro";
 import fontsCss from "@/styles/fonts.css?raw";
 import "@/styles/global.css";
 import {
@@ -145,4 +146,5 @@ const jsonLd =
       <slot />
     </main>
   </body>
+  <CodeBlock />
 </html>
