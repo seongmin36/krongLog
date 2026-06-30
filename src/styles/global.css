@@ -14,6 +14,31 @@
   --color-dark-text: #f0a8b8;
   --color-dark-description: #d1d5db;
 
+  /* UI · 본문 보조 */
+  --color-muted: #9ca3af;
+  --color-muted-dark: #6b7280;
+  --color-success: #16a34a;
+  --color-success-dark: #4ade80;
+  --color-hover-overlay-light: rgba(0, 0, 0, 0.06);
+  --color-hover-overlay-dark: rgba(255, 255, 255, 0.08);
+
+  /* MDX · 코드 블록 (Shiki github-light / github-dark 배경) */
+  --color-code-block-surface: #f6f8fa;
+  --color-code-block-surface-dark: #24292e;
+
+  /* MDX · 인라인 코드 · 인용구 · 태그 기본 */
+  --color-inline-code-surface: #f3f4f6;
+  --color-inline-code-surface-dark: #2a2d35;
+  --color-blockquote-surface: #f8fafc;
+  --color-blockquote-surface-dark: #1a1b1e;
+  --color-blockquote-text-dark: #9ca3af;
+  --color-tag-default-bg-dark: #383b40;
+  --color-tag-default-text-dark: #9ca3af;
+
+  /* 소셜 · 브랜드 (Header 아이콘 hover) */
+  --color-brand-linkedin: #0a66c2;
+  --color-brand-rss: #f26522;
+
   /* 본문·코드 형광펜 하이라이트 (#E9F1EC 계열) */
   --color-highlight-pen: #e9f1ec;
   --color-highlight-pen-dark: #7a5b69;
