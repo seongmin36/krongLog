@@ -7,23 +7,8 @@ interface Props {
 const { src, poster } = Astro.props;
 ---
 
-<div class="video-wrapper">
-  <video controls preload="metadata" poster={poster}>
+<div class="w-full overflow-hidden rounded-lg bg-transparent">
+  <video class="block h-auto w-full" controls preload="metadata" poster={poster}>
     <source src={src} type="video/mp4" />
   </video>
 </div>
-
-<style>
-  .video-wrapper {
-    width: 100%;
-    border-radius: 0.5rem;
-    overflow: hidden;
-    background: transparent;
-  }
-
-  video {
-    display: block;
-    width: 100%;
-    height: auto;
-  }
-</style>
