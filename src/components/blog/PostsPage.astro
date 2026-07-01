@@ -146,6 +146,11 @@ function fmt(date: Date) {
 
   <script
     type="application/json"
+    id="top-tags-data"
+    set:html={JSON.stringify(topTags)}
+  />
+  <script
+    type="application/json"
     id="sub-tags-data"
     set:html={JSON.stringify(subTagsByLabel)}
   />
@@ -161,6 +166,10 @@ function fmt(date: Date) {
   const emptyMsg = document.getElementById("posts-empty")!;
   const categoryList = document.getElementById("category-list")!;
   const chips = document.querySelectorAll<HTMLButtonElement>("[data-chip]");
+  const topTagsDataEl = document.getElementById("top-tags-data")!;
+  const topTags = JSON.parse(
+    topTagsDataEl.textContent ?? "[]",
+  ) as SubTagEntry[];
   const subTagsDataEl = document.getElementById("sub-tags-data")!;
   const subTagsByLabel = JSON.parse(
     subTagsDataEl.textContent ?? "{}",
@@ -215,7 +224,8 @@ function fmt(date: Date) {
   }
 
   function renderCategoryList(label: string) {
-    const entries: SubTagEntry[] = label === "" ? [] : (subTagsByLabel[label] ?? []);
+    const entries: SubTagEntry[] =
+      label === "" ? topTags : (subTagsByLabel[label] ?? []);
     const allCount = labelPostCount(label);
 
     categoryList.replaceChildren();
