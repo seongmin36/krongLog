@@ -18,6 +18,20 @@ const topTags = [...tagCounts.entries()]
   .sort((a, b) => b[1] - a[1])
   .slice(0, 10);
 
+const subTagsByLabel: Record<string, [string, number][]> = {};
+for (const [label] of topTags) {
+  const counts = new Map<string, number>();
+  for (const post of sortedPosts) {
+    const tags = post.data.tags ?? [];
+    if (!tags.includes(label)) continue;
+    for (const tag of tags) {
+      if (tag === label) continue;
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+  subTagsByLabel[label] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+}
+
 const yearCounts = new Map<number, number>();
 for (const post of sortedPosts) {
   const year = post.data.date.getFullYear();
@@ -31,5 +45,10 @@ const sortedYears = [...yearCounts.entries()].sort((a, b) => b[0] - a[0]);
   description="개발하면서 배운 것들을 기록합니다."
   ogType="website"
 >
-  <PostsPage posts={sortedPosts} topTags={topTags} sortedYears={sortedYears} />
+  <PostsPage
+    posts={sortedPosts}
+    topTags={topTags}
+    subTagsByLabel={subTagsByLabel}
+    sortedYears={sortedYears}
+  />
 </BaseLayout>

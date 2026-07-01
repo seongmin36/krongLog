@@ -5,10 +5,11 @@ import "@/styles/posts-page.css";
 interface Props {
   posts: CollectionEntry<"post">[];
   topTags: [string, number][];
+  subTagsByLabel: Record<string, [string, number][]>;
   sortedYears: [number, number][];
 }
 
-const { posts, topTags, sortedYears } = Astro.props;
+const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
 
 function fmt(date: Date) {
   const y = date.getFullYear();
@@ -75,7 +76,7 @@ function fmt(date: Date) {
     <aside class="posts-sidebar">
       <div class="sidebar-section">
         <p class="sidebar-label">카테고리</p>
-        <ul class="sidebar-list">
+        <ul id="category-list" class="sidebar-list">
           <li>
             <button
               class="sidebar-item sidebar-item-active"
@@ -142,8 +143,13 @@ function fmt(date: Date) {
       <p id="posts-empty" class="posts-empty" hidden>검색 결과가 없습니다.</p>
     </section>
   </div>
-</div>
 
+  <script
+    type="application/json"
+    id="sub-tags-data"
+    set:html={JSON.stringify(subTagsByLabel)}
+  />
+</div>
 
 <script>
   const searchInput = document.getElementById(
