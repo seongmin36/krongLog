@@ -43,6 +43,12 @@
 | `--color-success-dark` | `#4ade80` | copy 성공(다크) |
 | `--color-hover-overlay-light` | `rgba(0,0,0,0.06)` | 버튼 hover 배경(라이트) |
 | `--color-hover-overlay-dark` | `rgba(255,255,255,0.08)` | 버튼 hover 배경(다크) |
+| `--color-border` | `rgba(0,0,0,0.1)` | 범용 테두리(라이트) |
+| `--color-border-dark` | `rgba(255,255,255,0.08)` | 범용 테두리(다크) |
+| `--color-muted-alpha` | `rgba(113,113,130,0.6)` | 흐린 보조 텍스트(날짜·카운트) |
+| `--color-muted-placeholder` | `rgba(113,113,130,0.5)` | 입력 placeholder |
+| `--color-primary-surface` | `rgba(59,122,87,0.06)` | 활성 항목 배경(라이트) |
+| `--color-primary-surface-dark` | `rgba(59,122,87,0.12)` | 활성 항목 배경(다크) |
 
 ### MDX · 코드
 
@@ -72,6 +78,30 @@
 | `--color-brand-rss` | RSS 아이콘 hover |
 
 기술 태그(`--color-tag-react-*` 등) 전체 목록은 `global.css` `@theme` 블록을 참고합니다.
+
+## 스타일 파일 위치
+
+`global.css`는 Astro의 Tailwind 통합을 통해 **전역으로 로드**됩니다.<br />
+따라서 별도 `.css` 파일에서는 `@apply`, `var(--color-…)` 모두 `@reference` 없이 동작합니다.
+
+- **간단한 스타일** → `.astro`의 `<style>` 블록으로 충분합니다.
+- **`var(--color-…)`는 런타임** CSS 변수라 어느 파일에서도 `@reference` 없이 동작합니다.
+- **`@apply`는 빌드 타임** Tailwind 지시어입니다. `<style>` 블록이든 `.css` 파일이든 `@apply`를 쓰면 `@reference "tailwindcss";`가 필요합니다. 이 복잡함을 피하려면 **`@apply` 대신 raw CSS를 작성**하면 됩니다.
+
+```css
+/* ✅ raw CSS — 어디서든 @reference 없이 동작 */
+.my-element {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+/* ⚠️ @apply — @reference "tailwindcss"; 가 파일 상단에 있어야 함 */
+.my-element {
+  @apply text-sm font-semibold;
+  color: var(--color-primary);
+}
+```
 
 ## 사용 예
 
