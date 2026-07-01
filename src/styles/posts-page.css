@@ -121,7 +121,9 @@
   color: var(--color-dark);
   border-color: var(--color-dark-text);
 }
-.chip-active:hover,
+.chip-active:hover {
+  background: var(--color-primary);
+}
 .dark .chip-active:hover {
   background: var(--color-dark-text);
 }
