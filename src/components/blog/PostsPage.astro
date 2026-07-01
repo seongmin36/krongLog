@@ -152,16 +152,23 @@ function fmt(date: Date) {
 </div>
 
 <script>
+  type SubTagEntry = [string, number];
+
   const searchInput = document.getElementById(
     "post-search",
   ) as HTMLInputElement;
   const postList = document.getElementById("post-list")!;
   const emptyMsg = document.getElementById("posts-empty")!;
+  const categoryList = document.getElementById("category-list")!;
   const chips = document.querySelectorAll<HTMLButtonElement>("[data-chip]");
-  const sidebarItems =
-    document.querySelectorAll<HTMLButtonElement>("[data-sidebar]");
+  const subTagsDataEl = document.getElementById("sub-tags-data")!;
+  const subTagsByLabel = JSON.parse(
+    subTagsDataEl.textContent ?? "{}",
+  ) as Record<string, SubTagEntry[]>;
+  const totalPostCount = postList.querySelectorAll(".post-row").length;
 
-  let activeTag = "";
+  let activeLabel = "";
+  let activeSubTag = "";
   let searchQuery = "";
 
   function filter() {
@@ -171,11 +178,12 @@ function fmt(date: Date) {
     rows.forEach((row) => {
       const title = row.dataset.postTitle ?? "";
       const tags: string[] = JSON.parse(row.dataset.postTags ?? "[]");
-      const matchTag = activeTag === "" || tags.includes(activeTag);
+      const matchLabel = activeLabel === "" || tags.includes(activeLabel);
+      const matchSubTag = activeSubTag === "" || tags.includes(activeSubTag);
       const matchSearch =
         searchQuery === "" || title.includes(searchQuery.toLowerCase());
 
-      const show = matchTag && matchSearch;
+      const show = matchLabel && matchSubTag && matchSearch;
       row.hidden = !show;
       if (show) visible++;
     });
@@ -183,29 +191,77 @@ function fmt(date: Date) {
     emptyMsg.hidden = visible > 0;
   }
 
-  function setTag(tag: string) {
-    activeTag = tag;
+  function labelPostCount(label: string): number {
+    if (label === "") return totalPostCount;
+    const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
+    let count = 0;
+    rows.forEach((row) => {
+      const tags: string[] = JSON.parse(row.dataset.postTags ?? "[]");
+      if (tags.includes(label)) count++;
+    });
+    return count;
+  }
+
+  function setSubTag(tag: string) {
+    activeSubTag = tag;
+    categoryList
+      .querySelectorAll<HTMLButtonElement>("[data-sidebar]")
+      .forEach((item) => {
+        const on = item.dataset.sidebar === tag;
+        item.classList.toggle("sidebar-item-active", on);
+        item.setAttribute("aria-pressed", String(on));
+      });
+    filter();
+  }
+
+  function renderCategoryList(label: string) {
+    const entries: SubTagEntry[] = label === "" ? [] : (subTagsByLabel[label] ?? []);
+    const allCount = labelPostCount(label);
+
+    categoryList.replaceChildren();
+
+    const allLi = document.createElement("li");
+    const allButton = document.createElement("button");
+    allButton.className = "sidebar-item sidebar-item-active";
+    allButton.dataset.sidebar = "";
+    allButton.setAttribute("aria-pressed", "true");
+    allButton.innerHTML = `<span>전체</span><span class="sidebar-count">${allCount}</span>`;
+    allButton.addEventListener("click", () => setSubTag(""));
+    allLi.appendChild(allButton);
+    categoryList.appendChild(allLi);
+
+    entries.forEach(([tag, count]) => {
+      const li = document.createElement("li");
+      const button = document.createElement("button");
+      button.className = "sidebar-item";
+      button.dataset.sidebar = tag;
+      button.setAttribute("aria-pressed", "false");
+      button.innerHTML = `<span>${tag}</span><span class="sidebar-count">${count}</span>`;
+      button.addEventListener("click", () => setSubTag(tag));
+      li.appendChild(button);
+      categoryList.appendChild(li);
+    });
+  }
+
+  function setLabel(label: string) {
+    activeLabel = label;
+    activeSubTag = "";
     chips.forEach((chip) => {
-      const on = chip.dataset.chip === tag;
+      const on = chip.dataset.chip === label;
       chip.classList.toggle("chip-active", on);
       chip.setAttribute("aria-pressed", String(on));
     });
-    sidebarItems.forEach((item) => {
-      const on = item.dataset.sidebar === tag;
-      item.classList.toggle("sidebar-item-active", on);
-      item.setAttribute("aria-pressed", String(on));
-    });
+    renderCategoryList(label);
     filter();
   }
 
   chips.forEach((chip) =>
-    chip.addEventListener("click", () => setTag(chip.dataset.chip ?? "")),
-  );
-  sidebarItems.forEach((item) =>
-    item.addEventListener("click", () => setTag(item.dataset.sidebar ?? "")),
+    chip.addEventListener("click", () => setLabel(chip.dataset.chip ?? "")),
   );
   searchInput.addEventListener("input", () => {
     searchQuery = searchInput.value;
     filter();
   });
+
+  renderCategoryList("");
 </script>
