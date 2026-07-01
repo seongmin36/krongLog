@@ -1,0 +1,205 @@
+---
+import type { CollectionEntry } from "astro:content";
+import "@/styles/posts-page.css";
+
+interface Props {
+  posts: CollectionEntry<"post">[];
+  topTags: [string, number][];
+  sortedYears: [number, number][];
+}
+
+const { posts, topTags, sortedYears } = Astro.props;
+
+function fmt(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}.${m}.${d}`;
+}
+---
+
+<div class="posts-page">
+  <!-- 헤딩 -->
+  <div>
+    <h1 class="posts-title">전체 글</h1>
+    <p class="posts-subtitle">개발하면서 배운 것들을 기록합니다.</p>
+  </div>
+
+  <!-- 검색 + 필터 칩 -->
+  <div class="posts-toolbar">
+    <label class="posts-search">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="posts-search-icon"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        id="post-search"
+        type="text"
+        placeholder="글 검색…"
+        autocomplete="off"
+        class="posts-search-input"
+      />
+    </label>
+    <div class="posts-chips" role="group" aria-label="태그 필터">
+      <button class="chip chip-active" data-chip="" aria-pressed="true"
+        >전체</button
+      >
+      {
+        topTags.map(([tag]) => (
+          <button class="chip" data-chip={tag} aria-pressed="false">
+            {tag}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- 구분선 -->
+  <div class="posts-divider"></div>
+
+  <!-- 콘텐츠 -->
+  <div class="posts-content">
+    <!-- 사이드바 -->
+    <aside class="posts-sidebar">
+      <div class="sidebar-section">
+        <p class="sidebar-label">카테고리</p>
+        <ul class="sidebar-list">
+          <li>
+            <button
+              class="sidebar-item sidebar-item-active"
+              data-sidebar=""
+              aria-pressed="true"
+            >
+              <span>전체</span>
+              <span class="sidebar-count">{posts.length}</span>
+            </button>
+          </li>
+          {
+            topTags.map(([tag, count]) => (
+              <li>
+                <button
+                  class="sidebar-item"
+                  data-sidebar={tag}
+                  aria-pressed="false"
+                >
+                  <span>{tag}</span>
+                  <span class="sidebar-count">{count}</span>
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label">연도</p>
+        <ul class="sidebar-list">
+          {
+            sortedYears.map(([year, count]) => (
+              <li>
+                <div class="sidebar-item sidebar-item-static">
+                  <span>{year}</span>
+                  <span class="sidebar-count">{count}</span>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </aside>
+
+    <!-- 포스트 목록 -->
+    <section id="post-list" aria-label="포스트 목록">
+      {
+        posts.map((post) => {
+          const firstTag = post.data.tags?.[0] ?? "";
+          return (
+            <a
+              href={`/blogs/${post.id}/`}
+              class="post-row"
+              data-post-title={post.data.title.toLowerCase()}
+              data-post-tags={JSON.stringify(post.data.tags ?? [])}
+            >
+              <span class="post-date">{fmt(post.data.date)}</span>
+              <span class="post-tag">{firstTag}</span>
+              <span class="post-title-text">{post.data.title}</span>
+            </a>
+          );
+        })
+      }
+      <p id="posts-empty" class="posts-empty" hidden>검색 결과가 없습니다.</p>
+    </section>
+  </div>
+</div>
+
+
+<script>
+  const searchInput = document.getElementById(
+    "post-search",
+  ) as HTMLInputElement;
+  const postList = document.getElementById("post-list")!;
+  const emptyMsg = document.getElementById("posts-empty")!;
+  const chips = document.querySelectorAll<HTMLButtonElement>("[data-chip]");
+  const sidebarItems =
+    document.querySelectorAll<HTMLButtonElement>("[data-sidebar]");
+
+  let activeTag = "";
+  let searchQuery = "";
+
+  function filter() {
+    const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
+    let visible = 0;
+
+    rows.forEach((row) => {
+      const title = row.dataset.postTitle ?? "";
+      const tags: string[] = JSON.parse(row.dataset.postTags ?? "[]");
+      const matchTag = activeTag === "" || tags.includes(activeTag);
+      const matchSearch =
+        searchQuery === "" || title.includes(searchQuery.toLowerCase());
+
+      const show = matchTag && matchSearch;
+      row.hidden = !show;
+      if (show) visible++;
+    });
+
+    emptyMsg.hidden = visible > 0;
+  }
+
+  function setTag(tag: string) {
+    activeTag = tag;
+    chips.forEach((chip) => {
+      const on = chip.dataset.chip === tag;
+      chip.classList.toggle("chip-active", on);
+      chip.setAttribute("aria-pressed", String(on));
+    });
+    sidebarItems.forEach((item) => {
+      const on = item.dataset.sidebar === tag;
+      item.classList.toggle("sidebar-item-active", on);
+      item.setAttribute("aria-pressed", String(on));
+    });
+    filter();
+  }
+
+  chips.forEach((chip) =>
+    chip.addEventListener("click", () => setTag(chip.dataset.chip ?? "")),
+  );
+  sidebarItems.forEach((item) =>
+    item.addEventListener("click", () => setTag(item.dataset.sidebar ?? "")),
+  );
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value;
+    filter();
+  });
+</script>

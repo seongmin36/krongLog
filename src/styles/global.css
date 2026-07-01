@@ -17,10 +17,16 @@
   /* UI · 본문 보조 */
   --color-muted: #9ca3af;
   --color-muted-dark: #6b7280;
+  --color-muted-alpha: rgba(113, 113, 130, 0.6);
+  --color-muted-placeholder: rgba(113, 113, 130, 0.5);
   --color-success: #16a34a;
   --color-success-dark: #4ade80;
   --color-hover-overlay-light: rgba(0, 0, 0, 0.06);
   --color-hover-overlay-dark: rgba(255, 255, 255, 0.08);
+  --color-border: rgba(0, 0, 0, 0.1);
+  --color-border-dark: rgba(255, 255, 255, 0.08);
+  --color-primary-surface: rgba(59, 122, 87, 0.06);
+  --color-primary-surface-dark: rgba(240, 168, 184, 0.12);
 
   /* MDX · 코드 블록 (Shiki github-light / github-dark 배경) */
   --color-code-block-surface: #f6f8fa;
