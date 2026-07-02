@@ -31,7 +31,7 @@ pnpm typecheck    # astro check (Astro + TypeScript 진단)
 **주요 아키텍처 결정 사항:**
 - React는 클라이언트 사이드 인터랙션이 필요한 컴포넌트(`ThemeToggle.tsx`, `AppIcons.tsx`)에만 사용됩니다. 나머지 컴포넌트는 모두 `.astro` 파일입니다.
 - 다크 모드 상태는 Nanostores(`src/lib/stores/theme.ts`)로 관리되며 localStorage에 저장됩니다. `BaseLayout.astro`에 FOUC 방지를 위한 인라인 스크립트가 포함되어 있습니다.
-- Tailwind v4 설정은 `src/styles/global.css`에 완전히 위치합니다(`tailwind.config.*` 파일 없음). 커스텀 테마 토큰(색상, 폰트)은 `@theme`으로 정의하며, 규칙은 `docs/code-conventions.md`를 참고합니다.
+- Tailwind v4 설정은 `src/styles/global.css`에 완전히 위치합니다(`tailwind.config.*` 파일 없음). 커스텀 테마 토큰(색상, 폰트)은 `@theme`으로 정의하며, 스타일 토큰 규칙은 `docs/conventions/style-tokens.md`, 파일·역할 분리 규칙은 `docs/conventions/file-structure.md`를 참고합니다.
 - 기술 태그 색상(React, TypeScript, Docker 등)은 `Tag.astro`의 `data-tag` 속성을 통한 CSS로 정의됩니다.
 - 경로 별칭 `@/*`는 `src/*`로 매핑됩니다.
 - SVG 파일은 SVGR(Vite 플러그인, `astro.config.mjs`)을 통해 React 컴포넌트로 임포트됩니다.

@@ -1,0 +1,287 @@
+---
+import type { CollectionEntry } from "astro:content";
+import "@/styles/posts-page.css";
+
+interface Props {
+  posts: CollectionEntry<"post">[];
+  topTags: [string, number][];
+  subTagsByLabel: Record<string, [string, number][]>;
+  sortedYears: [number, number][];
+}
+
+const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
+
+function fmt(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}.${m}.${d}`;
+}
+---
+
+<div class="posts-page">
+  <!-- 헤딩 -->
+  <div>
+    <h1 class="posts-title">전체 글</h1>
+    <p class="posts-subtitle">개발하면서 배운 것들을 기록합니다.</p>
+  </div>
+
+  <!-- 검색 + 필터 칩 -->
+  <div class="posts-toolbar">
+    <label class="posts-search">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+        class="posts-search-icon"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <input
+        id="post-search"
+        type="text"
+        placeholder="글 검색…"
+        autocomplete="off"
+        class="posts-search-input"
+      />
+      <kbd class="posts-search-kbd">
+        <span class="posts-search-kbd-cmd">⌘</span><span>K</span>
+      </kbd>
+    </label>
+    <div class="posts-chips" role="group" aria-label="태그 필터">
+      <button class="chip chip-active" data-chip="" aria-pressed="true"
+        >전체</button
+      >
+      {
+        topTags.map(([tag]) => (
+          <button class="chip" data-chip={tag} aria-pressed="false">
+            {tag}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- 구분선 -->
+  <div class="posts-divider"></div>
+
+  <!-- 콘텐츠 -->
+  <div class="posts-content">
+    <!-- 사이드바 -->
+    <aside class="posts-sidebar">
+      <div class="sidebar-section">
+        <p class="sidebar-label">카테고리</p>
+        <ul id="category-list" class="sidebar-list">
+          <li>
+            <button
+              class="sidebar-item sidebar-item-active"
+              data-sidebar=""
+              aria-pressed="true"
+            >
+              <span>전체</span>
+              <span class="sidebar-count">{posts.length}</span>
+            </button>
+          </li>
+          {
+            topTags.map(([tag, count]) => (
+              <li>
+                <button
+                  class="sidebar-item"
+                  data-sidebar={tag}
+                  aria-pressed="false"
+                >
+                  <span>{tag}</span>
+                  <span class="sidebar-count">{count}</span>
+                </button>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <div class="sidebar-section">
+        <p class="sidebar-label">연도</p>
+        <ul class="sidebar-list">
+          {
+            sortedYears.map(([year, count]) => (
+              <li>
+                <div class="sidebar-item sidebar-item-static">
+                  <span>{year}</span>
+                  <span class="sidebar-count">{count}</span>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </aside>
+
+    <!-- 포스트 목록 -->
+    <section id="post-list" aria-label="포스트 목록">
+      {
+        posts.map((post) => {
+          const firstTag = post.data.tags?.[0] ?? "";
+          return (
+            <a
+              href={`/blogs/${post.id}/`}
+              class="post-row"
+              data-post-title={post.data.title.toLowerCase()}
+              data-post-tags={JSON.stringify(post.data.tags ?? [])}
+            >
+              <span class="post-date">{fmt(post.data.date)}</span>
+              <span class="post-tag">{firstTag}</span>
+              <span class="post-title-text">{post.data.title}</span>
+            </a>
+          );
+        })
+      }
+      <p id="posts-empty" class="posts-empty" hidden>검색 결과가 없습니다.</p>
+    </section>
+  </div>
+
+  <script
+    type="application/json"
+    id="top-tags-data"
+    set:html={JSON.stringify(topTags)}
+  />
+  <script
+    type="application/json"
+    id="sub-tags-data"
+    set:html={JSON.stringify(subTagsByLabel)}
+  />
+</div>
+
+<script>
+  type SubTagEntry = [string, number];
+
+  const searchInput = document.getElementById(
+    "post-search",
+  ) as HTMLInputElement;
+  const postList = document.getElementById("post-list")!;
+  const emptyMsg = document.getElementById("posts-empty")!;
+  const categoryList = document.getElementById("category-list")!;
+  const chips = document.querySelectorAll<HTMLButtonElement>("[data-chip]");
+  const topTagsDataEl = document.getElementById("top-tags-data")!;
+  const topTags = JSON.parse(
+    topTagsDataEl.textContent ?? "[]",
+  ) as SubTagEntry[];
+  const subTagsDataEl = document.getElementById("sub-tags-data")!;
+  const subTagsByLabel = JSON.parse(
+    subTagsDataEl.textContent ?? "{}",
+  ) as Record<string, SubTagEntry[]>;
+  const totalPostCount = postList.querySelectorAll(".post-row").length;
+
+  let activeLabel = "";
+  let activeSubTag = "";
+  let searchQuery = "";
+
+  function filter() {
+    const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
+    let visible = 0;
+
+    rows.forEach((row) => {
+      const title = row.dataset.postTitle ?? "";
+      const tags: string[] = JSON.parse(row.dataset.postTags ?? "[]");
+      const matchLabel = activeLabel === "" || tags.includes(activeLabel);
+      const matchSubTag = activeSubTag === "" || tags.includes(activeSubTag);
+      const matchSearch =
+        searchQuery === "" || title.includes(searchQuery.toLowerCase());
+
+      const show = matchLabel && matchSubTag && matchSearch;
+      row.hidden = !show;
+      if (show) visible++;
+    });
+
+    emptyMsg.hidden = visible > 0;
+  }
+
+  function labelPostCount(label: string): number {
+    if (label === "") return totalPostCount;
+    const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
+    let count = 0;
+    rows.forEach((row) => {
+      const tags: string[] = JSON.parse(row.dataset.postTags ?? "[]");
+      if (tags.includes(label)) count++;
+    });
+    return count;
+  }
+
+  function setSubTag(tag: string) {
+    activeSubTag = tag;
+    categoryList
+      .querySelectorAll<HTMLButtonElement>("[data-sidebar]")
+      .forEach((item) => {
+        const on = item.dataset.sidebar === tag;
+        item.classList.toggle("sidebar-item-active", on);
+        item.setAttribute("aria-pressed", String(on));
+      });
+    filter();
+  }
+
+  function renderCategoryList(label: string) {
+    const entries: SubTagEntry[] =
+      label === "" ? topTags : (subTagsByLabel[label] ?? []);
+    const allCount = labelPostCount(label);
+
+    categoryList.replaceChildren();
+
+    const allLi = document.createElement("li");
+    const allButton = document.createElement("button");
+    allButton.className = "sidebar-item sidebar-item-active";
+    allButton.dataset.sidebar = "";
+    allButton.setAttribute("aria-pressed", "true");
+    allButton.innerHTML = `<span>전체</span><span class="sidebar-count">${allCount}</span>`;
+    allButton.addEventListener("click", () => setSubTag(""));
+    allLi.appendChild(allButton);
+    categoryList.appendChild(allLi);
+
+    entries.forEach(([tag, count]) => {
+      const li = document.createElement("li");
+      const button = document.createElement("button");
+      button.className = "sidebar-item";
+      button.dataset.sidebar = tag;
+      button.setAttribute("aria-pressed", "false");
+      button.innerHTML = `<span>${tag}</span><span class="sidebar-count">${count}</span>`;
+      button.addEventListener("click", () => setSubTag(tag));
+      li.appendChild(button);
+      categoryList.appendChild(li);
+    });
+  }
+
+  function setLabel(label: string) {
+    activeLabel = label;
+    activeSubTag = "";
+    chips.forEach((chip) => {
+      const on = chip.dataset.chip === label;
+      chip.classList.toggle("chip-active", on);
+      chip.setAttribute("aria-pressed", String(on));
+    });
+    renderCategoryList(label);
+    filter();
+  }
+
+  chips.forEach((chip) =>
+    chip.addEventListener("click", () => setLabel(chip.dataset.chip ?? "")),
+  );
+  searchInput.addEventListener("input", () => {
+    searchQuery = searchInput.value;
+    filter();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      searchInput.focus();
+    }
+  });
+
+  renderCategoryList("");
+</script>

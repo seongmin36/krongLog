@@ -1,37 +1,54 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import PostCard from "@/components/blog/PostCard.astro";
+import PostsPage from "@/components/blog/PostsPage.astro";
 import { getCollection } from "astro:content";
 
 const allPosts = await getCollection("post");
 const sortedPosts = allPosts.sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );
+
+const tagCounts = new Map<string, number>();
+for (const post of sortedPosts) {
+  for (const tag of post.data.tags ?? []) {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+}
+const topTags = [...tagCounts.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10);
+
+const subTagsByLabel: Record<string, [string, number][]> = {};
+for (const [label] of topTags) {
+  const counts = new Map<string, number>();
+  for (const post of sortedPosts) {
+    const tags = post.data.tags ?? [];
+    if (!tags.includes(label)) continue;
+    for (const tag of tags) {
+      if (tag === label) continue;
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+  subTagsByLabel[label] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+const yearCounts = new Map<number, number>();
+for (const post of sortedPosts) {
+  const year = post.data.date.getFullYear();
+  yearCounts.set(year, (yearCounts.get(year) ?? 0) + 1);
+}
+const sortedYears = [...yearCounts.entries()].sort((a, b) => b[0] - a[0]);
 ---
 
 <BaseLayout
-  title="전체 글 | Krong Dev."
+  title="전체 글 | KrongLog"
   description="개발하면서 배운 것들을 기록합니다."
   ogType="website"
 >
-  <section class="pt-12 pb-8 sm:pt-16 sm:pb-10">
-    <h1
-      class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50"
-    >
-      전체 글
-    </h1>
-    <p class="mt-2 text-sm text-gray-500 sm:text-base dark:text-gray-400">
-      제가 차곡차곡 모아둔 이야기들을 만나보세요.
-    </p>
-  </section>
-
-  <section class="pb-16 sm:pb-20">
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-      {
-        sortedPosts.map((post, i) => (
-          <PostCard post={post} priorityLcp={i === 0} />
-        ))
-      }
-    </div>
-  </section>
+  <PostsPage
+    posts={sortedPosts}
+    topTags={topTags}
+    subTagsByLabel={subTagsByLabel}
+    sortedYears={sortedYears}
+  />
 </BaseLayout>
