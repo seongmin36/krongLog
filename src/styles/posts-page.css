@@ -32,38 +32,53 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
+  gap: 2rem;
 }
 
 .posts-search {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
-  border-radius: 10px;
-  padding: 11px 15px;
+  gap: 10px;
+  border-radius: 12px;
+  padding: 11.5px 17.5px;
   width: 300px;
   flex-shrink: 0;
-  background: var(--color-inline-code-surface);
-  border: 1px solid var(--color-border);
+  background: var(--color-search-surface);
+  border: 1.5px solid var(--color-search-border);
+  box-shadow: inset 0 1px 4px var(--color-search-inset-shadow);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .dark .posts-search {
-  background: var(--color-inline-code-surface-dark);
-  border-color: var(--color-border-dark);
+  background: var(--color-search-surface-dark);
+  border-color: var(--color-search-border-dark);
+  box-shadow: inset 0 1px 4px var(--color-search-inset-shadow-dark);
+}
+.posts-search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 8px 2px var(--color-search-glow);
+}
+.dark .posts-search:focus-within {
+  border-color: var(--color-dark-text);
+  box-shadow: 0 0 8px 2px var(--color-search-glow-dark);
 }
 
 .posts-search-icon {
   flex-shrink: 0;
-  color: var(--color-muted);
+  color: var(--color-search-text);
+  transform: translateY(1px);
 }
 .dark .posts-search-icon {
-  color: var(--color-muted-dark);
+  color: var(--color-search-text-dark);
 }
 
 .posts-search-input {
   flex: 1 1 0%;
   border: none;
   background: transparent;
-  font-size: 0.875rem;
+  font-size: 14px;
+  line-height: 21px;
   outline: none;
   color: var(--color-dark);
 }
@@ -71,10 +86,34 @@
   color: var(--color-dark-description);
 }
 .posts-search-input::placeholder {
-  color: var(--color-muted-placeholder);
+  color: var(--color-search-text);
 }
 .dark .posts-search-input::placeholder {
-  color: var(--color-muted-dark);
+  color: var(--color-search-text-dark);
+}
+
+.posts-search-kbd {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: 0.12px;
+  background: var(--color-search-border);
+  color: var(--color-search-text);
+}
+.dark .posts-search-kbd {
+  background: var(--color-search-border-dark);
+  color: var(--color-search-text-dark);
+}
+
+.posts-search-kbd-cmd {
+  font-size: 15px;
+  transform: translateY(1px);
 }
 
 /* 필터 칩 */
@@ -103,7 +142,7 @@
 }
 .dark .chip {
   border-color: var(--color-border-dark);
-  color: var(--color-muted);
+  color: var(--color-gray-200);
 }
 .chip:hover {
   background-color: var(--color-hover-overlay-light);
@@ -165,7 +204,7 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-muted-alpha);
+  color: var(--color-dark);
 }
 .dark .sidebar-label {
   color: var(--color-muted-dark);

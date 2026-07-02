@@ -52,6 +52,9 @@ function fmt(date: Date) {
         autocomplete="off"
         class="posts-search-input"
       />
+      <kbd class="posts-search-kbd">
+        <span class="posts-search-kbd-cmd">⌘</span><span>K</span>
+      </kbd>
     </label>
     <div class="posts-chips" role="group" aria-label="태그 필터">
       <button class="chip chip-active" data-chip="" aria-pressed="true"
@@ -271,6 +274,13 @@ function fmt(date: Date) {
   searchInput.addEventListener("input", () => {
     searchQuery = searchInput.value;
     filter();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      searchInput.focus();
+    }
   });
 
   renderCategoryList("");
