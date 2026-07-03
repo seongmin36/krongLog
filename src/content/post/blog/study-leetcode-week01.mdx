@@ -63,9 +63,9 @@ function containsDuplicate(nums) {
 ## 리뷰어 피드백
 
 원래는 `if (set_nums.size !== nums.length) return true; else return false;` 형태로 조건을 나눠서 반환했습니다.<br />
-리뷰어 [Zero-1016](https://github.com/Zero-1016) 님이 조건 자체가 이미 boolean이니 그대로 반환해도 된다는 피드백을 남겨주셨고, 비교식을 바로 반환하는 형태로 다듬었습니다.
+리뷰어 **Zero-1016** 님이 조건 자체가 이미 boolean이니 그대로 반환해도 된다는 피드백을 남겨주셨고, 비교식을 바로 반환하는 형태로 다듬었습니다.
 
-{/* TODO: Zero-1016 리뷰 스크린샷 - 조건문을 boolean 그대로 반환하라는 피드백 */}
+![리뷰어 Zero-1016 피드백 스크린샷](/images/study-leetcode-week01/1.png)
 
 Set을 다루는 방식과 변수명이 깔끔하다는 총평도 함께 받았는데, 리뷰를 통해 **조건문을 얼마나 유연하게 쓰는지**가 코드 가독성에 큰 영향을 준다는 걸 다시 느꼈습니다.
 
@@ -174,11 +174,12 @@ function topKFrequent(nums, k) {
 
 ## 리뷰어 피드백
 
-원래는 루프 안에서 `result.length === k`가 되는 순간 바로 `return result.slice(0, k).map(Number)`로 끊어내는 방식이었습니다.<br />
-[Zero-1016](https://github.com/Zero-1016) 님이 `Object.entries`로 가져온 key가 문자열이라 `Number()`로 변환하는 이유는 이해했지만 `push`할 때 이미 형변환을 하고 있어서 문제없어 보인다는 점과, 결과 길이를 확인하는 `if`문 자체를 지워도 된다는 점을 짚어주셨습니다.<br />
-루프 중간에 억지로 끊어내는 것보다 끝까지 순회한 뒤 `slice(0, k)`로 자르는 편이 더 자연스럽다고 판단해서, 조기 반환 로직과 중복된 `.map(Number)`를 모두 제거했습니다.
+원래는 루프 안에서 `result.length === k`가 되는 순간 바로 <br/>`return result.slice(0, k).map(Number)`로 끊어내는 방식이었습니다.
 
-{/* TODO: Zero-1016 리뷰 스크린샷 - Number() 중복 형변환 및 조기 반환 if문 제거 피드백 */}
+![리뷰어 Zero-1016 피드백 스크린샷](/images/study-leetcode-week01/2.png)
+
+**Zero-1016** 님이 `Object.entries`로 가져온 key가 문자열이라 `Number()`로 변환하는 이유는 이해했지만 `push`할 때 이미 형변환을 하고 있어서 문제없어 보인다는 점과, 결과 길이를 확인하는 `if`문 자체를 지워도 된다는 점을 짚어주셨습니다.<br />
+루프 중간에 억지로 끊어내는 것보다 끝까지 순회한 뒤 `slice(0, k)`로 자르는 편이 더 자연스럽다고 판단해서, 조기 반환 로직과 중복된 `.map(Number)`를 모두 제거했습니다.
 
 ---
 
@@ -282,14 +283,12 @@ function rob(nums) {
 ## 리뷰어 피드백
 
 원래 코드에는 `switch`문에 `case 0: return 0;` 분기가 남아 있었습니다.<br />
-[Zero-1016](https://github.com/Zero-1016) 님이 문제 제약 조건에 이미 `nums.length != 0`이 명시되어 있어서 이 분기는 불필요해 보인다고 짚어주셨고, 실제로 제약 조건을 다시 확인해보니 맞는 지적이라 바로 제거했습니다.
+**Zero-1016** 님이 문제 제약 조건에 이미 `nums.length != 0`이 명시되어 있어서 이 분기는 불필요해 보인다고 짚어주셨고, 실제로 제약 조건을 다시 확인해보니 맞는 지적이라 바로 제거했습니다.
 
-{/* TODO: Zero-1016 리뷰 스크린샷 - 문제 제약조건상 불필요한 case 0 분기 제거 피드백 */}
+![리뷰어 Zero-1016 피드백 스크린샷](/images/study-leetcode-week01/3.png)
 
 같은 리뷰에서 본인은 `Math.max(...arr)`로 전체 배열에서 최댓값을 구했는데 마지막 두 값만 비교해도 되는 방식이 좋다는 코멘트도 받았습니다.<br />
 같은 문제를 풀어도 최댓값을 확인하는 범위를 배열 전체로 볼지, 마지막 두 칸으로 좁힐지에 따라 접근이 달라질 수 있다는 걸 알게 됐습니다.
-
-{/* TODO: Zero-1016 리뷰 스크린샷 - Math.max 비교 범위를 마지막 두 값으로 좁히는 제안 */}
 
 ---
 
