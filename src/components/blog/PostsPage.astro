@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { blogPostPath } from "@/lib/blog-url";
 import "@/styles/posts-page.css";
 
 interface Props {
@@ -131,7 +132,7 @@ function fmt(date: Date) {
           const firstTag = post.data.tags?.[0] ?? "";
           return (
             <a
-              href={`/blogs/${post.id}/`}
+              href={blogPostPath(post.id)}
               class="post-row"
               data-post-title={post.data.title.toLowerCase()}
               data-post-tags={JSON.stringify(post.data.tags ?? [])}
