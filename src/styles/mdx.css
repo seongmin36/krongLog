@@ -114,12 +114,14 @@
 }
 
 /* Shiki: 줄 단위 / 단어 단위 하이라이트 */
-.prose-blog .code-block-wrapper pre.astro-code .line.highlighted {
+.prose-blog .code-block-wrapper pre.astro-code .line.highlighted::before,
+.prose-blog .code-block-wrapper pre.astro-code .line.highlighted > span {
   background-color: var(--color-highlight-pen) !important;
   border-radius: 0.1875rem;
 }
 
-.dark .prose-blog .code-block-wrapper pre.astro-code .line.highlighted {
+.dark .prose-blog .code-block-wrapper pre.astro-code .line.highlighted::before,
+.dark .prose-blog .code-block-wrapper pre.astro-code .line.highlighted > span {
   background-color: var(--color-highlight-pen-dark) !important;
 }
 
@@ -215,7 +217,7 @@
 }
 
 .copy-btn {
-  @apply absolute top-2 right-2 z-10 flex cursor-pointer items-center justify-center gap-1 rounded-lg border-0 bg-transparent p-1.5 opacity-0 whitespace-nowrap;
+  @apply absolute top-2 right-2 z-10 flex cursor-pointer items-center justify-center gap-1 rounded-lg border-0 bg-transparent p-1.5 whitespace-nowrap opacity-0;
   color: var(--color-muted);
   transition:
     color 0.15s ease,
@@ -247,7 +249,7 @@
 }
 
 .copy-label {
-  @apply text-[0.7rem] font-medium leading-none;
+  @apply text-[0.7rem] leading-none font-medium;
 }
 
 .dark .copy-btn.copied {
@@ -257,15 +259,25 @@
 /* 라인 넘버 */
 .prose-blog .code-block-wrapper pre.astro-code code {
   counter-reset: line;
+  display: table;
+  width: 100%;
+  border-spacing: 0;
+}
+
+.prose-blog .code-block-wrapper pre.astro-code .line {
+  display: table-row;
 }
 
 .prose-blog .code-block-wrapper pre.astro-code .line::before {
   counter-increment: line;
   content: counter(line);
-  display: inline-block;
-  width: 1.5ch;
-  margin-right: 1.5rem;
+  display: table-cell;
+  width: 1px;
+  padding-right: 1.5rem;
   text-align: right;
+  vertical-align: top;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
   color: var(--color-muted);
   user-select: none;
   opacity: 0.75;

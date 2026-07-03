@@ -1,5 +1,6 @@
 ---
 import Tag from "@/components/ui/Tag.astro";
+import { blogPostPath } from "@/lib/blog-url";
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import placeholderImage from "@/assets/img-default.png";
@@ -29,7 +30,7 @@ const cardWidths = [400, 560, 720, 840, 960, 1120] as const;
 ---
 
 <a
-  href={`/blogs/${post.id}`}
+  href={blogPostPath(post.id)}
   class="group dark:bg-dark flex flex-col overflow-hidden bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-black/5"
   data-astro-prefetch
 >
