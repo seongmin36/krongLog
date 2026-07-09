@@ -17,3 +17,4 @@ jobs:
             --repo seongmin36/seongmin36
         env:
           GH_TOKEN: ${{ secrets.PROFILE_REPO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PROFILE_REPO_TOKEN }}
