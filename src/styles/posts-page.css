@@ -343,7 +343,8 @@
 /* 반응형 */
 @media (max-width: 768px) {
   .posts-page {
-    padding: 2rem 1rem 3rem;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
   }
   .posts-content {
     flex-direction: column;
@@ -367,5 +368,14 @@
   }
   .post-tag {
     order: -1;
+  }
+}
+
+/* Header.astro의 px-4 → sm:px-6 전환(Tailwind 기본 브레이크포인트 640px)과
+   좌우 padding을 일치시키기 위한 전용 쿼리 */
+@media (max-width: 639px) {
+  .posts-page {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
