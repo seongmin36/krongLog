@@ -1,7 +1,7 @@
 .posts-page {
-  max-width: 1200px;
+  max-width: 1280px;
   margin-inline: auto;
-  padding: 3rem 1.5rem 4.5rem;
+  padding: 4rem 0;
 }
 
 /* 헤딩 */
@@ -368,14 +368,5 @@
   }
   .post-tag {
     order: -1;
-  }
-}
-
-/* Header.astro의 px-4 → sm:px-6 전환(Tailwind 기본 브레이크포인트 640px)과
-   좌우 padding을 일치시키기 위한 전용 쿼리 */
-@media (max-width: 639px) {
-  .posts-page {
-    padding-left: 1rem;
-    padding-right: 1rem;
   }
 }
