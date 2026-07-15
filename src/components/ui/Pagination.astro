@@ -1,0 +1,82 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  id?: string;
+}
+const { id = "posts-pagination" }: Props = Astro.props;
+
+const arrowButtonClass =
+  "inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-description transition-colors duration-150 enabled:hover:bg-hover-overlay-light enabled:hover:text-dark disabled:cursor-default disabled:opacity-35 dark:text-muted dark:enabled:hover:bg-hover-overlay-dark dark:enabled:hover:text-gray-50";
+---
+
+<div
+  id={id}
+  class="posts-pagination mt-8 flex items-center justify-center gap-3"
+  aria-label="글 목록 페이지"
+>
+  <button
+    type="button"
+    class={arrowButtonClass}
+    data-page="prev"
+    aria-label="이전 페이지"
+  >
+    <Icon name="lucide:chevron-left" width={18} height={18} />
+  </button>
+  <span
+    class="text-description dark:text-muted text-sm font-medium tabular-nums"
+    aria-live="polite"
+  >
+    <span data-current>1</span><span aria-hidden="true"> / </span><span
+      data-total>1</span
+    >
+  </span>
+  <button
+    type="button"
+    class={arrowButtonClass}
+    data-page="next"
+    aria-label="다음 페이지"
+  >
+    <Icon name="lucide:chevron-right" width={18} height={18} />
+  </button>
+</div>
+
+<script>
+  document
+    .querySelectorAll<HTMLElement>(".posts-pagination")
+    .forEach((nav) => {
+      const prevBtn = nav.querySelector<HTMLButtonElement>(
+        '[data-page="prev"]',
+      )!;
+      const nextBtn = nav.querySelector<HTMLButtonElement>(
+        '[data-page="next"]',
+      )!;
+      const currentEl = nav.querySelector("[data-current]")!;
+      const totalEl = nav.querySelector("[data-total]")!;
+
+      function update(current: number, total: number) {
+        currentEl.textContent = String(current);
+        totalEl.textContent = String(total);
+        prevBtn.disabled = current <= 1;
+        nextBtn.disabled = current >= total;
+      }
+      update(1, 1);
+
+      (nav as HTMLElement & { updatePagination: typeof update }).updatePagination =
+        update;
+
+      nav.addEventListener("click", (e) => {
+        const button = (e.target as HTMLElement).closest<HTMLButtonElement>(
+          "[data-page]",
+        );
+        if (!button || button.disabled) return;
+
+        nav.dispatchEvent(
+          new CustomEvent("paginate", {
+            detail: { direction: button.dataset.page },
+            bubbles: true,
+          }),
+        );
+      });
+    });
+</script>

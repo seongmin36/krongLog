@@ -2,6 +2,8 @@
 import type { CollectionEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
 import { blogPostPath } from "@/lib/blog-url";
+import { PAGE_SIZE } from "@/lib/posts-page-pagination";
+import Pagination from "@/components/ui/Pagination.astro";
 import "@/styles/posts-page.css";
 
 interface Props {
@@ -112,7 +114,7 @@ function fmt(date: Date) {
     </aside>
 
     <!-- 포스트 목록 -->
-    <section id="post-list" aria-label="포스트 목록">
+    <section id="post-list" aria-label="포스트 목록" data-page-size={PAGE_SIZE}>
       {
         posts.map((post) => {
           const firstTag = post.data.tags?.[0] ?? "";
@@ -133,6 +135,8 @@ function fmt(date: Date) {
       <p id="posts-empty" class="posts-empty" hidden>검색 결과가 없습니다.</p>
     </section>
   </div>
+
+  <Pagination id="posts-pagination" />
 
   <script
     type="application/json"
@@ -165,14 +169,21 @@ function fmt(date: Date) {
     subTagsDataEl.textContent ?? "{}",
   ) as Record<string, SubTagEntry[]>;
   const totalPostCount = postList.querySelectorAll(".post-row").length;
+  const PAGE_SIZE = Number(postList.dataset.pageSize) || 8;
+  const paginationEl = document.getElementById("posts-pagination") as
+    | (HTMLElement & {
+        updatePagination?: (current: number, total: number) => void;
+      })
+    | null;
 
   let activeLabel = "";
   let activeSubTag = "";
   let searchQuery = "";
+  let currentPage = 1;
 
   function filter() {
     const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
-    let visible = 0;
+    const matched: HTMLAnchorElement[] = [];
 
     rows.forEach((row) => {
       const title = row.dataset.postTitle ?? "";
@@ -182,13 +193,32 @@ function fmt(date: Date) {
       const matchSearch =
         searchQuery === "" || title.includes(searchQuery.toLowerCase());
 
-      const show = matchLabel && matchSubTag && matchSearch;
-      row.hidden = !show;
-      if (show) visible++;
+      if (matchLabel && matchSubTag && matchSearch) matched.push(row);
     });
 
-    emptyMsg.hidden = visible > 0;
+    const totalPages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
+    currentPage = Math.min(currentPage, totalPages);
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const visiblePage = new Set(matched.slice(start, start + PAGE_SIZE));
+
+    rows.forEach((row) => {
+      row.hidden = !visiblePage.has(row);
+    });
+
+    emptyMsg.hidden = matched.length > 0;
+    paginationEl?.updatePagination?.(currentPage, totalPages);
   }
+
+  paginationEl?.addEventListener("paginate", (e) => {
+    const { direction } = (e as CustomEvent<{ direction: "prev" | "next" }>)
+      .detail;
+    currentPage =
+      direction === "prev"
+        ? Math.max(1, currentPage - 1)
+        : currentPage + 1;
+    filter();
+  });
 
   function labelPostCount(label: string): number {
     if (label === "") return totalPostCount;
@@ -203,6 +233,7 @@ function fmt(date: Date) {
 
   function setSubTag(tag: string) {
     activeSubTag = tag;
+    currentPage = 1;
     categoryList
       .querySelectorAll<HTMLButtonElement>("[data-sidebar]")
       .forEach((item) => {
@@ -246,6 +277,7 @@ function fmt(date: Date) {
   function setLabel(label: string) {
     activeLabel = label;
     activeSubTag = "";
+    currentPage = 1;
     chips.forEach((chip) => {
       const on = chip.dataset.chip === label;
       chip.classList.toggle("chip-active", on);
@@ -260,6 +292,7 @@ function fmt(date: Date) {
   );
   searchInput.addEventListener("input", () => {
     searchQuery = searchInput.value;
+    currentPage = 1;
     filter();
   });
 
@@ -271,4 +304,5 @@ function fmt(date: Date) {
   });
 
   renderCategoryList("");
+  filter();
 </script>
