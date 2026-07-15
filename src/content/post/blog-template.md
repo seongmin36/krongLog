@@ -12,7 +12,7 @@
 title: "게시글 제목"
 description: "게시글 한 줄 요약. 독자가 읽기 전 무엇을 얻는지 알 수 있도록."
 date: "YYYY-MM-DD"
-tags: ["태그1", "태그2"]
+tags: ["Backend", "Nest.js", "TypeORM"]
 image: "./images/이미지파일명.jpg"
 ---
 ```
@@ -21,8 +21,38 @@ image: "./images/이미지파일명.jpg"
 
 - `title`: 키워드 중심, 간결하게. 부제목 형식(`A와 B`) 허용
 - `description`: 1~2문장. "~를 정리합니다" 형태로 마무리
-- `tags`: 2~4개. 기술 스택 또는 카테고리 단어만
+- `tags`: **2~3개**. **큰 규모 → 구체적 주제** 순으로 나열한다 (아래 「태그 규칙」 참고)
 - `image`: 항상 포함. 경로는 `./images/` 기준
+
+### 태그 규칙 (일반 블로그)
+
+태그는 **핵심만 2~3개** 붙인다. `/blogs` 상단 필터·사이드바 드릴다운에 쓰이므로, 글마다 남발하지 않는다.
+
+**순서:** 넓은 카테고리 → 프레임워크·도구 → **이 글의 핵심 주제**
+
+| 순서 | 역할 | 예 |
+| --- | --- | --- |
+| 1 | 도메인·영역 | `Backend`, `DevOps`, `블로그`, `HTTP`, `회고` |
+| 2 | 스택·플랫폼 | `Nest.js`, `Node.js`, `Docker`, `AWS`, `Astro` |
+| 3 | 글의 핵심 주제 | `TypeORM`, `Logging`, `Error`, `EC2`, `GitHub Actions`, `폰트` |
+
+**예시 (실제 포스트 기준)**
+
+```yaml
+tags: ["Backend", "Nest.js", "TypeORM"]
+tags: ["Backend", "Nest.js", "Logging"]
+tags: ["DevOps", "Docker"]
+tags: ["DevOps", "AWS", "EC2"]
+tags: ["CI/CD", "GitHub Actions"]
+tags: ["블로그", "Astro"]
+tags: ["회고", "2025"]
+```
+
+**주의**
+
+- SEO·키워드 나열용으로 태그를 많이 붙이지 않는다
+- 한글·영문 혼용 시 **같은 의미 중복 금지** (예: `Backend`와 `백엔드` 동시 사용 X)
+- leetcode 주간 회고글은 이 규칙이 아니라 `algorithm-post-template.md`의 태그 규칙을 따른다
 
 ---
 
@@ -338,7 +368,7 @@ posts/
 title: ""
 description: ""
 date: "YYYY-MM-DD"
-tags: [""]
+tags: ["Backend", "Nest.js", "TypeORM"]
 image: "./images/이미지.jpg"
 ---
 
