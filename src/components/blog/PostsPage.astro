@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { Icon } from "astro-icon/components";
 import { blogPostPath } from "@/lib/blog-url";
 import "@/styles/posts-page.css";
 
@@ -30,22 +31,7 @@ function fmt(date: Date) {
   <!-- 검색 + 필터 칩 -->
   <div class="posts-toolbar">
     <label class="posts-search">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        aria-hidden="true"
-        class="posts-search-icon"
-      >
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
+      <Icon name="lucide:search" width={16} height={16} class="posts-search-icon" />
       <input
         id="post-search"
         type="text"

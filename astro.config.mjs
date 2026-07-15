@@ -4,6 +4,7 @@ import react from "@astrojs/react";
 import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import vercel from "@astrojs/vercel";
+import icon from "astro-icon";
 import svgr from "vite-plugin-svgr";
 import { visit } from "unist-util-visit";
 import {
@@ -176,5 +177,5 @@ export default defineConfig({
       entrypoint: "astro/assets/services/sharp",
     },
   },
-  integrations: [mdx(), react(), sitemap()],
+  integrations: [mdx(), react(), sitemap(), icon()],
 });
