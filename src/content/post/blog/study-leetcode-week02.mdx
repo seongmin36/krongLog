@@ -1,0 +1,269 @@
+---
+title: "leetcode 스터디 2주차 회고 - 정렬과 DFS로 문제 풀기"
+description: "Valid Anagram부터 Validate Binary Search Tree까지, DaleStudy leetcode 2주차에 푼 다섯 문제와 코드 리뷰에서 받은 피드백을 정리합니다."
+date: "2026-07-13"
+tags: ["알고리즘", "LeetCode"]
+image: "./images/leetcode-study-thumbnail.png"
+---
+
+import Tooltip from "@/components/ui/Tooltip.astro";
+
+[DaleStudy](https://github.com/DaleStudy/leetcode-study)는 LeetCode에서 가장 유명한 문제 모음집인 [Blind 75](https://www.teamblind.com/post/new-year-gift---curated-list-of-top-75-leetcode-questions-to-save-your-time-OaM1orEU)를 함께 풀어나가는 알고리즘 스터디입니다.<br />
+매주 정해진 문제를 각자 PR로 제출하고 서로 코드 리뷰를 남기는 방식으로 진행되며, 자세한 진행 방식은 [스터디 위키](https://github.com/DaleStudy/leetcode-study/wiki)에 정리되어 있습니다.
+
+2주차에는 아래 다섯 문제를 PR로 제출하고 리뷰를 받았습니다.
+
+- [Valid Anagram](https://github.com/DaleStudy/leetcode-study/issues/218)
+- [Climbing Stairs](https://github.com/DaleStudy/leetcode-study/issues/230)
+- [Product of Array Except Self](https://github.com/DaleStudy/leetcode-study/issues/239)
+- [3Sum](https://github.com/DaleStudy/leetcode-study/issues/241)
+- [Validate Binary Search Tree](https://github.com/DaleStudy/leetcode-study/issues/251)
+
+이 글에서는 [2주차 PR](https://github.com/DaleStudy/leetcode-study/pull/2690)에서 풀었던 다섯 문제를 **풀기 전에 세웠던 생각 → 실제 구현 → 리뷰어 [JAEKWANG97](https://github.com/JAEKWANG97) 님의 피드백** 순서로 정리합니다.
+
+---
+
+# 문제 한눈에 보기
+
+이번 주는 세 문제를 반복문 기반으로, 나머지 두 문제를 재귀로 풀었습니다.
+
+| 문제                                                                                   | 패턴                | 복잡도(시간/공간)            |
+| -------------------------------------------------------------------------------------- | ------------------- | ---------------------------- |
+| [Valid Anagram](https://github.com/DaleStudy/leetcode-study/issues/218)                | Hash Map            | O(n) / O(n)                  |
+| [Product of Array Except Self](https://github.com/DaleStudy/leetcode-study/issues/239) | Two Pointer         | O(n) / O(1) (출력 배열 제외) |
+| [3Sum](https://github.com/DaleStudy/leetcode-study/issues/241)                         | Sorting + Hash Set  | O(n²) / O(n)                 |
+| [Climbing Stairs](https://github.com/DaleStudy/leetcode-study/issues/230)              | Dynamic Programming | O(n) / O(n)                  |
+| [Validate Binary Search Tree](https://github.com/DaleStudy/leetcode-study/issues/251)  | DFS                 | O(n) / O(h)                  |
+
+---
+
+# Hash와 정렬로 푼 세 문제
+
+## Valid Anagram — Hash Map으로 문자 빈도 비교 · [#218](https://github.com/DaleStudy/leetcode-study/issues/218)
+
+### 풀이 전 생각
+
+두 문자열이 <Tooltip note='애너그램(Anagram)은 두 문자열이 구성된 문자의 종류와 개수가 같은 경우를 말합니다.'>Anagram</Tooltip>인지 확인하려면 결국 길이와 각 문자의 개수가 같아야 한다는 점에서 출발했습니다.<br />
+Map에 첫 번째 문자열의 문자별 개수를 먼저 채워두고, 두 번째 문자열을 순회하면서 그 개수를 하나씩 차감하는 방식으로 접근하겠다는 계획이었습니다.
+
+## 실제 구현
+
+실제 구현은 이렇게 됐습니다.
+
+```javascript
+function isAnagram(s, t) {
+  if (s.length !== t.length) return false;
+
+  let map_s = new Map();
+
+  for (let char of s) {
+    map_s.set(char, (map_s.get(char) || 0) + 1);
+  }
+
+  for (let char of t) {
+    if (!map_s.has(char) || map_s.get(char) === 0) {
+      return false;
+    }
+    map_s.set(char, map_s.get(char) - 1);
+  }
+
+  return true;
+}
+```
+
+## 리뷰어 피드백
+
+이 문제는 별도의 코드 라인 피드백 없이 승인됐습니다.<br />
+리뷰어 [JAEKWANG97](https://github.com/JAEKWANG97) 님은 PR 전체 리뷰에서 "길이는 같지만 문자 구성이 다른 경우"를 로컬에서 직접 검증했다고 남겨주셨습니다.
+
+---
+
+## <mark>Product of Array Except Self</mark> — 좌우 누적곱으로 O(n) 달성 · [#239](https://github.com/DaleStudy/leetcode-study/issues/239)
+
+### 풀이 전 생각
+
+이 문제의 핵심은 이중 반복문 없이 "인덱스와 곱을 어떻게 O(n)으로 구하느냐"였습니다.<br />
+배열을 순회하며 <Tooltip note="배열이나 리스트에 순차적으로 접근할 때 두 개의 포인터 위치를 동시에 기록하며 처리하는 방식입니다. 정렬된 두 리스트의 합집합이나 병합 정렬(merge sort)의 conquer 단계에서도 쓰입니다.">투 포인터(Two Pointer)</Tooltip> 방식을 쓰기로 했습니다.<br />
+이중 반복 없이 각 인덱스를 순회하면서 본인을 제외한 곱을 `answer[index]`에 중첩시키고, 왼쪽과 오른쪽에서 오는 누적곱을 나눠서 다시 곱하는 방식으로 접근하겠다는 계획이었습니다.
+
+## 실제 구현
+
+실제 구현은 이렇게 됐습니다.
+
+```javascript
+function productExceptSelf(nums) {
+  let answer = new Array(nums.length).fill(1);
+
+  let left = 0;
+  let right = nums.length - 1;
+
+  let mul_left = 1;
+  let mul_right = 1;
+
+  while (left < nums.length && right >= 0) {
+    answer[left] *= mul_left;
+    mul_left *= nums[left];
+
+    answer[right] *= mul_right;
+    mul_right *= nums[right];
+
+    left++;
+    right--;
+  }
+
+  return answer;
+}
+```
+
+## 리뷰어 피드백
+
+이 문제도 별도의 코드 라인 피드백 없이 승인됐습니다.<br />
+리뷰어 [JAEKWANG97](https://github.com/JAEKWANG97) 님은 prefix/suffix 누적 방식이 깔끔하게 동작한다고 총평에 남겼고, 0이 포함된 경우와 0이 두 개 포함된 경우까지 로컬에서 직접 검증했다고 알려주셨습니다.
+
+---
+
+## 3Sum — 정렬 후 Hash Set으로 역원 찾기 · [#241](https://github.com/DaleStudy/leetcode-study/issues/241)
+
+### 풀이 전 생각
+
+이 문제의 핵심은 짝을 찾는 것, 즉 더해서 0이 되는 역원(inverse)을 찾는 것이라는 점에서 출발했습니다.<br />
+역원은 한 번에 하나만 확인하면 되기 때문에, 이를 담아둘 주머니 역할로 `Set` 인스턴스를 쓰기로 했습니다.<br />
+배열을 정렬한 뒤, 현재 인덱스보다 뒤에 있는 원소 중 값이 같은 원소는 건너뛰는 방식으로 중복을 제거하겠다는 계획이었습니다.
+
+## 실제 구현
+
+실제 구현은 이렇게 됐습니다.
+
+```javascript
+function threeSum(nums) {
+  let result = [];
+
+  nums.sort((a, b) => a - b);
+
+  for (let i = 0; i < nums.length; i++) {
+    if (nums[i] > 0) break;
+
+    if (i > 0 && nums[i] === nums[i - 1]) continue;
+
+    let pocket = new Set();
+
+    for (let g = i + 1; g < nums.length; g++) {
+      let find_num = -(nums[i] + nums[g]);
+
+      if (pocket.has(find_num)) {
+        result.push([nums[i], find_num, nums[g]]);
+
+        while (g + 1 < nums.length && nums[g] === nums[g + 1]) {
+          g++;
+        }
+      }
+      pocket.add(nums[g]);
+    }
+  }
+  return result;
+}
+```
+
+## 리뷰어 피드백
+
+이 문제도 별도의 코드 라인 피드백 없이 승인됐습니다.<br />
+리뷰어 [JAEKWANG97](https://github.com/JAEKWANG97) 님은 3Sum의 중복 처리가 깔끔하게 동작한다고 총평에 남겼고, 중복 원소가 있는 케이스와 0만 있는 케이스까지 로컬에서 확인했다고 알려주셨습니다.
+
+---
+
+# 재귀로 넘어간 두 문제
+
+## Climbing Stairs — 배열에 점화식을 쌓아 DP 연습 · [#230](https://github.com/DaleStudy/leetcode-study/issues/230)
+
+### 풀이 전 생각
+
+n칸의 계단을 오르는 방법의 수는 n-1칸까지의 방법 수와 n-2칸까지의 방법 수를 더한 값과 같다는 점화식에서 출발했습니다.<br />
+
+{/* TODO: 개념 정리글 작성 후 링크 연결 - DP(Dynamic Programming) */}
+
+지난주 [House Robber](/blogs/study-leetcode-week01)에서 썼던 것과 같은 DP(Dynamic Programming) 방식으로, 배열에 각 칸까지의 경우의 수를 순서대로 채워나가면 되겠다고 생각했습니다.
+
+## 실제 구현
+
+실제 구현은 이렇게 됐습니다.
+
+```javascript
+function climbStairs(n) {
+  if (n <= 2) return n;
+
+  let arr = new Array(n + 1);
+
+  arr[0] = 1;
+  arr[1] = 2;
+
+  for (let i = 2; i < arr.length; i++) {
+    arr[i] = arr[i - 2] + arr[i - 1];
+  }
+
+  return arr[n - 1];
+}
+```
+
+## 리뷰어 피드백
+
+원래 코드는 `arr[0]`을 1칸, `arr[1]`을 2칸으로 두고 `arr[n - 1]`을 반환하는 구조였습니다.<br />
+리뷰어 [JAEKWANG97](https://github.com/JAEKWANG97) 님이 점화식을 배열로 풀어낸 흐름은 따라가기 좋았다면서도, 계단 수와 배열 인덱스를 그대로 맞추면(`dp[1] = 1`, `dp[2] = 2`) 점화식이 더 자연스럽게 읽힐 것 같다는 가독성 의견을 남겨주셨습니다.
+
+![리뷰어 JAEKWANG97 피드백 스크린샷](/images/study-leetcode-week02/1.png)
+
+가독성 관점에서 타당한 지적이라 동의를 남겼습니다.<br />
+다만 이번 PR에서는 코드를 바로 고치지 않았고, 인덱스를 계단 수에 맞추는 리팩터링은 다음으로 미뤄뒀습니다.
+
+---
+
+## <mark>Validate Binary Search Tree</mark> — 범위를 물려주는 DFS로 검증 · [#251](https://github.com/DaleStudy/leetcode-study/issues/251)
+
+### 풀이 전 생각
+
+이진 탐색 트리는 부모 노드를 기준으로 왼쪽은 더 작은 수, 오른쪽은 더 큰 수여야 한다는 특징에서 출발했습니다.<br />
+
+{/* TODO: 개념 정리글 작성 후 링크 연결 - 깊이 우선 탐색(DFS) */}
+
+주어진 트리가 이 조건을 만족하는지 확인하려면 깊이 우선 탐색(DFS)으로 각 노드를 재귀적으로 검증하면 되겠다고 생각했습니다.<br />
+현재 노드만 부모와 비교하지 않고, 각 노드가 가질 수 있는 값의 범위(min, max)를 자식에게 물려주면서 좁혀나가는 방식으로 접근하기로 했습니다.
+
+## 실제 구현
+
+실제 구현은 이렇게 됐습니다.
+
+```javascript
+function isValidBST(root) {
+  function validate(p, min, max) {
+    if (p === null) return true;
+
+    if (p.val <= min || p.val >= max) return false;
+
+    return validate(p.left, min, p.val) && validate(p.right, p.val, max);
+  }
+
+  return validate(root, -Infinity, Infinity);
+}
+```
+
+## 리뷰어 피드백
+
+이 문제는 코드 수정 없이 승인됐습니다.<br />
+리뷰어 [JAEKWANG97](https://github.com/JAEKWANG97) 님은 현재 노드와 자식만 비교하지 않고 min, max 범위를 서브트리 전체에 물려주며 검증한 점이 좋았다고, BST의 함정 케이스도 잘 처리할 수 있는 구조로 보인다는 피드백을 남겨주셨습니다.
+
+![리뷰어 JAEKWANG97 피드백 스크린샷](/images/study-leetcode-week02/2.png)
+
+단순 비교보다 범위 자체를 파라미터로 넘기는 방식이 재귀 검증 문제에서 얼마나 강력한지 다시 확인한 리뷰였습니다.
+
+---
+
+## 마치며
+
+2주차는 정렬과 해시를 조합해 조건을 좁혀가는 문제(3Sum)와, 재귀로 트리를 검증하는 문제(Validate Binary Search Tree)에서 새로운 패턴을 처음 다뤄본 주차였습니다.<br />
+지난주에 이어 Climbing Stairs에서 DP 점화식도 한 번 더 연습했습니다.
+
+리뷰를 받으면서 두 가지가 확실히 와닿았습니다.
+
+- 정답이 나온다고 끝이 아니라, 인덱스나 변수를 문제의 의미(계단 수 등)에 맞춰 두면 점화식을 읽는 사람 입장에서 훨씬 자연스럽다는 것
+- 재귀로 조건을 검증할 때는 현재 노드만 보지 않고, 자식에게 물려줄 값의 범위(min, max) 자체를 파라미터로 넘기는 방식이 함정 케이스를 막는 데 효과적이라는 것
+
+다음 글에서는 3주차에 푼 문제들을 정리할 예정입니다.
