@@ -12,7 +12,7 @@
 title: "게시글 제목"
 description: "게시글 한 줄 요약. 독자가 읽기 전 무엇을 얻는지 알 수 있도록."
 date: "YYYY-MM-DD"
-tags: ["Backend", "Nest.js", "TypeORM"]
+tags: ["태그1", "태그2"]
 image: "./images/이미지파일명.jpg"
 ---
 ```
@@ -30,11 +30,11 @@ image: "./images/이미지파일명.jpg"
 
 **순서:** 넓은 카테고리 → 프레임워크·도구 → **이 글의 핵심 주제**
 
-| 순서 | 역할 | 예 |
-| --- | --- | --- |
-| 1 | 도메인·영역 | `Backend`, `DevOps`, `블로그`, `HTTP`, `회고` |
-| 2 | 스택·플랫폼 | `Nest.js`, `Node.js`, `Docker`, `AWS`, `Astro` |
-| 3 | 글의 핵심 주제 | `TypeORM`, `Logging`, `Error`, `EC2`, `GitHub Actions`, `폰트` |
+| 순서 | 역할           | 예                                                             |
+| ---- | -------------- | -------------------------------------------------------------- |
+| 1    | 도메인·영역    | `Backend`, `DevOps`, `블로그`, `HTTP`, `회고`                  |
+| 2    | 스택·플랫폼    | `Nest.js`, `Node.js`, `Docker`, `AWS`, `Astro`                 |
+| 3    | 글의 핵심 주제 | `TypeORM`, `Logging`, `Error`, `EC2`, `GitHub Actions`, `폰트` |
 
 **예시 (실제 포스트 기준)**
 
@@ -368,7 +368,7 @@ posts/
 title: ""
 description: ""
 date: "YYYY-MM-DD"
-tags: ["Backend", "Nest.js", "TypeORM"]
+tags: [""]
 image: "./images/이미지.jpg"
 ---
 
