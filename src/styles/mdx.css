@@ -34,7 +34,7 @@
   --tw-prose-bullets: var(--color-tag-redis-text-dark);
 
   & p {
-    @apply text-gray-300;
+    @apply text-gray-200;
   }
 
   & hr {
