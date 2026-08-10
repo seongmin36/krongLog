@@ -404,28 +404,49 @@
 
 /* 팔레트: amber */
 [data-tag="Backend"] {
-  @apply bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300;
+  @apply bg-amber-100 text-amber-700;
+}
+.dark [data-tag="Backend"] {
+  @apply bg-amber-900/40 text-amber-300;
 }
 /* 팔레트: emerald */
 [data-tag="알고리즘"],
 [data-tag="DevOps"] {
-  @apply bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300;
+  @apply bg-emerald-100 text-emerald-700;
+}
+.dark [data-tag="알고리즘"],
+.dark [data-tag="DevOps"] {
+  @apply bg-emerald-900/40 text-emerald-300;
 }
 /* 팔레트: teal */
 [data-tag="블로그"],
 [data-tag="CI/CD"] {
-  @apply bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300;
+  @apply bg-teal-100 text-teal-700;
+}
+.dark [data-tag="블로그"],
+.dark [data-tag="CI/CD"] {
+  @apply bg-teal-900/40 text-teal-300;
 }
 /* 팔레트: orange */
 [data-tag="API"] {
-  @apply bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300;
+  @apply bg-orange-100 text-orange-700;
+}
+.dark [data-tag="API"] {
+  @apply bg-orange-900/40 text-orange-300;
 }
 [data-tag="회고"],
 [data-tag="Architecture"] {
-  @apply bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300;
+  @apply bg-indigo-100 text-indigo-700;
+}
+.dark [data-tag="회고"],
+.dark [data-tag="Architecture"] {
+  @apply bg-indigo-900/40 text-indigo-300;
 }
 [data-tag="Serverless"] {
-  @apply bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300;
+  @apply bg-purple-100 text-purple-700;
+}
+.dark [data-tag="Serverless"] {
+  @apply bg-purple-900/40 text-purple-300;
 }
 
 [data-note]::after {

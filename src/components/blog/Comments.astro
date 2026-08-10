@@ -1,0 +1,98 @@
+---
+interface Props {
+  theme?: string;
+}
+
+const { theme } = Astro.props as Props;
+const initialTheme = theme ?? "light";
+---
+
+<section class="mt-3">
+  <script
+    src="https://giscus.app/client.js"
+    data-repo="seongmin36/krongLog"
+    data-repo-id="R_kgDORVeG7Q"
+    data-category="Announcements"
+    data-category-id="DIC_kwDORVeG7c4C8AN6"
+    data-mapping="pathname"
+    data-strict="0"
+    data-reactions-enabled="1"
+    data-emit-metadata="1"
+    data-input-position="top"
+    data-theme={initialTheme}
+    data-lang="ko"
+    data-loading="lazy"
+    crossorigin="anonymous"
+    async></script>
+</section>
+
+<script define:vars={{ theme }}>
+  function getGiscusTheme() {
+    return (
+      theme ??
+      (document.documentElement.classList.contains("dark") ? "dark" : "light")
+    );
+  }
+
+  function sendMessage(message) {
+    const iframe = document.querySelector("iframe.giscus-frame");
+    if (!iframe) return;
+
+    iframe.contentWindow?.postMessage(
+      { giscus: message },
+      "https://giscus.app",
+    );
+  }
+
+  function updateGiscusTheme() {
+    sendMessage({ setConfig: { theme: getGiscusTheme() } });
+  }
+
+  // <html> class(다크모드 토글)가 바뀔 때마다 동기화
+  const observer = new MutationObserver(() => {
+    updateGiscusTheme();
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
+
+  /**
+   * data-theme은 서버 렌더 시점 값이라 실제 저장된 테마와 다를 수 있다.
+   * giscus는 범용 "준비 완료" 이벤트를 제공하지 않는다 — discussion 메타데이터
+   * 메시지는 해당 페이지에 이미 discussion이 있을 때만 오고(신규 글엔 안 옴),
+   * iframe의 load 이벤트조차 giscus 내부 앱이 메시지 리스너를 붙이기 전에 먼저
+   * 발생해 setConfig가 씹힐 수 있다(실측 확인됨). 그래서 load 이후 짧게 몇 번
+   * 재전송해 안전마진을 둔다 — 매번 같은 값을 보내는 것뿐이라 여러 번 도착해도
+   * 무해하다.
+   */
+  function watchGiscusFrame() {
+    function syncAfterLoad(iframe) {
+      [0, 300, 800, 1500].forEach((delay) => {
+        setTimeout(updateGiscusTheme, delay);
+      });
+    }
+
+    const existing = document.querySelector("iframe.giscus-frame");
+    if (existing) {
+      existing.addEventListener("load", () => syncAfterLoad(existing), {
+        once: true,
+      });
+      return;
+    }
+
+    const frameObserver = new MutationObserver((_, obs) => {
+      const iframe = document.querySelector("iframe.giscus-frame");
+      if (!iframe) return;
+      iframe.addEventListener("load", () => syncAfterLoad(iframe), {
+        once: true,
+      });
+      obs.disconnect();
+    });
+
+    frameObserver.observe(document.body, { childList: true, subtree: true });
+  }
+
+  watchGiscusFrame();
+</script>
