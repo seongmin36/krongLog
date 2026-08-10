@@ -1,12 +1,9 @@
 ---
-import Header from "@/components/Header.astro";
+import Header from "@/components/sections/Header.astro";
 import CodeBlock from "@/components/ui/CodeBlock.astro";
 import fontsCss from "@/styles/fonts.css?raw";
 import "@/styles/global.css";
-import {
-  buildBlogPostingJsonLd,
-  buildWebsiteJsonLd,
-} from "@/lib/json-ld";
+import { buildBlogPostingJsonLd, buildWebsiteJsonLd } from "@/lib/json-ld";
 
 interface Props {
   title?: string;
@@ -53,7 +50,9 @@ const jsonLd =
     ? jsonLdGraph[0]
     : {
         "@context": "https://schema.org",
-        "@graph": jsonLdGraph.map(({ ["@context"]: _context, ...node }) => node),
+        "@graph": jsonLdGraph.map(
+          ({ ["@context"]: _context, ...node }) => node,
+        ),
       };
 ---
 
