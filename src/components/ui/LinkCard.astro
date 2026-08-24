@@ -1,0 +1,92 @@
+---
+import { fetchOgData } from "@/lib/link-preview";
+
+interface Props {
+  url: string;
+  // 문장 안에 끼워 넣는 한 줄 형태
+  inline?: boolean;
+}
+
+const { url, inline = false } = Astro.props;
+
+const og = await fetchOgData(url);
+const hostname = og ? new URL(url).hostname : "";
+---
+
+{
+  !og ? (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-primary break-all underline"
+    >
+      {url}
+    </a>
+  ) : inline ? (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="not-prose inline-flex max-w-full items-center gap-1.5 align-baseline no-underline"
+    >
+      <img
+        src={og.favicon}
+        alt=""
+        width="16"
+        height="16"
+        loading="lazy"
+        class="m-0 size-4 shrink-0 rounded-sm border-0"
+      />
+      <span class="decoration-muted hover:decoration-primary dark:text-dark-text truncate font-semibold text-gray-900 underline underline-offset-2 transition-colors">
+        {og.title}
+      </span>
+      <span class="text-muted dark:text-muted-dark shrink-0 text-[13px]">
+        {og.siteName}
+      </span>
+    </a>
+  ) : (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="not-prose border-border dark:border-border-dark dark:bg-dark hover:bg-primary-surface dark:hover:bg-primary-surface-dark hover:border-primary/30 my-5 flex items-stretch justify-between gap-4 overflow-hidden rounded-lg border bg-white no-underline transition-colors duration-200"
+    >
+      <div class="flex min-w-0 flex-1 flex-col gap-1.5 px-4 py-3.5">
+        <p class="dark:text-dark-text m-0 line-clamp-1 text-[15px] leading-snug font-bold text-gray-900">
+          {og.title}
+        </p>
+
+        {og.description && (
+          <p class="text-description dark:text-dark-description m-0 line-clamp-2 text-[13px] leading-relaxed">
+            {og.description}
+          </p>
+        )}
+
+        <div class="text-muted dark:text-muted-dark mt-auto flex items-center gap-1.5 pt-1 text-[13px]">
+          <img
+            src={og.favicon}
+            alt=""
+            width="16"
+            height="16"
+            loading="lazy"
+            class="m-0 size-4 shrink-0 rounded-sm border-0"
+          />
+          <span class="truncate">{hostname}</span>
+        </div>
+      </div>
+
+      {og.image && (
+        <div class="hidden w-[30%] max-w-45 shrink-0 sm:block">
+          <img
+            src={og.image}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            class="m-0 size-full rounded-none border-0 object-cover"
+          />
+        </div>
+      )}
+    </a>
+  )
+}
