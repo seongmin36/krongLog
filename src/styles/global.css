@@ -123,4 +123,14 @@
     #7a1f1f 0%,
     #6b1f7a 100%
   );
+
+  /* Github 상태 색상 */
+  --color-gh-open: #1a7f37;
+  --color-gh-closed: #cf222e;
+  --color-gh-merged: #8250df;
+  --color-gh-draft: #59636e;
+  --color-gh-open-dark: #3fb950;
+  --color-gh-closed-dark: #f85149;
+  --color-gh-merged-dark: #a371f7;
+  --color-gh-draft-dark: #8b949e;
 }
