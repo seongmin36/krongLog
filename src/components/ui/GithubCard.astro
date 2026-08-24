@@ -57,7 +57,7 @@ const segments = issue ? parseTitle(issue.title) : [];
 
       <div class="min-w-0 flex-1">
         <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span class="dark:text-dark-text text-[15px] leading-snug font-bold text-gray-900">
+          <span class="dark:text-card-title-dark text-[15px] leading-snug font-bold text-gray-900">
             {segments.map((seg) =>
               seg.code ? (
                 <code class="bg-inline-code-surface dark:bg-inline-code-surface-dark dark:text-dark-description rounded px-1 py-0.5 font-mono text-[13px] font-semibold text-gray-800">
@@ -79,14 +79,14 @@ const segments = issue ? parseTitle(issue.title) : [];
           ) : (
             <span class="inline-flex shrink-0 items-center gap-1">
               <StateIcon state={issue.state} />
-              <span class="text-muted dark:text-muted-dark text-[15px] font-medium">
+              <span class="text-card-meta dark:text-card-meta-dark text-[15px] font-medium">
                 {STATE_LABEL[issue.state]}
               </span>
             </span>
           )}
         </div>
 
-        <div class="text-muted dark:text-muted-dark mt-1 flex flex-wrap items-center gap-x-1.5 text-[13px]">
+        <div class="text-card-meta dark:text-card-meta-dark mt-1 flex flex-wrap items-center gap-x-1.5 text-[13px]">
           <StateIcon state={issue.state} class="size-3.5" />
           <span class="tabular-nums">
             {issue.isPullRequest ? "PR " : "#"}

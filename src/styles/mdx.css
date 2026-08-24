@@ -80,7 +80,7 @@
 }
 
 /* 링크: hover 시에만 underline */
-.prose a {
+.prose a:not(.not-prose, .not-prose *) {
   @apply text-primary dark:text-dark-text no-underline hover:underline;
 }
 
