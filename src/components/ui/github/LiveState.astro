@@ -1,0 +1,128 @@
+---
+import type { GitHubState } from "@/lib/link-preview";
+import { STATE_LABEL } from "@/lib/link-preview";
+import IssueOpened from "@/assets/icons/github/icon-issue-opened.svg";
+import IssueClosed from "@/assets/icons/github/icon-issue-closed.svg";
+import GitMerge from "@/assets/icons/github/icon-git-merge.svg";
+import PrDraft from "@/assets/icons/github/icon-pr-draft.svg";
+
+interface Props {
+  state: GitHubState;
+  owner: string;
+  repo: string;
+  number: number;
+}
+
+const { state, owner, repo, number } = Astro.props;
+
+const ICON = "size-4 shrink-0";
+const LABEL = "text-muted dark:text-muted-dark text-[15px] font-medium";
+
+// 4개 state를 전부 렌더링하고 활성 상태만 노출한다.
+// 스크립트느 hidden 클래스만 토글하므로 tailwind 퍼지에 걸리지 않는다.
+const hide = (s: GitHubState) => (state === s ? "" : "hidden");
+---
+
+<span
+  class="inline-flex shrink-0 items-center gap-1"
+  data-gh-state
+  data-owner={owner}
+  data-repo={repo}
+  data-number={number}
+>
+  <IssueOpened
+    data-icon="open"
+    class:list={["text-gh-open dark:text-gh-open-dark", ICON, hide("open")]}
+  />
+  <IssueClosed
+    data-icon="closed"
+    class:list={[
+      "text-gh-closed dark:text-gh-closed-dark",
+      ICON,
+      hide("closed"),
+    ]}
+  />
+  <GitMerge
+    data-icon="merged"
+    class:list={[
+      "text-gh-merged dark:text-gh-merged-dark",
+      ICON,
+      hide("merged"),
+    ]}
+  />
+  <PrDraft
+    data-icon="draft"
+    class:list={["text-gh-draft dark:text-gh-draft-dark", ICON, hide("draft")]}
+  />
+
+  <span data-label="open" class:list={[LABEL, hide("open")]}>
+    {STATE_LABEL.open}
+  </span>
+  <span data-label="closed" class:list={[LABEL, hide("closed")]}>
+    {STATE_LABEL.closed}
+  </span>
+  <span data-label="merged" class:list={[LABEL, hide("merged")]}>
+    {STATE_LABEL.merged}
+  </span>
+  <span data-label="draft" class:list={[LABEL, hide("draft")]}>
+    {STATE_LABEL.draft}
+  </span>
+</span>
+
+<script>
+  type GitHubState = "open" | "closed" | "merged" | "draft";
+
+  const STATES: GitHubState[] = ["open", "closed", "merged", "draft"];
+
+  function apply(root: HTMLElement, state: GitHubState) {
+    for (const s of STATES) {
+      const on = s === state;
+      root.querySelector(`[data-icon="${s}"]`)?.classList.toggle("hidden", !on);
+      root
+        .querySelector(`[data-label="${s}"]`)
+        ?.classList.toggle("hidden", !on);
+    }
+  }
+
+  async function revalidate(root: HTMLElement) {
+    const { owner, repo, number } = root.dataset;
+    if (!owner || !repo || !number) return;
+
+    try {
+      const res = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}/issues/${number}`,
+        { headers: { Accept: "application/vnd.github+json" } },
+      );
+
+      if (!res.ok) return;
+
+      const issue = await res.json();
+
+      apply(
+        root,
+        issue.pull_request?.merged_at
+          ? "merged"
+          : issue.draft
+            ? "draft"
+            : issue.state === "closed"
+              ? "closed"
+              : "open",
+      );
+    } catch {
+      // 네트워크 실패 시에도 조용히 빌드 타임 값을 유지
+    }
+  }
+
+  // 뷰포트에 들어온 카드만 갱신
+  const observer = new IntersectionObserver((entries, obs) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      obs.unobserve(entry.target);
+      revalidate(entry.target as HTMLElement);
+    }
+  });
+
+  document
+    .querySelectorAll<HTMLElement>("[data-gh-state]")
+    .forEach((el) => observer.observe(el));
+</script>
