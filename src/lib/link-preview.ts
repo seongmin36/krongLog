@@ -85,6 +85,27 @@ function extractMeta(html: string, property: string): string | null {
   return null;
 }
 
+function extractFavicon(html: string, pageUrl: string): string {
+  const { origin } = new URL(pageUrl);
+  const patterns = [
+    /<link[^>]+rel=["'](?:shortcut icon|icon|apple-touch-icon)["'][^>]+href=["']([^"']+)["']/i,
+    /<link[^>]+href=["']([^"']+)["'][^>]+rel=["'](?:shortcut icon|icon|apple-touch-icon)["']/i,
+  ];
+
+  for (const pattern of patterns) {
+    const href = html.match(pattern)?.[1];
+    if (!href) continue;
+
+    try {
+      return new URL(href, pageUrl).href;
+    } catch {
+      continue;
+    }
+  }
+
+  return `${origin}/favicon.ico`;
+}
+
 export async function fetchOgData(url: string): Promise<OgData | null> {
   const key = `og_${cacheKey(url)}`;
   const cached = await readCache<OgData>(key);
@@ -114,7 +135,7 @@ export async function fetchOgData(url: string): Promise<OgData | null> {
       description:
         extractMeta(html, "og:description") ?? extractMeta(html, "description"),
       image: extractMeta(html, "og:image"),
-      favicon: `html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1];`,
+      favicon: extractFavicon(html, url),
       siteName: extractMeta(html, "og:site_name") ?? hostname,
     };
 
