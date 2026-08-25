@@ -1,0 +1,28 @@
+---
+import type { GitHubState } from "@/lib/link-preview";
+import IssueOpened from "@/assets/icons/github/icon-issue-opened.svg";
+import IssueClosed from "@/assets/icons/github/icon-issue-closed.svg";
+import GitMerge from "@/assets/icons/github/icon-git-merge.svg";
+import PrDraft from "@/assets/icons/github/icon-pr-draft.svg";
+
+interface Props {
+  state: GitHubState;
+  class?: string;
+}
+
+const { state, class: className = "size-4" } = Astro.props;
+
+const ICONS = {
+  open: { Icon: IssueOpened, color: "text-gh-open dark:text-gh-open-dark" },
+  closed: {
+    Icon: IssueClosed,
+    color: "text-gh-closed dark:text-gh-closed-dark",
+  },
+  merged: { Icon: GitMerge, color: "text-gh-merged dark:text-gh-merged-dark" },
+  draft: { Icon: PrDraft, color: "text-gh-draft dark:text-gh-draft-dark" },
+} as const;
+
+const { Icon, color } = ICONS[state];
+---
+
+<Icon class={`${color} ${className} shrink-0`} />

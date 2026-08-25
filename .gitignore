@@ -49,3 +49,5 @@ coverage/
 .omc/
 .worktrees/
 .claude/
+
+.cache/

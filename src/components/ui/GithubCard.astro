@@ -1,0 +1,103 @@
+---
+import {
+  fetchGitHubIssue,
+  formatRelativeTime,
+  parseTitle,
+  STATE_LABEL,
+} from "@/lib/link-preview";
+import StateIcon from "./github/StateIcon.astro";
+import LiveState from "./github/LiveState.astro";
+import GitHubMark from "@/assets/icons/icon-github.svg";
+
+interface Props {
+  url: string;
+  // 방문 시점 상태로 갱신한다
+  live?: boolean;
+}
+
+const { url, live = false } = Astro.props;
+
+const issue = await fetchGitHubIssue(url);
+
+// 제목의 백틱을 인라인 코드로 렌더링하기 위해 조각낸다
+const segments = issue ? parseTitle(issue.title) : [];
+---
+
+{
+  !issue ? (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-primary break-all underline"
+    >
+      {url}
+    </a>
+  ) : (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="not-prose border-border dark:border-border-dark dark:bg-dark hover:bg-primary-surface dark:hover:bg-primary-surface-dark hover:border-primary/30 dark:hover:border-dark-text/30 my-5 flex items-center gap-3 rounded-lg border bg-white px-4 py-3.5 no-underline transition-colors duration-200"
+    >
+      <div class="relative shrink-0">
+        <img
+          src={`${issue.authorAvatar}&s=96`}
+          alt=""
+          width="44"
+          height="44"
+          loading="lazy"
+          decoding="async"
+          class="bg-inline-code-surface dark:bg-inline-code-surface-dark m-0 size-11 rounded-full border-0"
+        />
+        <span class="dark:bg-dark absolute -right-0.5 -bottom-0.5 flex items-center justify-center rounded-full bg-white p-0.5">
+          <GitHubMark class="size-4 text-gray-900 dark:text-gray-100" />
+        </span>
+      </div>
+
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span class="dark:text-card-title-dark text-[15px] leading-snug font-bold text-gray-900">
+            {segments.map((seg) =>
+              seg.code ? (
+                <code class="bg-inline-code-surface dark:bg-inline-code-surface-dark dark:text-dark-description rounded px-1 py-0.5 font-mono text-[13px] font-semibold text-gray-800">
+                  {seg.text}
+                </code>
+              ) : (
+                seg.text
+              ),
+            )}
+          </span>
+
+          {live ? (
+            <LiveState
+              state={issue.state}
+              owner={issue.owner}
+              repo={issue.repo}
+              number={issue.number}
+            />
+          ) : (
+            <span class="inline-flex shrink-0 items-center gap-1">
+              <StateIcon state={issue.state} />
+              <span class="text-card-meta dark:text-card-meta-dark text-[15px] font-medium">
+                {STATE_LABEL[issue.state]}
+              </span>
+            </span>
+          )}
+        </div>
+
+        <div class="text-card-meta dark:text-card-meta-dark mt-1 flex flex-wrap items-center gap-x-1.5 text-[13px]">
+          <StateIcon state={issue.state} class="size-3.5" />
+          <span class="tabular-nums">
+            {issue.isPullRequest ? "PR " : "#"}
+            {issue.number}
+          </span>
+          <span aria-hidden="true">·</span>
+          <span>{issue.author}</span>
+          <span aria-hidden="true">·</span>
+          <span>{formatRelativeTime(issue.updatedAt, issue.state)}</span>
+        </div>
+      </div>
+    </a>
+  )
+}

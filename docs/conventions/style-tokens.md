@@ -82,6 +82,14 @@
 
 라이트 모드 기본 태그는 `--color-inline-code-surface` + `--color-description` 조합을 재사용합니다.
 
+### 링크 프리뷰 카드 (LinkCard, GithubCard)
+
+| 토큰                     | 값        | 용도                                      |
+| ------------------------ | --------- | ----------------------------------------- |
+| `--color-card-title-dark` | `#f0efed` | 카드 제목 텍스트(다크, 라이트는 `text-gray-900` 재사용) |
+| `--color-card-meta`       | `#7d7a75` | Github 카드 상태 라벨·메타 정보(라이트)  |
+| `--color-card-meta-dark`  | `#ada9a3` | 동일(다크)                               |
+
 ### Tooltip · 소셜
 
 | 토큰                                    | 용도                  |

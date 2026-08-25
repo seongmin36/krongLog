@@ -123,4 +123,19 @@
     #7a1f1f 0%,
     #6b1f7a 100%
   );
+
+  /* Github 상태 색상 */
+  --color-gh-open: #2e7d32;
+  --color-gh-closed: #d44c47;
+  --color-gh-merged: #9065b0;
+  --color-gh-draft: #787774;
+  --color-gh-open-dark: #57ab5a;
+  --color-gh-closed-dark: #e56a64;
+  --color-gh-merged-dark: #b083d1;
+  --color-gh-draft-dark: #9b9a97;
+
+  /* 링크 프리뷰 카드 (LinkCard, GithubCard) */
+  --color-card-title-dark: #f0efed;
+  --color-card-meta: #7d7a75;
+  --color-card-meta-dark: #ada9a3;
 }
