@@ -11,11 +11,13 @@
     @apply mt-10 mb-4 text-2xl;
   }
   & h3 {
-    @apply mt-8 mb-3 text-base;
+    @apply mt-8 mb-3 text-xl;
   }
 
   & p {
     @apply text-dark leading-relaxed;
+    font-family: "KaKao Small", "KaKao Big Fallback", sans-serif;
+    font-weight: 300;
   }
 
   & hr {
@@ -87,6 +89,7 @@
 /* bold 강조 */
 .prose strong {
   @apply font-bold;
+  font-family: "KaKao Big", "KaKao Big Fallback", sans-serif;
 }
 
 /*
