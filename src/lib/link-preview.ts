@@ -115,7 +115,7 @@ export async function fetchOgData(url: string): Promise<OgData | null> {
     const res = await fetch(url, {
       // OG 태그를 봇에게 내려주지 않는 사이트가 있어 일반 브라우저처럼 요청한다
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; LinkPreviewBot/1.0",
+        "User-Agent": "Mozilla/5.0 (compatible; LinkPreviewBot/1.0)",
         Accept: "text/html",
       },
       signal: AbortSignal.timeout(8000),
