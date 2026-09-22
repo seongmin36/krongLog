@@ -6,6 +6,7 @@ tags: ["CI/CD", "GitHub Actions"]
 ---
 
 import LinkCard from "@/components/ui/LinkCard.astro";
+import Tooltip from "@/components/ui/Tooltip.astro";
 
 > GitHub PR 협업 이벤트와 CI 성공/실패 결과를 하나의 채널에 몰아넣지 않고, GitHub Webhook과 GitHub Actions로 나눠 각각 다른 Discord 채널로 보내도록 구성한 과정을 정리합니다.
 
@@ -188,7 +189,7 @@ Discord 메시지 1개 전송
 
 ### ci.yml: 언제, 무엇을 검사하는가
 
-CI workflow는 핵심 브랜치인 **`develop`**, **`main`**에 대해서만 실행합니다.
+CI workflow는 핵심 브랜치인 `develop`, `main`에 대해서만 실행합니다.
 
 ```yaml
 name: CI
@@ -219,9 +220,9 @@ concurrency:
 
 ### 두 개의 CI Job
 
-이 workflow는 **두 개의 job**으로 나뉩니다.
+이 workflow는 두 개의 job으로 나뉩니다.
 
-#### 1. 코드 품질과 빌드를 검사하는 **`ci`**
+#### 1. 코드 품질과 빌드를 검사하는 `ci`
 
 ```yaml
 - uses: actions/checkout@v4
@@ -237,10 +238,11 @@ concurrency:
   run: npm ci
 ```
 
-여기서 실행하는 `npm ci`는 `package-lock.json`과 **정확히 일치**하는 의존성만 설치하는 것인데, `npm install`에서 발생하는 lockfile을 임의로 바꾸거나 **의존성 버전이 달라져버릴 수 있는 문제를 해결**합니다.<br />
-`persist-credentials: false`는 checkout 이후 Github 인증 토큰이 git remote URL에 남지 않도록 하는 보안 설정입니다.
+여기서 실행하는 `npm ci`는 `package-lock.json`과 **정확히 일치**하는 의존성만 설치하는 것인데, `npm install`에서 발생하는 <Tooltip note="프로그램이나 패키지 매니저가 의존성 버전이나 파일 접근을 고정하여 일관성을 유지하기 위해 사용하는 특수한 기록 파일">lockfile</Tooltip>을 임의로 바꾸거나 **의존성 버전이 달라져버릴 수 있는 문제를 해결**합니다.
 
 <LinkCard url="https://docs.npmjs.com/cli/v11/commands/npm-ci/" />
+
+`persist-credentials: false`는 checkout 이후 Github 인증 토큰이 git remote URL에 남지 않도록 하는 보안 설정입니다.
 
 <LinkCard url="https://github.com/actions/checkout/blob/main/README.md" />
 
@@ -270,7 +272,7 @@ Storybook job은 다음을 확인합니다.
 - **Playwright Chromium 설치** : 브라우저 기반 interaction test 실행 환경 구성
 - **Storybook test** : `play()` 기반 사용자 인터랙션 및 접근성 검사 실행
 
-특히 Storybook의 `play()` 기반 interaction test는 정적 lint나 axe만으로는 **놓치기 쉬운 결함**을 잡는 데 유용합니다.
+특히 Storybook의 `play()` 기반 interaction test는 <Tooltip note="정적 분석 : 코드를 실행하기 전(IDE, CI/CD 단계)에 HTML, JSX, 마크다운 등의 소스 코드만 보고 규칙 위반을 검사">정적 분석</Tooltip>나 <Tooltip note="Axe DevTools Linter : 유명한 접근성 테스트 엔진인 axe-core 기반으로 만들어진 린터로, VSCode 등의 편집기에서 이미지의 alt 속성 누락이나 잘못된 aria 속성 등을 실시간으로 표시해준다.">Axe</Tooltip>만으로는 **놓치기 쉬운 결함**을 잡는 데 유용합니다.
 
 <LinkCard url="https://storybook.js.org/docs/writing-tests/interaction-testing" />
 
@@ -284,8 +286,7 @@ Storybook job은 다음을 확인합니다.
 
 ### 병렬 실행
 
-앞서 언급한 2가지 job, `ci`와 `storybook` 사이에는 `needs`가 없습니다.<br />
-즉, **병렬 실행**입니다.
+앞서 언급한 2가지 job, `ci`와 `storybook` 사이에는 <Tooltip note="작업(Job) 간의 의존성 즉, 선행 관계">needs</Tooltip>가 없습니다. 즉, **병렬 실행**입니다.
 
 ```yaml
 storybook:
@@ -367,6 +368,8 @@ name: Frontend CI
 workflows: ["CI"]
 ```
 
+<LinkCard url="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run" />
+
 ### 어떤 CI 결과만 알려야 할까?
 
 알림 workflow의 `if` 조건은 다음 두 조건을 모두 만족해야 합니다.
@@ -379,7 +382,7 @@ workflows: ["CI"]
 `pull-requests: read` 권한은 PR 제목, 작성자 리뷰어 목록 등을 GIthub API로 조회하기 위해 필요합니다.<br />
 `timeout-minutes: 5`는 이 job이 오래 실행될 이유가 없으므로, 예외적으로 멈췄을 때 자동 정리하기 위한 안전장치입니다.
 
-<LinkCard url="https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/managing-permissions-for-your-github_token" />
+<LinkCard url="https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions" />
 
 아래의 경우들은 전부 제외하였습니다.
 
@@ -440,9 +443,10 @@ if (!ref) {
 }
 ```
 
-먼저 `workflow_run.pull_requests`에서 PR 정보를 찾습니다.<br />
-다만 Fork PR 등 일부 상황에서는 `pull_requests` 배열이 비어있을 수 있습니다.<br />
-이때 CI가 실행된 커밋 SHA와 연결된 열린 PR을 GIthub API로 다시 찾는 fallback을 둡니다.<br />
+먼저 `workflow_run.pull_requests`에서 PR 정보를 찾습니다.
+
+다만 Fork PR 등 일부 상황에서는 `pull_requests` 배열이 비어있을 수 있습니다. 이때 CI가 실행된 커밋 SHA와 연결된 열린 PR을 GIthub API로 다시 찾는 fallback을 둡니다.
+
 그래도 PR이 없으면 알림을 스킵합니다.
 
 #### 3. 닫힌 PR과 Draft PR을 제외한다.
@@ -462,9 +466,14 @@ if (pr.state !== "open" || pr.draft) {
 Draft PR은 아직 리뷰 요청 전의 작업 중 상태입니다.<br />
 따라서 Draft PR에 아래와 같은 메시지를 보내지 않도록 제외합니다.
 
-> **✅ CI 통과 — 리뷰 부탁드립니다**
+**✅ CI 통과 — 리뷰 부탁드립니다**
 
-{/* ![Actions 탭에서 `CI` 실행이 끝난 직후 `PR Discord Notification`이 이어서 실행되는 모습](/images/github-discord-webhook/4.png) */}
+<figure>
+  <img src="/images/github-discord-webhook/4.png" alt="Actions 탭에서 `CI` 실행이 끝난 직후 `PR Discord Notification`이 이어서 실행되는 모습" />
+  <figcaption>
+    Actions 탭에서 <code>CI</code> 실행이 끝난 직후 <code>PR Discord Notification</code>이 이어서 실행되는 모습
+  </figcaption>
+</figure>
 
 ---
 
@@ -496,6 +505,8 @@ const m = (login) => (map[login] ? `<@${map[login]}>` : `\`${login}\``);
 변환 결과는 `seongmin36 → <@201312188466593805>`가 되어 Discord에 실제 사용자를 멘션합니다.<br />
 이 값은 Discord Webhook URL처럼 채널 전송 권한을 직접 가진 값이 아닙니다.<br />
 따라서 `DISCORD_WEBHOOK_URL`은 Secret으로 저장하고, GitHub 아이디와 Discord 사용자 ID의 매핑은 Repository Variable로 관리합니다.
+
+<LinkCard url="https://docs.github.com/en/actions/learn-github-actions/variables" />
 
 매핑이 없는 GitHub 아이디는 Discord 멘션 대신 코드 텍스트로 표시됩니다. (작성자 `unknown-user`)
 
