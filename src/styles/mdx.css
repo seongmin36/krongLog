@@ -64,6 +64,10 @@
   @apply mt-2 text-right text-xs text-gray-500 dark:text-gray-400;
 }
 
+.prose figcaption p {
+  @apply m-0;
+}
+
 /* 인용구 */
 .prose blockquote {
   @apply border-l-4 px-4 py-1;
@@ -150,6 +154,20 @@
   background-color: var(--color-inline-code-surface-dark);
 }
 
+/* figcaption 인라인 코드: 본문 code(text-sm font-bold)보다 작고 가볍게 */
+.prose.prose-blog figcaption > code,
+.prose.prose-blog figcaption p > code {
+  @apply px-0.5 text-xs font-normal;
+  color: var(--color-primary);
+  background-color: transparent;
+}
+
+.dark .prose.prose-blog figcaption > code,
+.dark .prose.prose-blog figcaption p > code {
+  color: var(--color-dark-text);
+  background-color: transparent;
+}
+
 /* backtick(`) 제거 */
 .prose :not(pre) > code::before,
 .prose :not(pre) > code::after {
@@ -233,17 +251,17 @@
 }
 
 .copy-btn:hover {
-  @apply text-gray-700;
+  color: var(--color-description);
   background-color: var(--color-hover-overlay-light);
 }
 
 .dark .copy-btn {
-  color: var(--color-muted-dark);
+  color: var(--color-code-copy-icon-dark);
 }
 
 .dark .copy-btn:hover {
-  color: var(--color-dark-description);
-  background-color: var(--color-hover-overlay-dark);
+  color: var(--color-code-copy-icon-dark-hover);
+  background-color: var(--color-code-copy-hover-overlay-dark);
 }
 
 .copy-btn.copied {
@@ -253,10 +271,15 @@
 
 .copy-label {
   @apply text-[0.7rem] leading-none font-medium;
+  color: currentColor;
 }
 
 .dark .copy-btn.copied {
   color: var(--color-success-dark);
+}
+
+.dark .copy-btn.copied .copy-label {
+  color: currentColor;
 }
 
 /* 라인 넘버 */
