@@ -42,6 +42,9 @@
   /* MDX · 코드 블록 (Shiki github-light / github-dark 배경) */
   --color-code-block-surface: #f6f8fa;
   --color-code-block-surface-dark: #24292e;
+  --color-code-copy-icon-dark: #8b949e;
+  --color-code-copy-icon-dark-hover: #e6edf3;
+  --color-code-copy-hover-overlay-dark: rgba(255, 255, 255, 0.1);
 
   /* MDX · 인라인 코드 · 인용구 · 태그 기본 */
   --color-inline-code-surface: #f3f4f6;
