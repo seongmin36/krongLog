@@ -1,20 +1,18 @@
 ---
 title: "PR 알림과 CI 알림, GitHub에서 Discord로 나눠 보내기"
-description: "GitHub PR 협업 이벤트와 CI 성공·실패 결과를 하나의 채널에 몰아넣지 않고, GitHub Webhook과 GitHub Actions로 나눠 각각 다른 Discord 채널로 보내도록 구성한 과정을 정리합니다."
-date: "2026-08-31"
-tags: ["GitHub Actions", "Discord"]
+description: "GitHub PR 협업 이벤트와 CI 성공/실패 결과를 하나의 채널에 몰아넣지 않고, GitHub Webhook과 GitHub Actions로 나눠 각각 다른 Discord 채널로 보내도록 구성한 과정을 정리합니다."
+date: "2026-09-22"
+tags: ["CI/CD", "GitHub Actions"]
 ---
 
 import LinkCard from "@/components/ui/LinkCard.astro";
 
-프론트엔드 저장소에 GitHub 알림을 Discord로 연결하는 작업을 맡으면서, 처음엔 웹훅 하나만 걸면 끝나는 줄 알았어요.<br />
-그런데 PR 리뷰 알림과 CI 결과 알림을 같은 채널에 몰아넣고 나니, CI가 재실행될 때마다 메시지가 섞여서 정작 확인해야 할 리뷰 요청이 묻히는 게 눈에 보였어요.
+> GitHub PR 협업 이벤트와 CI 성공/실패 결과를 하나의 채널에 몰아넣지 않고, GitHub Webhook과 GitHub Actions로 나눠 각각 다른 Discord 채널로 보내도록 구성한 과정을 정리합니다.
 
-> 사람이 만드는 협업 이벤트와, 기계가 만드는 자동 검증 결과를 같은 채널에 둬도 괜찮을까?
+Github 레포지토리 저장소에 GitHub 알림을 Discord로 연결하는 작업을 맡으면서, 처음엔 웹훅 하나만 걸면 끝나는 줄 알았습니다.<br />
+하지만, ci check 여부나 github events 알림 기능을 알게 되면서, 한 가지 의문점이 들었습니다.
 
-> GitHub 이벤트를 Discord로 보내는 방법이 여러 가지인데, 언제 Webhook을 쓰고 언제 Actions를 써야 할까?
-
-이 글에서는 이 두 질문에 대한 답을 **채널과 Webhook을 용도별로 분리하는 방식**으로 정리한 과정을 담아요.
+> **GitHub 이벤트를 Discord로 보내는 방법 중 언제 Webhook을 쓰고 언제 Actions를 써야 할까?**
 
 ---
 
@@ -22,21 +20,27 @@ import LinkCard from "@/components/ui/LinkCard.astro";
 
 ## <mark>사람의 이벤트와 자동 결과를 분리한다</mark>
 
-GitHub에서 Discord로 보내고 싶은 알림은 크게 두 종류였어요.<br />
-하나는 PR 생성, 리뷰, 댓글, 승인, 변경 요청처럼 사람이 직접 만드는 협업 이벤트고, 다른 하나는 ESLint·타입체크·빌드·Storybook처럼 자동으로 돌아가는 CI 검증 결과예요.
+GitHub에서 Discord로 보내고자 한 알림은 크게 두 종류였습니다.
 
-이 둘을 한 채널에 두면 리뷰 알림과 CI 알림이 뒤섞이고, CI 재실행이 잦아질수록 정말 확인해야 할 메시지를 찾기 어려워져요.<br />
-그래서 아래처럼 채널과 알림 경로 자체를 나눴어요.
+- **협업 이벤트:** PR 생성, 리뷰어 지정 요청, PR 병합 또는 닫힘처럼 사람이 만드는 PR 단위 상태 변화
+- **자동 검증 결과:** ESLint, TypeScript type check, Next.js build, Storybook test처럼 CI가 만드는 결과
 
-```text
+이 둘을 한 채널에 두면 리뷰 알림과 CI 알림이 뒤섞이고, CI 재실행이 잦아질수록 정말 확인해야 할 메시지를 찾기 어려워집니다.<br />
+그래서 아래처럼 채널과 알림 경로 자체를 나눴습니다.
+
+```plain text
+// 1. GitHub PR Event
 GitHub PR 이벤트
   ↓
 GitHub Repository Webhook
   ↓
-#프론트-github-webhook
+#프론트-github-events
   ↓
-PR 생성 / 리뷰 / 댓글 / 승인 / 변경 요청 알림
+PR 생성 / 리뷰어 요청 / 병합 / 닫힘 알림
+```
 
+```plain text
+// 2. GitHub Actions CI
 GitHub Actions CI 완료
   ↓
 PR Discord Notification workflow
@@ -46,17 +50,17 @@ PR Discord Notification workflow
 CI 성공 / CI 실패 알림
 ```
 
-| Discord 채널               | 역할                        | 메시지를 보내는 주체       |
-| --------------------------- | --------------------------- | -------------------------- |
-| `#프론트-github-webhook`   | PR·리뷰·댓글 등 협업 활동 알림 | GitHub Repository Webhook |
-| `#프론트-github-ci-bot`    | CI 성공·실패 알림           | GitHub Actions             |
+| Discord 채널                | 역할                                               | 메시지를 보내는 주체      |
+| --------------------------- | -------------------------------------------------- | ------------------------- |
+| **`#프론트-github-events`** | PR 생성·리뷰어 요청·병합·닫힘 등 PR 단위 협업 알림 | GitHub Repository Webhook |
+| **`#프론트-github-ci-bot`** | CI 성공·실패 알림                                  | GitHub Actions            |
 
-GitHub Webhook은 GitHub에서 특정 이벤트가 발생했을 때 지정한 URL로 HTTP 요청을 직접 보내는 기능이고, Discord Incoming Webhook은 특정 채널에 메시지를 남길 수 있는 전용 URL이에요.
+GitHub Webhook은 GitHub에서 특정 이벤트가 발생했을 때 지정한 URL로 HTTP 요청을 직접 보내는 기능이고, Discord Incoming Webhook은 Discord 특정 채널에 메시지를 남길 수 있는 전용 URL입니다.
 
 <LinkCard url="https://docs.github.com/en/webhooks/about-webhooks" />
 
-채널이 2개면 이 둘을 연결하는 Webhook도 2개가 필요해요.<br />
-이후 섹션에서 각각을 어떻게 구성했는지 정리해요.
+채널이 2개면 이 둘을 연결하는 Webhook도 2개가 필요합니다.<br />
+각각을 어떻게 구성했는지 알아봅니다.
 
 ---
 
@@ -64,94 +68,103 @@ GitHub Webhook은 GitHub에서 특정 이벤트가 발생했을 때 지정한 UR
 
 ### 실제로 받는 이벤트
 
-첫 번째 채널 `#프론트-github-webhook`에는 아래 이벤트만 들어와요.
+첫 번째 채널 `#프론트-github-events`에는 아래 이벤트만 들어오도록 구성했습니다.
 
 - PR 생성
-- PR 리뷰 요청
-- PR 승인 / 변경 요청
-- PR 코드 리뷰 댓글
-- PR 리뷰 스레드 해결
-- PR 일반 댓글
-- PR 병합 또는 닫힘
+- PR 리뷰어 지정 요청
+- PR 병합
+- PR 닫힘
 
-<br />
+현재 GitHub Webhook 설정에서는 **`Pull Requests` 이벤트 하나만 체크**되어 있습니다.<br />
+따라서 현재 구성은 PR 단위의 큰 상태 변화만 알리고, 리뷰 제출, 승인, 변경 요청, 댓글, push 같은 세부 이벤트는 Discord로 보내지 않습니다.
 
-## <mark>이벤트는 최소한으로 고른다</mark>
+### 이벤트는 최소한으로 고른다
 
-GitHub Repository Webhook 설정 화면에서 이벤트를 고를 때, 실제로 체크한 것과 체크하지 않은 것을 나눠보면 이래요.
+GitHub Repository Webhook 설정 화면에서 이벤트를 고를 때, 실제로 체크한 것과 체크하지 않은 것을 나눠보면 다음과 같습니다.
 
-| GitHub Event                  | 실제 동작                        | Discord 알림 여부       |
-| ------------------------------ | --------------------------------- | ------------------------- |
-| Pull requests                  | PR 생성, 닫힘, 병합, 리뷰어 요청 등 | 전송                     |
-| Pull request reviews           | Approve, Request changes 등 리뷰 제출 | 전송                 |
-| Pull request review comments   | 코드 줄 단위 inline 댓글           | 전송                     |
-| Pull request review threads    | 리뷰 스레드 resolve/unresolve      | 전송                     |
-| Issue comments                 | PR 일반 댓글, Issue 댓글           | 전송                     |
-| Pushes                         | 브랜치에 커밋 push                 | 미전송                   |
-| Workflow runs / Check runs     | CI workflow·check 상태             | 미전송 (Actions가 담당) |
+| GitHub Event                   | 실제 동작                             | Discord 알림 여부       |
+| ------------------------------ | ------------------------------------- | ----------------------- |
+| `Pull requests`                | PR 생성, 닫힘, 병합, 리뷰어 요청 등   | 전송                    |
+| `Pull request reviews`         | Approve, Request changes 등 리뷰 제출 | 미전송                  |
+| `Pull request review comments` | 코드 줄 단위 inline 댓글              | 미전송                  |
+| `Pull request review threads`  | 리뷰 스레드 resolve/unresolve         | 미전송                  |
+| `Issue comments`               | PR 일반 댓글, Issue 댓글              | 미전송                  |
+| `Pushes`                       | 브랜치에 커밋 push                    | 미전송                  |
+| `Workflow runs / Check runs`   | CI workflow·check 상태                | 미전송 (Actions가 담당) |
 
 <LinkCard url="https://docs.github.com/en/webhooks/webhook-events-and-payloads" />
 
-여기서 `Pushes`를 체크하지 않은 게 중요해요.<br />
-PR 브랜치에 커밋을 push할 때마다 알림이 오면 채널이 금방 시끄러워지기 때문에, 실제로 팀원이 확인해야 하는 이벤트(PR 생성·리뷰·승인·변경 요청·댓글)만 받도록 걸러냈어요.
+여기서 `Pushes`를 체크하지 않은 게 중요합니다.<br />
+PR 브랜치에 커밋을 push할 때마다 알림이 오면 채널이 금방 시끄러워지기 때문에, 실제로 팀원이 확인해야 하는 필수 이벤트만 받도록 걸러냈습니다.
 
-<br />
+### Payload URL 끝에 `/github`를 붙이는 이유
 
-### Payload URL 끝에 /github를 붙이는 이유
+GitHub Repository Webhook의 Payload URL은 일반 Discord Webhook URL과 조금 다르게 설정합니다.
 
-GitHub Repository Webhook의 Payload URL은 일반 Discord Webhook URL과 조금 다르게 설정해요.
-
-```text
+```plain text
 https://discord.com/api/webhooks/{WEBHOOK_ID}/{WEBHOOK_TOKEN}/github
 ```
 
-GitHub와 Discord는 기본 Webhook payload 형식이 달라요.<br />
-GitHub는 GitHub 이벤트 JSON을 그대로 보내는데, Discord의 일반 Incoming Webhook은 Discord 메시지 JSON을 기대해요.
+그 이유는 GitHub와 Discord는 기본 **Webhook payload 형식이 다르기 때문**입니다.<br />
+GitHub는 GitHub 이벤트 JSON을 그대로 보내는데, Discord의 일반 Incoming Webhook은 Discord 메시지로 JSON으로 받기를 원합니다.
 
-그래서 URL 끝에 `/github`를 붙여야, Discord가 GitHub payload를 해석해서 사람이 읽을 수 있는 메시지로 변환해줘요.
+<figure>
+  <img src="/images/github-discord-webhook/1.png" alt="Discord Webhook Resource Document" />
+  <figcaption>출처: Discord Webhook Resource Document</figcaption>
+</figure>
 
-<LinkCard url="https://discord.com/developers/docs/resources/webhook" />
+그래서 URL 끝에 `/github`를 붙여야, Discord가 GitHub payload를 해석해서 사람이 읽을 수 있는 메시지로 변환해줍니다.
 
-<br />
+— ✨ 출처 : [Webhook Resource - Documentation - Discord](https://docs.discord.com/developers/resources/webhook)
 
-### ping 테스트로 연결부터 확인한다
+### ping 테스트로 확인하기
 
-GitHub Repository Webhook을 저장하면 GitHub가 자동으로 `ping` 이벤트를 보내요.<br />
-여기서 확인한 응답은 아래와 같았어요.
+GitHub Repository Webhook을 저장하면 GitHub가 자동으로 **`ping`** 이벤트를 보냅니다.<br />
+여기서 확인한 응답은 아래와 같았습니다.
 
-```text
+```shell
 Event: ping
 Response: 204
 Completed in: 0.08 seconds
 ```
 
-HTTP 204는 요청이 정상 처리됐지만 별도 응답 본문은 없다는 뜻이라, 이 시점에는 연결 자체만 확인된 상태예요.<br />
-GitHub 저장소의 Settings → Webhooks → 해당 Webhook → Recent deliveries에서 전송 기록을 볼 수 있고, 원하면 Redeliver로 다시 보낼 수도 있어요.
+HTTP 204는 요청이 정상 처리됐지만 별도 응답 본문은 없다는 뜻이라, 이 시점에는 연결 자체만 확인된 상태입니다.
 
-실제 협업 알림은 PR을 만들어야 확인할 수 있어서, 빈 커밋으로 테스트 PR을 하나 열어봤어요.
+![GitHub Webhook ping 테스트 Recent deliveries](/images/github-discord-webhook/2.png)
+
+GitHub 저장소의 Settings → Webhooks → 해당 Webhook → Recent deliveries에서 전송 기록을 볼 수 있고, 원하면 Redeliver로 다시 보낼 수도 있습니다.
+
+### PR로 검증하기
+
+실제 협업 알림은 PR을 만들어야 확인할 수 있어서, 빈 커밋으로 테스트 PR을 하나 열어봤습니다.
 
 ```bash
-git checkout -b chore/test-github-webhook
+git checkout -b chore/test-github-events
 git commit --allow-empty -m "chore: test github webhook"
-git push -u origin chore/test-github-webhook
+git push -u origin chore/test-github-events
 ```
 
-이 브랜치로 `develop`을 대상으로 PR을 생성하면 `Pull requests → opened` 이벤트가 발생하고, `#프론트-github-webhook`에 메시지가 와야 정상이에요.<br />
-반대로 로컬에서 파일만 수정하거나 단순히 `git push`만 하는 것으로는 알림이 오지 않는데, `Pushes` 이벤트를 체크하지 않았기 때문이에요.<br />
-GitHub 입장에서는 PR이 열려야 비로소 `pull_request` 이벤트가 발생해요.
+이 브랜치로 `develop`을 대상으로 PR을 생성하면 **`Pull requests → opened`** 이벤트가 발생하고, **`#프론트-github-events`** 로 메시지가 도착합니다.
 
-{/* ![GitHub Webhook ping 테스트 결과](/images/github-discord-webhook/1.png) */}
+<figure>
+  <img src="/images/github-discord-webhook/3.png" alt="테스트 PR 생성 후 `#프론트-github-events`에 도착한 PR opened 알림" />
+  <figcaption>
+    테스트 PR 생성 후 <code>#프론트-github-events</code>에 도착한 PR opened 알림
+  </figcaption>
+</figure>
+
+GitHub 입장에서는 PR이 열려야 비로소 **`pull_request`** 이벤트가 발생합니다.
 
 ---
 
 # GitHub Actions로 CI 결과만 골라 보내기
 
-## <mark>Workflow 전체가 끝났을 때만 보낸다</mark>
+### Workflow 전체가 끝났을 때만 보낸다
 
-GitHub Repository Webhook에서 `Check runs`, `Workflow jobs`, `Workflow runs` 같은 이벤트도 고를 수 있긴 해요.<br />
-그런데 이렇게 하면 CI 내부 job마다 알림이 따로 오게 돼요.
+GitHub Repository Webhook에서 **`Check runs`**, **`Workflow jobs`**, **`Workflow runs`** 같은 이벤트도 선택할 수 있습니다.<br />
+그런데 이렇게 하면 CI 내부 job마다 알림이 따로 옵니다.
 
-```text
+```plain text
 ESLint 완료 → 알림
 Type check 완료 → 알림
 Build 완료 → 알림
@@ -159,25 +172,23 @@ Storybook build 완료 → 알림
 Storybook test 완료 → 알림
 ```
 
-메시지가 너무 많아지고, "전체 CI가 정말 성공했는지"를 한 번에 판단하기도 어려워요.<br />
-그래서 `ci`와 `storybook` job이 모두 끝나 전체 workflow의 conclusion이 결정된 시점에만, 별도 workflow가 Discord로 메시지 1개를 보내도록 나눴어요.
+이 방식은 메시지가 너무 많아지고, “전체 CI가 정말 성공했는지”를 한 번에 판단하기도 어렵습니다.<br />
+그래서 `ci`와 **`storybook`** job이 모두 끝나 전체 workflow의 `conclusion`이 결정된 시점에만, 별도 workflow가 Discord 메시지 한 건을 전송하도록 분리했습니다.
 
-```text
+```plain text
 ci job 완료
 storybook job 완료
-  ↓
+			↓
 CI workflow 전체 conclusion 결정
-  ↓
+			↓
 PR Discord Notification 실행
-  ↓
+			↓
 Discord 메시지 1개 전송
 ```
 
-<br />
-
 ### ci.yml: 언제, 무엇을 검사하는가
 
-CI workflow는 핵심 브랜치인 `develop`, `main`에 대해서만 돌게 했어요.
+CI workflow는 핵심 브랜치인 **`develop`**, **`main`**에 대해서만 실행합니다.
 
 ```yaml
 name: CI
@@ -192,10 +203,9 @@ permissions:
   contents: read
 ```
 
-`permissions: contents: read`는 CI가 코드만 checkout해서 검사하면 되므로, 읽기 권한만 부여한 거예요.<br />
-PR 수정이나 Secret 변경, repository push는 할 수 없어요.
+`permissions: contents: read`는 CI가 코드만 checkout해서 검사하면 되므로, **읽기 권한만 부여**하였기 때문에 이 workflow는 생성, 수정, push 등의 작업을 할 수 없습니다.
 
-같은 PR에 새 커밋이 push되면 이전 CI를 취소하도록 concurrency도 걸었어요.
+또한 같은 PR에 새 커밋이 push되면 이전 CI를 취소하도록 `concurrency`도 설정했습니다.
 
 ```yaml
 concurrency:
@@ -203,10 +213,15 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 ```
 
-`cancel-in-progress`를 `pull_request` 이벤트일 때만 `true`로 둬서, PR 브랜치의 오래된 커밋에 대한 CI는 취소하되 `main`·`develop`에 직접 push한 CI는 취소하지 않도록 했어요.
+`cancel-in-progress`를 `pull_request == true`로 둔 것은 PR 브랜치의 예전 커밋에 대한 CI는 취소하되, 핵심 브랜치에 직접 push한 CI는 유지하기 위해서입니다.
 
-이 workflow는 두 job으로 나뉘어요.<br />
-하나는 코드 품질과 빌드를 검사하는 `ci` job이고,
+<LinkCard url="https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/control-the-concurrency-of-workflows-and-jobs" />
+
+### 두 개의 CI Job
+
+이 workflow는 **두 개의 job**으로 나뉩니다.
+
+#### 1. 코드 품질과 빌드를 검사하는 **`ci`**
 
 ```yaml
 - uses: actions/checkout@v4
@@ -222,7 +237,21 @@ concurrency:
   run: npm ci
 ```
 
-다른 하나는 Storybook을 빌드하고 interaction·접근성 테스트를 돌리는 `storybook` job이에요.
+여기서 실행하는 `npm ci`는 `package-lock.json`과 **정확히 일치**하는 의존성만 설치하는 것인데, `npm install`에서 발생하는 lockfile을 임의로 바꾸거나 **의존성 버전이 달라져버릴 수 있는 문제를 해결**합니다.<br />
+`persist-credentials: false`는 checkout 이후 Github 인증 토큰이 git remote URL에 남지 않도록 하는 보안 설정입니다.
+
+<LinkCard url="https://docs.npmjs.com/cli/v11/commands/npm-ci/" />
+
+<LinkCard url="https://github.com/actions/checkout/blob/main/README.md" />
+
+이렇게 ci 버전을 일치하도록 한 후 검사를 실행합니다.
+
+- **Prettier** : 코드 포맷 검사
+- **ESLint** : 코드 품질 및 잠재적 오류 검사
+- **Type Check** : TypeScript 타입 오류 검사
+- **Build** : Next.js production build 가능 여부 검사
+
+#### 2. Storybook 빌드 및 interaction 및 접근성 테스트
 
 ```yaml
 - name: Install Playwright (chromium)
@@ -235,21 +264,64 @@ concurrency:
   run: npm run test-storybook
 ```
 
-`npm ci`는 `package-lock.json`과 정확히 일치하는 의존성만 설치해서, `npm install`과 달리 lockfile을 임의로 바꾸지 않아요.<br />
-CI에는 이 재현성이 더 중요해서 `npm ci`를 썼어요.<br />
-`persist-credentials: false`는 checkout 이후 GitHub 인증 토큰이 git remote URL에 남지 않도록 하는 보안 설정이에요.
+Storybook job은 다음을 확인합니다.
 
-지금은 두 job 사이에 `needs`를 걸지 않아서 병렬로 실행돼요.<br />
-실패 항목을 한 번에 모두 확인하고 싶어서 내린 선택인데, `# needs: ci` 주석을 풀면 `ci`가 실패했을 때 Storybook job(특히 Playwright 설치 시간)을 건너뛸 수 있어요.<br />
-다만 전체 CI 시간은 길어져요.
+- **Storybook build** : Story 파일, 컴포넌트, Storybook 설정이 정상 빌드되는지 확인
+- **Playwright Chromium 설치** : 브라우저 기반 interaction test 실행 환경 구성
+- **Storybook test** : `play()` 기반 사용자 인터랙션 및 접근성 검사 실행
 
-이전에 실측해본 경험상, Storybook의 play 기반 interaction test는 모달 포커스 트랩, Esc 키 처리, 로딩 중 접근 가능한 이름 유지처럼 정적 lint나 axe만으로는 놓치기 쉬운 결함을 잡아낼 때가 많았어요.
+특히 Storybook의 `play()` 기반 interaction test는 정적 lint나 axe만으로는 **놓치기 쉬운 결함**을 잡는 데 유용합니다.
 
-<br />
+<LinkCard url="https://storybook.js.org/docs/writing-tests/interaction-testing" />
 
-### PR과 연결하고, draft·closed는 거른다
+여기서 **놓치기 쉬운 결함**을 예로 들면 다음과 같습니다.
 
-CI 알림 workflow는 `workflow_run` 이벤트로 트리거돼요.
+- 모달 포커스 트랩 부재
+- ESC 키로 모달을 닫지 못하는 문제
+- 로딩 상태에서 버튼의 접근 가능한 이름이 사라지는 문제
+- 클릭 핸들러가 의도한 횟수만큼 호출되지 않는 문제
+- 키보드 TAB 이동 순서 문제
+
+### 병렬 실행
+
+앞서 언급한 2가지 job, `ci`와 `storybook` 사이에는 `needs`가 없습니다.<br />
+즉, **병렬 실행**입니다.
+
+```yaml
+storybook:
+  name: Storybook build · test
+  runs-on: ubuntu-latest
+  timeout-minutes: 15
+  # needs: ci
+```
+
+병렬 실행을 하는 이유는 하나의 PR에서 **실패 항목을 한 번에 확인**하기 위해서입니다.<br />
+이렇게 하면 **피드백의 밀도**를 높일 수 있고, 전체 개발 주기의 **병목을 줄여 배포 속도를 개선**할 수 있습니다.<br />
+실패한 테스트를 수정하기 위해 ci 결과를 여러 번 기다릴 필요가 없기 때문입니다.
+
+반대로 `needs: ci`로 **순차 실행**을 하면 **의존성을 부여**할 수 있습니다.
+
+이 경우의 흐름은 다음과 같습니다.
+
+1. **ci job 성공** → storybook job 실행
+2. **ci job 실패** → storybook job 실행 안 함 + Playwright 설치 및 Storybook 빌드 시간 절약
+
+이 방식의 단점은, green CI(✅)의 전체 완료 시간이 길어집니다.
+
+#### 병렬 실행과 순차 실행 비교
+
+| 방식                     | 장점                                            | 단점                                      |
+| ------------------------ | ----------------------------------------------- | ----------------------------------------- |
+| 병렬 실행 (`needs` 없음) | 전체 CI 시간이 짧고 실패를 한 번에 확인         | 앞 단계 실패에도 Storybook 실행 비용 발생 |
+| 순차 실행 (`needs: ci`)  | 빨간 PR에서 Playwright·Storybook 실행 비용 절약 | 정상 PR의 전체 CI 시간이 길어짐           |
+
+---
+
+# CI 결과 알림의 원리
+
+## <mark>workflow_run으로 CI 완료 감지</mark>
+
+CI 결과 알림은 `discord-pr-notification.yml`에서 처리합니다.
 
 ```yaml
 name: PR Discord Notification
@@ -258,10 +330,34 @@ on:
   workflow_run:
     workflows: ["CI"]
     types: [completed]
+
+concurrency:
+  group: discord-${{ github.event.workflow_run.head_sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      (github.event.workflow_run.conclusion == 'success' ||
+      github.event.workflow_run.conclusion == 'failure')
 ```
 
-여기서 `workflows: ["CI"]`의 `"CI"`는 `ci.yml`의 `name: CI`와 **정확히 일치**해야 해요.<br />
-이름이 다르면 아예 감지되지 않아요.
+`workflow_run`은 다른 GitHub Actions workflow가 끝났을 때 실행되는 트리거입니다.
+
+1. CI workflow 실행
+2. **CI workflow 완료**
+3. **workflow_run 이벤트 실행**
+4. PR Discord Notification 실행
+
+여기서 중요한 점은 `workflows: ['CI']`의 `CI`는 반드시 `ci.yml`의 workflow 이름과 정확히 일치해야 합니다.<br />
+아래처럼 이름이 다르면 알림 workflow가 CI 완료를 감지하지 못합니다.
 
 ```yaml
 # ci.yml
@@ -271,21 +367,31 @@ name: Frontend CI
 workflows: ["CI"]
 ```
 
-위 예시처럼 `Frontend CI`와 `CI`는 다른 workflow 이름이라 연결되지 않아요.
+### 어떤 CI 결과만 알려야 할까?
 
-<LinkCard url="https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_run" />
+알림 workflow의 `if` 조건은 다음 두 조건을 모두 만족해야 합니다.
 
-알림은 PR에서 실행된 CI가 성공하거나 실패했을 때만 보내요.
+- `github.event.workflow_run.event == 'pull_request'`
+- `github.event.workflow_run.conclusion == 'success' || github.event.workflow_run.conclusion == 'failure'`
 
-```yaml
-if: >-
-  github.event.workflow_run.event == 'pull_request' &&
-  (github.event.workflow_run.conclusion == 'success' ||
-   github.event.workflow_run.conclusion == 'failure')
-```
+즉, PR에서 실행된 CI와 CI 결과가 success 또는 failure일 때에만 Discord 메시지를 전송합니다.
 
-`develop`·`main`에 직접 push한 CI, 취소되거나 skipped된 CI는 여기서 걸러져요.<br />
-같은 커밋 SHA에서 알림 workflow가 여러 번 실행되는 경우를 대비해 concurrency도 걸었어요.
+`pull-requests: read` 권한은 PR 제목, 작성자 리뷰어 목록 등을 GIthub API로 조회하기 위해 필요합니다.<br />
+`timeout-minutes: 5`는 이 job이 오래 실행될 이유가 없으므로, 예외적으로 멈췄을 때 자동 정리하기 위한 안전장치입니다.
+
+<LinkCard url="https://docs.github.com/en/actions/writing-workflows/choosing-what-your-workflow-does/managing-permissions-for-your-github_token" />
+
+아래의 경우들은 전부 제외하였습니다.
+
+- `develop`에 직접 push된 CI
+- `main`에 직접 push된 CI
+- 취소된 CI
+- skipped된 CI
+- draft PR
+- 닫힌 PR
+- 연결된 열린 PR을 찾지 못한 경우
+
+**같은 커밋의 중복 알림도 방지합니다.**
 
 ```yaml
 concurrency:
@@ -293,11 +399,31 @@ concurrency:
   cancel-in-progress: true
 ```
 
-PR 정보는 `workflow_run` payload에서 먼저 찾고, 없으면 커밋 SHA로 다시 검색해요.
+1. 같은 head SHA에서 알림 workflow가 중복 실행
+2. 이전 알림 workflow 취소
+3. 마지막 workflow만 Discord 전송
 
-```js
+### 실제 알림 로직 스크립트
+
+실제 알림은 `actions/github-script` 스텝 하나에서 PR 조회부터 메시지 전송까지 처리합니다.
+
+#### 1. Secret이 없으면 안전하게 건너뛴다
+
+```typescript
+if (!process.env.DISCORD_WEBHOOK) {
+  return core.warning("DISCORD_WEBHOOK_URL secret 미설정 → 알림 스킵");
+}
+```
+
+secret이 아직 등록되지 않은 상태에서도 CI 전체가 불필요하게 실패하지 않도록 방어합니다.
+
+#### 2. 연결된 PR을 찾는다
+
+```typescript
 const run = context.payload.workflow_run;
-let ref = (run.pull_requests || [])[0];
+const { owner, repo } = context.repo;
+
+let ref = run.pull_requests || [];
 
 if (!ref) {
   const { data } = await github.rest.repos.listPullRequestsAssociatedWithCommit({
@@ -306,140 +432,215 @@ if (!ref) {
     commit_sha: run.head_sha,
   });
 
-  ref = data.find((pr) => pr.state === "open");
+  ref = data.find((p) => p.state === "open");
 }
 
-const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: ref.number });
-```
-
-`workflow_run.pull_requests`가 fork PR 등 일부 상황에서 비어 있을 수 있어서, 커밋 SHA와 연결된 열린 PR을 GitHub API로 다시 찾는 fallback을 넣었어요.
-
-닫혔거나 draft인 PR은 알림을 보내지 않도록 걸렀어요.
-
-```js
-if (pr.state !== "open" || pr.draft) {
-  core.info("닫힘/draft PR → 스킵");
-  return;
+if (!ref) {
+  return core.info("연결된 열린 PR 없음");
 }
 ```
 
-Draft PR은 아직 리뷰 요청 전인 작업 중 상태라, "CI 통과 — 리뷰 부탁드립니다" 같은 메시지를 보내면 맥락에 안 맞기 때문이에요.
+먼저 `workflow_run.pull_requests`에서 PR 정보를 찾습니다.<br />
+다만 Fork PR 등 일부 상황에서는 `pull_requests` 배열이 비어있을 수 있습니다.<br />
+이때 CI가 실행된 커밋 SHA와 연결된 열린 PR을 GIthub API로 다시 찾는 fallback을 둡니다.<br />
+그래도 PR이 없으면 알림을 스킵합니다.
 
-<br />
+#### 3. 닫힌 PR과 Draft PR을 제외한다.
 
-### 성공/실패 메시지와 멘션
-
-CI 결과에 따라 아래 형식으로 메시지를 만들어요.
-
-```text
-✅ CI 통과 — 리뷰 부탁드립니다
-📌 PR 제목
-🔗 PR 링크
-👤 작성자 @DiscordUser
-👁️ 리뷰어 @DiscordReviewer
-```
-
-```text
-❌ CI 실패 — 확인 필요
-📌 PR 제목
-🔗 PR 링크
-👤 작성자 @DiscordUser
-🪵 로그 CI 실행 링크
-```
-
-실패 메시지의 로그 링크는 `run.html_url`을 그대로 써서, 클릭하면 실패한 GitHub Actions 실행 페이지로 바로 이동해요.
-
-{/* ![CI 성공/실패 알림 메시지 예시](/images/github-discord-webhook/2.png) */}
-
-<br />
-
-### Webhook URL과 사용자 ID는 반드시 가려서 관리한다
-
-CI Bot은 Discord에 직접 HTTP 요청을 보내요.
-
-```js
-await fetch(process.env.DISCORD_WEBHOOK, {
-  method: "POST",
-  headers: { "content-type": "application/json" },
-  body: JSON.stringify({ content }),
+```typescript
+const { data: pr } = await github.rest.pulls.get({
+  owner,
+  repo,
+  pull_number: ref.number,
 });
+
+if (pr.state !== "open" || pr.draft) {
+  return core.info("닫힘/draft PR → 스킵");
+}
 ```
 
-```yaml
-env:
-  DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
-```
+Draft PR은 아직 리뷰 요청 전의 작업 중 상태입니다.<br />
+따라서 Draft PR에 아래와 같은 메시지를 보내지 않도록 제외합니다.
 
-Discord Webhook URL을 아는 사람은 봇 계정 로그인 없이도 그 채널에 메시지를 보낼 수 있어서, 사실상 채널 전송 권한을 가진 비밀 키예요.<br />
-그래서 코드나 README, PR 본문, 스크린샷 어디에도 URL 전체가 그대로 보이면 안 되고, GitHub Repository Secret에만 저장해야 해요.<br />
-이 Secret에는 앞서 나온 `/github`를 붙이지 않는데, Discord 형식 JSON을 Actions 코드가 직접 만들어서 보내기 때문이에요.
+> **✅ CI 통과 — 리뷰 부탁드립니다**
 
-성공 메시지에 작성자·리뷰어를 실제 멘션으로 표시하려고 GitHub 아이디와 Discord 사용자 ID를 매핑하는 Repository Variable도 하나 더 뒀어요.<br />
-아래는 예시 형태예요.
+{/* ![Actions 탭에서 `CI` 실행이 끝난 직후 `PR Discord Notification`이 이어서 실행되는 모습](/images/github-discord-webhook/4.png) */}
 
-```json
-{ "octocat": "111111111111111111", "hubot": "222222222222222222" }
-```
+---
 
-```js
+### 작성자와 리뷰어 멘션
+
+Github 아이디를 Discord 멘션으로 바꾸기 위해 Repository Variable `DISCORD_USER_MAP`을 사용합니다.
+
+```javascript
+let map = {};
+
+try {
+  map = JSON.parse(process.env.DISCORD_USER_MAP || "{}");
+} catch {
+  core.warning("DISCORD_USER_MAP JSON 파싱 실패");
+}
+
 const m = (login) => (map[login] ? `<@${map[login]}>` : `\`${login}\``);
 ```
 
-```js
-allowed_mentions: {
-  parse: ["users"];
+예를 들어 Variable 값은 다음처럼 저장합니다.
+
+```json
+{
+  "seongmin36": "201312188466593805",
+  "dew2314": "479166893941325844"
 }
 ```
 
-`allowed_mentions.parse`에 `"users"`를 넣어야 메시지 안의 `<@디스코드ID>` 형식을 Discord가 실제 멘션으로 해석해요.<br />
-매핑이 없는 GitHub 아이디는 그냥 `octocat`처럼 코드 텍스트로만 표시돼요.<br />
-이 값은 Discord Webhook URL과 달리 채널 전송 권한을 직접 가진 값은 아니라서, Secret 대신 Repository Variable로 관리했어요.
+변환 결과는 `seongmin36 → <@201312188466593805>`가 되어 Discord에 실제 사용자를 멘션합니다.<br />
+이 값은 Discord Webhook URL처럼 채널 전송 권한을 직접 가진 값이 아닙니다.<br />
+따라서 `DISCORD_WEBHOOK_URL`은 Secret으로 저장하고, GitHub 아이디와 Discord 사용자 ID의 매핑은 Repository Variable로 관리합니다.
 
-<LinkCard url="https://docs.github.com/en/actions/learn-github-actions/variables" />
+매핑이 없는 GitHub 아이디는 Discord 멘션 대신 코드 텍스트로 표시됩니다. (작성자 `unknown-user`)
 
-두 Webhook을 정리하면 이래요.
+리뷰어는 **개인 사용자**와 **팀** 모두 올 수 있으므로 두 경우를 함께 처리합니다.
 
-| 구분                 | PR 협업 Webhook               | CI Bot Webhook                |
-| -------------------- | ------------------------------ | ------------------------------ |
-| Discord 채널         | `#프론트-github-webhook`      | `#프론트-github-ci-bot`       |
-| 호출 주체            | GitHub Repository Webhook      | GitHub Actions                 |
-| URL 형식             | `.../webhooks/.../github`      | `.../webhooks/...`             |
-| `/github` 필요 여부  | 필요                            | 필요 없음                      |
-| 메시지 형식          | Discord가 GitHub payload 변환  | workflow 코드가 직접 생성      |
-
----
-
-## 실제 PR로 검증하기
-
-두 workflow 파일은 로컬에만 있으면 GitHub가 존재를 몰라요.<br />
-그래서 먼저 설정 커밋을 만들어 기본 브랜치에 올리는 게 순서예요.
-
-```bash
-git add .github/workflows/ci.yml
-git add .github/workflows/discord-pr-notification.yml
-git commit -m "ci: add CI and Discord notifications"
-git push -u origin chore/add-ci-discord-notifications
+```javascript
+const reviewers = [...pr.requested_reviewers.map((r) => m(r.login)), ...pr.requested_teams.map((t) => `@${t.slug}`)].join(", ") || "미배정";
 ```
 
-이 PR에서는 GitHub Webhook PR 알림과 CI 실행까지는 확인할 수 있어요.<br />
-다만 CI가 끝났을 때 `PR Discord Notification`이 안정적으로 실행되려면, `workflow_run`이 다른 workflow의 완료를 감지하는 후속 트리거라는 특성상 알림 workflow 파일이 **기본 브랜치**에 있어야 해요.<br />
-그래서 설정 PR을 먼저 병합한 뒤, 별도의 테스트 PR로 두 번째 검증을 하는 편이 가장 확실해요.
-
-성공 흐름을 확인한 다음에는 일부러 실패도 만들어봐야, 실패 메시지와 로그 링크가 정상인지까지 확인할 수 있어요.<br />
-`typecheck` 스크립트를 잠깐 `exit 1`로 바꿔 push하고, 확인 후 되돌리는 방식으로 테스트했어요.
-
-{/* ![PR 협업 알림 채널에 도착한 메시지](/images/github-discord-webhook/3.png) */}
-
-{/* ![CI Bot 채널에 도착한 실패 알림](/images/github-discord-webhook/4.png) */}
+개인 리뷰어는 Discord ‘사용자 멘션’을, 팀 리뷰어는 Github ‘팀 slug’를 @team-name 형태로 표시하고, 리뷰어 설정이 안되어있는 경우에는 ‘미배정’처리를 합니다.
 
 ---
 
-## 마치며
+### 성공과 실패 메시지를 조합한다.
 
-PR·리뷰 같은 협업 이벤트는 GitHub Repository Webhook이 직접 처리하고, CI 성공·실패는 GitHub Actions가 전체 workflow가 끝난 시점에만 판단해서 보내도록 나눴어요.
+```javascript
+const ok = run.conclusion === "success";
 
-- Webhook과 Actions는 이벤트를 받는 방식 자체가 달라서, `/github` suffix 하나로도 payload 형식 차이가 확연히 체감됐어요.
-- job 단위로 알림을 보내는 대신 workflow 전체 conclusion이 결정된 시점에만 메시지 1개를 보내는 편이 신호 대비 잡음이 훨씬 적었어요.
-- Webhook URL과 Discord 사용자 ID처럼 채널 접근 권한과 연결되는 값은 Secret과 더미 매핑으로 분리해서 다뤄야 한다는 걸 다시 확인했어요.
+const content = ok
+  ? ["✅ **CI 통과 — 리뷰 부탁드립니다**", `📌 ${pr.title}`, `🔗 <${pr.html_url}>`, `👤 작성자 ${m(pr.user.login)}`, `👁️ 리뷰어 ${reviewers}`].join("\n")
+  : ["❌ **CI 실패 — 확인 필요**", `📌 ${pr.title}`, `🔗 <${pr.html_url}>`, `👤 작성자 ${m(pr.user.login)}`, `🪵 로그 <${run.html_url}>`].join("\n");
+```
 
-다음 글에서는 설정 PR을 실제로 병합한 뒤 두 채널에서 확인한 결과와, 검증 과정에서 만난 트러블슈팅을 정리할 예정이에요.
+CI 성공 시 Discord 메시지 예시는 다음과 같습니다.
+
+{/* ![CI 성공 Discord 메시지](/images/github-discord-webhook/5.png) */}
+
+CI 실패 시에는 로그 링크를 함께 전송합니다.
+
+{/* ![CI 실패 Discord 메시지](/images/github-discord-webhook/6.png) */}
+
+실패 메시지에 사용하는 `run.html_url`은 해당 GitHub Actions 실행 페이지입니다.<br />
+Discord에서 링크를 클릭하면 실패한 CI 로그로 바로 이동할 수 있습니다.
+
+---
+
+### PR 협업 Webhook과 CI Bot Webhook 비교 표
+
+| 구분                | PR 협업 Webhook                       | CI Bot Webhook                                    |
+| ------------------- | ------------------------------------- | ------------------------------------------------- |
+| Discord 채널        | `#프론트-github-webhook`              | `#프론트-github-ci-bot`                           |
+| 호출 주체           | GitHub Repository Webhook             | GitHub Actions                                    |
+| 주요 이벤트         | PR 생성, 리뷰, 댓글, 승인, 변경 요청  | CI 전체 성공 또는 실패                            |
+| URL 형식            | `.../webhooks/...`**`/github`**       | `.../webhooks/...`                                |
+| `/github` 필요 여부 | 필요                                  | 필요 없음                                         |
+| 메시지 형식         | Discord가 GitHub payload 변환         | workflow 코드가 Discord JSON을 직접 생성          |
+| 설정 위치           | GitHub Repository Settings → Webhooks | GitHub Settings → Secrets and variables → Actions |
+
+---
+
+# 실제 PR로 검증하기
+
+### workflow_run은 설정 PR을 먼저 병합한 뒤 검증한다
+
+`workflow_run`은 CI가 끝난 뒤 실행되는 후속 workflow입니다.<br />
+따라서 CI를 감지하는 `discord-pr-notification.yml` 파일이 기본 브랜치에 존재하지 않으면, 설정 파일을 처음 추가한 PR에서 후속 알림을 안정적으로 검증하기 어렵습니다.
+
+가장 확실한 **검증 순서**는 다음과 같습니다.
+
+1. **설정 PR 생성**
+   - ci.yml
+   - discord-pr-notification.yml
+   - Discord Secret / Variable 설정
+2. **설정 PR을 기본 브랜치에 병합**
+   - main 또는 팀의 기본 브랜치
+3. **새 테스트 브랜치 생성 후 PR 열기**
+   - pull_request 이벤트로 CI 실행
+4. **CI 완료 확인**
+   - ci job 완료
+   - storybook job 완료
+   - workflow 전체 conclusion 결정
+5. **PR Discord Notification 실행 확인**
+   - workflow_run: completed 감지
+6. **`#프론트-github-ci-bot` 알림 확인**
+   - 성공 메시지
+   - 또는 실패 메시지와 로그 링크
+
+확인 포인트는 **두 가지**입니다.
+
+- `workflows: ['CI']`의 이름이 실제 CI workflow의 `name: CI`와 정확히 일치하는가
+- `discord-pr-notification.yml`이 기본 브랜치에 병합된 뒤 생성한 새 PR에서 후속 workflow가 실행되는가
+
+{/* ![workflow_run 검증 Actions 탭](/images/github-discord-webhook/7.png) */}
+
+#### 성공과 실패를 모두 검증한다
+
+성공 메시지만 확인하면 실패 처리와 로그 링크가 정상인지 알 수 없습니다.<br />
+따라서 테스트 PR에서 의도적으로 **CI를 한 번 실패**시킵니다.
+
+예를 들어 `typecheck` script를 잠시 실패하게 바꿀 수 있습니다.
+
+```json
+{
+  "scripts": {
+    "typecheck": "exit 1"
+  }
+}
+```
+
+변경 후 push합니다.
+
+```bash
+git add package.json
+git commit -m "test: verify CI failure notification"
+git push
+```
+
+확인할 항목의 절차는 다음과 같습니다.
+
+“CI 실패 → PR Discord Notification 실행 → `#프론트-github-ci-bot` 실패 메시지 도착 → GitHub Actions 로그 링크 정상 이동”
+
+테스트가 끝나면 임시 실패 코드를 반드시 되돌립니다.
+
+```bash
+git restore package.json
+
+git add package.json
+git commit -m "chore: remove CI notification test"
+git push
+```
+
+---
+
+### 마치며
+
+이 구성에서는 PR 협업 이벤트와 CI 결과를 같은 방식으로 처리하지 않았습니다.<br />
+현재 Repository Webhook은 `Pull requests` 이벤트만 구독합니다.<br />
+따라서 PR 승인, 변경 요청, 코드 리뷰 댓글, 일반 PR 댓글, push 알림은 Discord로 보내지 않습니다.
+
+반면 CI 알림은 각 job의 완료 시점이 아니라 CI workflow 전체가 끝난 시점에 한 번만 전송합니다.
+
+이 구조를 통해 다음을 얻었습니다.
+
+- PR 단위 상태 변화와 자동 검증 결과를 서로 다른 채널에서 확인할 수 있습니다.
+- `Pushes`, `Check runs`, `Workflow jobs`처럼 메시지를 과도하게 만들 수 있는 이벤트를 Discord 채널에서 제외할 수 있습니다.
+- CI의 여러 job 결과를 개별적으로 알리는 대신, 최종 성공 또는 실패만 한 번 전달할 수 있습니다.
+- CI 실패 시 Discord 메시지에서 GitHub Actions 로그로 바로 이동할 수 있습니다.
+- Secret 미설정, 연결된 PR 없음, Draft PR, 닫힌 PR, Webhook 전송 실패 같은 예외를 workflow 안에서 방어할 수 있습니다.
+
+결국 Webhook과 Actions의 선택 기준은 단순합니다.
+
+| 상황                                                                     | 선택                      |
+| ------------------------------------------------------------------------ | ------------------------- |
+| GitHub에서 발생한 PR 상태 변화를 거의 그대로 전달하고 싶을 때            | GitHub Repository Webhook |
+| 여러 CI job의 결과를 모아 조건에 따라 하나의 메시지로 만들고 싶을 때     | GitHub Actions            |
+| Discord 메시지 형식, 멘션, PR 정보, 실패 로그 링크를 직접 제어해야 할 때 | GitHub Actions            |
+
+Webhook은 이벤트를 빠르게 전달하는 데 적합하고, Actions는 완료 조건을 판단하고 메시지를 가공하는 데 적합했습니다.
