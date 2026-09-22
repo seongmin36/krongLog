@@ -1,4 +1,3 @@
-import { timeStamp } from "node:console";
 import fs from "node:fs/promises";
 import path from "node:path";
 
@@ -57,7 +56,7 @@ export interface OgData {
 
 function decodeEntities(text: string): string {
   return text
-    .replace(/$amp;/g, "&")
+    .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
     .replace(/&quot;/g, '"')
@@ -106,8 +105,18 @@ function extractFavicon(html: string, pageUrl: string): string {
   return `${origin}/favicon.ico`;
 }
 
+function resolveAbsoluteUrl(value: string | null, baseUrl: string): string | null {
+  if (!value) return null;
+
+  try {
+    return new URL(value, baseUrl).href;
+  } catch {
+    return value;
+  }
+}
+
 export async function fetchOgData(url: string): Promise<OgData | null> {
-  const key = `og_${cacheKey(url)}`;
+  const key = `og_v2_${cacheKey(url)}`;
   const cached = await readCache<OgData>(key);
   if (cached) return cached;
 
@@ -124,7 +133,8 @@ export async function fetchOgData(url: string): Promise<OgData | null> {
     if (!res.ok) return null;
 
     const html = await res.text();
-    const { hostname } = new URL(url);
+    const finalUrl = res.url;
+    const { hostname } = new URL(finalUrl);
     const titleTag = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1];
 
     const data: OgData = {
@@ -134,8 +144,11 @@ export async function fetchOgData(url: string): Promise<OgData | null> {
         (titleTag ? decodeEntities(titleTag) : hostname),
       description:
         extractMeta(html, "og:description") ?? extractMeta(html, "description"),
-      image: extractMeta(html, "og:image"),
-      favicon: extractFavicon(html, url),
+      image: resolveAbsoluteUrl(
+        extractMeta(html, "og:image") ?? extractMeta(html, "twitter:image"),
+        finalUrl,
+      ),
+      favicon: extractFavicon(html, finalUrl),
       siteName: extractMeta(html, "og:site_name") ?? hostname,
     };
 

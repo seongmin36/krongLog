@@ -150,6 +150,18 @@
   background-color: var(--color-inline-code-surface-dark);
 }
 
+/* figcaption 인라인 코드: 본문 code(text-sm font-bold)보다 작고 가볍게 */
+.prose figcaption :not(pre) > code {
+  @apply px-0.5 text-xs font-normal;
+  color: var(--color-primary);
+  background-color: transparent;
+}
+
+.dark .prose figcaption :not(pre) > code {
+  color: var(--color-dark-text);
+  background-color: transparent;
+}
+
 /* backtick(`) 제거 */
 .prose :not(pre) > code::before,
 .prose :not(pre) > code::after {
