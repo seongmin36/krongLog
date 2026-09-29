@@ -90,6 +90,16 @@
   @apply text-primary dark:text-dark-text no-underline hover:underline;
 }
 
+/*
+ * LinkCard · GithubCard 카드형 제목
+ * span 사용: .prose-blog p(KaKao Small 300)가 제목까지 적용되지 않도록 함
+ * 색: style-tokens — 라이트 text-gray-900, 다크 --color-card-title-dark
+ */
+.card-preview-title {
+  @apply text-[15px] leading-snug font-bold text-gray-900 dark:text-card-title-dark;
+  font-family: "KaKao Big", "KaKao Big Fallback", sans-serif;
+}
+
 /* bold 강조 */
 .prose strong {
   @apply font-bold;
@@ -426,6 +436,25 @@
 .dark [data-tag="Vite"] {
   background-color: var(--color-tag-vite-bg-dark);
   color: var(--color-tag-vite-text-dark);
+}
+
+/* 오픈소스 · Fedify */
+[data-tag="오픈소스"] {
+  background-color: var(--color-tag-opensource-bg);
+  color: var(--color-tag-opensource-text);
+}
+.dark [data-tag="오픈소스"] {
+  background-color: var(--color-tag-opensource-bg-dark);
+  color: var(--color-tag-opensource-text-dark);
+}
+
+[data-tag="Fedify"] {
+  background-color: var(--color-tag-fedify-bg);
+  color: var(--color-tag-fedify-text);
+}
+.dark [data-tag="Fedify"] {
+  background-color: var(--color-tag-fedify-bg-dark);
+  color: var(--color-tag-fedify-text-dark);
 }
 
 /* 팔레트: amber */

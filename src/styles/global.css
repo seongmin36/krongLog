@@ -115,6 +115,17 @@
   --color-tag-vite-bg-dark: rgba(100, 108, 255, 0.15);
   --color-tag-vite-text-dark: #a5b4fc;
 
+  /* 오픈소스 · Fedify */
+  --color-tag-opensource-bg: rgba(132, 204, 22, 0.14);
+  --color-tag-opensource-text: #4d7c0f;
+  --color-tag-opensource-bg-dark: rgba(163, 230, 53, 0.14);
+  --color-tag-opensource-text-dark: #bef264;
+
+  --color-tag-fedify-bg: rgba(187, 230, 254, 0.55);
+  --color-tag-fedify-text: #0369a1;
+  --color-tag-fedify-bg-dark: rgba(187, 230, 254, 0.16);
+  --color-tag-fedify-text-dark: #bbe6fe;
+
   /* Astro 그라디언트 */
   --background-image-gradient-astro: linear-gradient(
     90deg,
