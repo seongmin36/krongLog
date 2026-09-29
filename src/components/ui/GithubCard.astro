@@ -57,7 +57,7 @@ const segments = issue ? parseTitle(issue.title) : [];
 
       <div class="min-w-0 flex-1">
         <div class="flex items-center gap-x-2 gap-y-1">
-          <span class="dark:text-card-title-dark truncate text-[15px] leading-snug font-bold text-gray-900">
+          <span class="card-preview-title truncate">
             {segments.map((seg) =>
               seg.code ? (
                 <code class="bg-inline-code-surface dark:bg-inline-code-surface-dark dark:text-dark-description rounded px-1 py-0.5 font-mono text-[13px] font-semibold text-gray-800">
