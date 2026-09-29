@@ -428,6 +428,25 @@
   color: var(--color-tag-vite-text-dark);
 }
 
+/* 오픈소스 · Fedify */
+[data-tag="오픈소스"] {
+  background-color: var(--color-tag-opensource-bg);
+  color: var(--color-tag-opensource-text);
+}
+.dark [data-tag="오픈소스"] {
+  background-color: var(--color-tag-opensource-bg-dark);
+  color: var(--color-tag-opensource-text-dark);
+}
+
+[data-tag="Fedify"] {
+  background-color: var(--color-tag-fedify-bg);
+  color: var(--color-tag-fedify-text);
+}
+.dark [data-tag="Fedify"] {
+  background-color: var(--color-tag-fedify-bg-dark);
+  color: var(--color-tag-fedify-text-dark);
+}
+
 /* 팔레트: amber */
 [data-tag="Backend"] {
   @apply bg-amber-100 text-amber-700;
