@@ -8,6 +8,7 @@ image: "./images/img-fedify.png"
 
 import LinkCard from "@/components/ui/LinkCard.astro";
 import GithubCard from "@/components/ui/GithubCard.astro";
+import Tooltip from "@/components/ui/Tooltip.astro";
 
 <GithubCard url="https://github.com/fedify-dev/fedify/issues/951" />
 
@@ -17,17 +18,19 @@ import GithubCard from "@/components/ui/GithubCard.astro";
 
 ## <mark>벤치마크(Benchmark)란?</mark>
 
-**벤치마크(benchmark)**는 정해진 조건으로 프로그램에 일을 시키고, 그때의 처리 속도와 결과를 측정하는 테스트입니다.<br />
+<strong>벤치마크(benchmark)</strong>는 정해진 조건으로 프로그램에 일을 시키고, 그때의 처리 속도와 결과를 측정하는 테스트입니다.<br />
 예를 들어 같은 요청을 여러 번 보내고, ‘얼마나 처리했는지, 얼마나 걸렸는지, 실패는 어떻게 처리되었는지’를 관찰합니다.
 
 <LinkCard url="https://fedify.dev/manual/benchmarking#benchmarking" />
 
-Fedify의 `bench`는 테스트 대상 서버에 ActivityPub 전달 작업을 시키는 도구입니다.<br />
-지금 보고 있는 failure 시나리오는 원격 수신함이 404 또는 410을 반환하게 해서, 서버가 그런 전달 실패를 어떻게 처리하는지 측정합니다.
+Fedify의 `fedify bench` 명령은 <Tooltip note="주의: 이 모드를 켜면 벤치마크 전용 엔드포인트가 노출되며, 벤치마크 대상 시스템에 맞춰 일부 기본 설정이 느슨하게 변경됩니다.">**benchmarkMode**</Tooltip>가 켜진 대상 서버에 ActivityPub 부하를 걸고, <br/>'지연, 처리량, 성공률, 오류'를 모아 보고하는 벤치마크 클라이언트입니다.<br />
+YAML 스위트(suite)로 시나리오를 정의하며, 클라이언트는 합성 원격 액터처럼 서명된 전달을 보내거나<br/> `/.well-known/fedify/bench/trigger`를 호출해 대상의 `sendActivity()`, 큐 경로를 재현합니다.
+
+<br/>
 
 ### 1. 무엇을 확인하는 것인가?
 
-> “shares sink base across remote fault mix”
+> shares sink base across remote fault mix
 
 이 문장의 뜻은 ‘서로 다른 원격 오류 시나리오’가 **같은 수신함 주소의 기준점**(sinkBase)을 쓰는지 확인한다는 것입니다.
 
@@ -58,14 +61,12 @@ sinkBase : http://127.0.0.1:9000/
 여기서 수신함은 테스트 대상 서버가 메시지를 보낼 목적지입니다.<br />
 러너가 대상 서버의 `/trigger`에 ‘이 주소의 수신함으로 보내라’고 전달하면, 대상 서버가 발신 전달을 시도하고, 벤치마크용 수신함이 설정된 404 또는 410으로 응답하는 흐름입니다.
 
-Fedify 문서에서는 고정된 `sinkBase`를 쓰면 대상 서버가 수신함 URL을 미리 `triggerSinks`에 등록해 허용할 수도 있다고 설명합니다.
+Fedify 문서에서는 고정된 `sinkBase`를 쓰면 대상 서버가 수신함 URL을 미리 <Tooltip note="대상 서버가 그 URL로 보내도 되는지 확인하는 허용 목록">`triggerSinks`</Tooltip>에 등록해 허용할 수도 있다고 설명합니다.
 
 <figure>
   <img src="/images/fedify-flaky-failure-runner-test/1.png" alt="Fedify benchmarking scenario types — sinkBase와 triggerSinks" />
   <figcaption>출처: Fedify Benchmarking — scenario types</figcaption>
 </figure>
-
-<LinkCard url="https://fedify.dev/manual/benchmarking#scenario-types" />
 
 위 문장을 순서대로 풀면 다음과 같습니다.
 
@@ -84,6 +85,8 @@ Fedify 문서에서는 고정된 `sinkBase`를 쓰면 대상 서버가 수신함
 
 `sinkBase` 덕분에 생성될 주소를 실행 전에 알 수 있으므로, 대상 서버의 `triggerSinks`에 생성될 수신함 URL 각각 설정할 수 있다는 뜻입니다.
 
+<br/>
+
 ### 2. 어떤 요청을 실행하나?
 
 앞서 살펴봤다시피 시나리오에는 **두 원격 결함**이 들어 있습니다.
@@ -96,6 +99,8 @@ fault: ["remote-404", "remote-410"];
 
 여기서 중요한 점은 실패 응답 자체가 **테스트 목적**이라는 것입니다.<br />
 즉, Fedify의 `failure` 시나리오에서 성공은 예측한 실패를 관찰했다는 의미입니다.
+
+<br/>
 
 ### 3. 테스트가 주소를 어떻게 기록하는가?
 
@@ -120,6 +125,8 @@ if (url.pathname === "/.well-known/fedify/bench/trigger") {
 
 즉, 나중에 `recipientInboxes`를 보면 러너가 실제로 어떤 수신함 URL을 만들어 요청했는지 알 수 있습니다.
 
+<br/>
+
 ### 4. 왜 최소 두 번이 필요할까?
 
 마지막 검증을 보면 두 주소가 모두 등장해야 합니다.
@@ -141,6 +148,8 @@ assert.ok(measurement.requests.total > 1);
 이 코드는 측정된 요청이 적어도 2개 이상이어야 한다는 것입니다.<br />
 다만 이 조건은 ‘주소 생성이 올바르다’를 직접 확인하는 것이 아니라, 주소 두 개를 확인할 만큼 요청이 여러 번 실행됐는지에 대한 확인 절차입니다.
 
+<br/>
+
 ### 5. 왜 25ms가 문제가 되었을까?
 
 이슈 본문에 적힌 내용에 따르면,
@@ -160,14 +169,14 @@ load: { concurrency: 1 },
 duration: "25ms",
 ```
 
-`concurrency: 1`은 동시에 진행하는 작업을 한 개로 제한하는 **폐쇄 루프 방식**입니다.<br />
+`concurrency: 1`은 동시에 진행하는 작업을 한 개로 제한하는 <Tooltip note="새로운 사용자가 무한히 유입되는 방식(Open Loop)이 아니라, 정해진 수의 가상 사용자가 작업을 마치면 다시 처음으로 돌아가 다음 작업을 반복하는 형태를 말합니다.">**폐쇄 루프 방식**</Tooltip>입니다.<br />
 첫 작업이 끝나야 다음 작업으로 넘어가는 방식이라는 것입니다.
 
-Fedify 공식 문서에서도 폐쇄 루프를 ‘고정된 수의 가상 사용자가 작업하는 방식’으로 설명하고 있고, 원격 결함 전달은 대상의 큐 결과를 관찰(Monitoring)하면서 직렬화한다고 설명합니다.
+Fedify 공식 문서에서도 폐쇄 루프를 ‘고정된 수의 <Tooltip note="동시에 접속해 요청을 보내는 봇(Bot) 또는 테스트용 가상 유저">가상 사용자</Tooltip>가 작업하는 방식’으로 설명하고 있고, <br/> 원격 <Tooltip note="네트워크가 끊기거나, 상대방 서버가 다운되는 등의 에러(장애)를 시스템에 인위적으로 주입하거나 전달하는 행위">**결함 전달**</Tooltip>은 대상의 큐 결과를 관찰(Monitoring)하면서 <Tooltip note="분산 시스템이나 멀티 스레드 환경에서 여러 작업이 얽히지 않도록 순서대로 줄을 세워 한 번에 하나씩 차례대로 처리(순차적 실행)">**직렬화**</Tooltip>한다고 설명합니다.
 
 <LinkCard url="https://fedify.dev/manual/benchmarking#load-generation-and-signing" />
 
-말이 어려울 수 있어서 정리하면, 정해진 인원의 **가상 유저들이 계속해서 작업을 반복하는 통제된 테스트 환경**에서, ‘**상대방 서버가 갑자기 다운되면 내 서버가 어떻게 반응**하는지’에 대한 장애 실험을 진행합니다.
+말이 어려울 수 있어서 정리해보자면, 정해진 인원의 **가상 유저**들이 계속해서 작업을 반복하는 통제된 테스트 환경에서, ‘**상대방 서버가 갑자기 다운되면 내 서버가 어떻게 반응**하는지’에 대한 장애 실험을 진행합니다.
 
 이때 상대방 서버가 죽어서 보내지 못한 메시지들은 대기열(Queue)에 쌓이게 되는데, 내 서버는 이 대기열의 상태를 실시간으로 지켜보면서 **작업이 서로 엉키거나 순서가 뒤바뀌지 않도록 한 줄로 바르게 세워**(직렬화) 차례대로 **재시도하거나 안전하게 삭제** 처리합니다.
 
@@ -200,13 +209,16 @@ recipientInboxes = ["/inbox/0"];
 정상적으로 테스트가 진행되었고, 100회 시도에도 이상은 없었습니다.
 
 결론적으로 **로컬 환경이 CI보다 빨라서 25ms 안에 끝났을 가능성이 높아서** 발생하지 않았지만, [#949의 Node.js 테스트 작업](https://github.com/fedify-dev/fedify/actions/runs/29640927713/job/88071217632?pr=949)에서 실패한 사례가 있었기 때문에 이것이 Flaky Test의 무서운 점입니다.
+<br/> → '이 주제에 대해서는 추후에 다뤄보고 싶다.'
+
+<br/>
 
 ### 6. 어떻게 고치면 될까?
 
 이 테스트의 본질은 ‘25ms 안에 몇 번 실행되느냐?’가 아니라 ‘두 결함을 실행했을 때 주소가 같은 `sinkBase` 아래에서 만들어지냐?’입니다.
 
 따라서 두 번의 요청이 실행될 조건을 먼저 보장해야 합니다.<br />
-이슈 본문에서 명시된 **접근 방식 제안(Suggested approach)**을 바탕으로 해결 방안을 얻을 수 있었습니다.
+이슈 본문에서 명시된 <strong>접근 방식 제안(Suggested approach)</strong>을 바탕으로 해결 방안을 얻을 수 있었습니다.
 
 - **가상 시계 주입** : 테스트가 시간을 통제해, CI가 느리더라도 두 요청을 관찰하기 전에 25ms 마감 시각이 지나지 않게 합니다.
 - **실행 횟수 고정** : 러너가 횟수 모드를 지원한다면(ex. `runs: 2` or `iterations: 2`), ‘25ms 동안 실행’ 대신 **시간 상관 없이** ‘**두 요청 실행**’으로 테스트합니다.
@@ -262,7 +274,8 @@ suite에서 failure 시나리오를 가져오는데, 설정의 의미는 다음�
 | `duration: "25ms"`                    | 예정 도착 시각을 생성할 구간             |
 | `queueDrainTimeout: "1s"`             | 큐 결과를 기다리는 경로의 제한 시간 설정 |
 
-이 시나리오의 흐름을 정리하면, `http://target.test/`를 대상으로 ‘alice’라는 가상 사용자가 보내는 활동에 대해 `remote-404`, `remote-410` 결함을 섞어 시험하고, 두 결함에 사용할 수신함을 동일한 `sinkBase` 아래에 만들면서, 초당 100건의 부하를 25ms 구간에 설정한 failure 시나리오를 정규화해 꺼냅니다.
+이 시나리오의 흐름을 정리하면, 
+>`http://target.test/`를 대상으로 ‘alice’라는 가상 사용자가 보내는 활동에 대해 `remote-404`, `remote-410` 결함을 섞어 시험하고, 두 결함에 사용할 수신함을 동일한 `sinkBase` 아래에 만들면서, 초당 100건의 부하를 25ms 구간에 설정한 failure 시나리오를 정규화해 꺼냅니다.
 
 ### 가상 시계로 시간 의존성 제거
 
@@ -285,7 +298,7 @@ const clock: Clock = {
 `now()`는 러너에게 테스트의 현재 시각을 알려줍니다.<br />
 `sleepUntil(timeMs)`는 실제로 `timeMs`만큼 기다리지 않고, `now` 시각을 time까지 전진시킵니다.
 
-이 시나리오는 `rate: 100`인 open-loop 부하를 사용하고, 기본 도착 분포인 `constant`에 따라 10ms 간격으로 요청을 예정합니다.<br />
+이 시나리오는 `rate: 100`인 <Tooltip note="서버 응답과 무관하게 정해진 스케줄과 주기에 맞춰서 새로운 트래픽을 쏘는 방식">open-loop 부하</Tooltip>를 사용하고, 기본 도착 분포인 <Tooltip note="요청들이 일정한 시간 간격을 두고 도착하는 형태"><code>constant</code></Tooltip>에 따라 <Tooltip note="1000ms(1초) / 100(rate) = 10ms">10ms 간격</Tooltip>으로 요청을 예정합니다.<br />
 따라서 `duration: "25ms"` 구간의 예정 시각은 `0·10·20ms`, 총 세 개입니다.<br />
 30ms 이상부터는 구간 밖입니다.
 
@@ -304,6 +317,8 @@ assert.ok(recipientInboxes.includes(new URL("/inbox/1", sinkBase).href));
 
 `.strictEqual()`은 파라미터의 **두 값이 일치하는지 엄격하게 확인**하고, `.ok()`는 값이 **truthy**한지 확인합니다.
 
+<LinkCard url="https://nodejs.org/api/assert.html#assertstrictEqualactual-expected-message" />
+
 즉, 위 코드에서 순서대로 측정하는 것들은 다음과 같습니다.
 
 1. 측정된 요청이 정확히 3건이어야 통과합니다.
@@ -313,9 +328,14 @@ assert.ok(recipientInboxes.includes(new URL("/inbox/1", sinkBase).href));
 
 ---
 
-## 마치며
+## 후기(문제를 겪었던 경험)
 
-#951은 failure 러너가 `sinkBase` 아래에서 inbox를 올바르게 나누는지 검증하는 테스트였지만, 짧은 `duration`과 CI 스케줄링이 겹치면 **환경에 따라 결과가 달라지는 Flaky Test**가 될 수 있었습니다.
+이슈의 문제는 25ms짜리 closed-loop 테스트가 실제 시간 안에 두 번째 요청을 끝내지 못하면 `total > 1` 단언에서 실패한다는 것이었습니다. 이슈에서는 주입 가능한 `Clock`으로 시간을 통제하거나, 요청 횟수를 고정하는 방안을 제안했습니다.
 
-가상 `Clock`으로 시간을 통제하고, open-loop `rate`와 고정된 단언으로 **‘몇 번 실행됐는지’를 환경과 분리**해 검증하도록 바꿨습니다.<br />
-벤치마크 테스트에서도 ‘무엇을 증명하려는지’에 맞는 관측 조건을 두는 것이, duration만 늘리는 것보다 근본적인 해결에 가깝다고 느꼈습니다.
+`now()`는 현재 값을 읽고, `sleepUntil()`만 그 값을 앞으로 옮기는 방식은 가상 시계가 실제 시간이 지나도 저절로 움직이지 않습니다. <br/> 따라서 `sleepUntil()`을 호출하지 않는 기존 closed-loop 경로에 시계만 주입하면 25ms 종료 조건에 도달하지 못하는 문제가 발생합니다.
+
+그래서 `rate: 100`을 지정해 open-loop로 바꿨습니다.<br/> `constant` 분포에서는 요청 간격이 10ms면, 25ms 구간에 예정되는 시각은 `0·10·20ms`입니다. open-loop는 각 예정 시각에 `sleepUntil()`을 호출하므로 주입한 시계가 앞으로 갑니다. <br/>하지만, 예정 시각이 세 개라는 사실만으로 요청 세 건이 측정됐다고 단정지을 수는 없습니다. <br/> 그래서 `measurement.requests.total === 3`을 확인하고, 그 값이 mock에서 관측한 `/trigger` 호출 수인 `triggerCalls`와도 일치하는지 검증했습니다.
+
+결과적으로 제거한 것은 ‘CI의 실제 25ms 안에 두 번 이상의 요청이 완료되도록 해야 한다’는 조건입니다. 두 inbox가 모두 사용됐는지는 기존 단언으로 계속 검증합니다.
+
+다음에는 테스트를 고치기 전에 실패한 단언이 무엇을 검증하고, 어떤 실행 조건에 의존하는지부터 보면 좋을 것 같습니다.
