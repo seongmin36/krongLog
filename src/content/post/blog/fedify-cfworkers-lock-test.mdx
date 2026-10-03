@@ -1,0 +1,333 @@
+---
+title: "Fedify #879 : KV 락 재시도를 스텁이 아닌 상태로 검증하기"
+description: "Fedify의 @fedify/cfworkers가 Workers KV의 최종적 일관성 때문에 best-effort로만 순서를 보장하는 이유를 정리하고, 이슈 #879에서 vi.spyOn() 스텁 대신 실제 상태를 가진 가짜 KV로 락 재시도 테스트를 작성한 과정을 담습니다."
+date: "2026-10-04"
+tags: ["오픈소스", "Fedify", "테스트"]
+image: "./images/img-fedify.png"
+---
+
+import Tooltip from "@/components/ui/Tooltip.astro";
+import LinkCard from "@/components/ui/LinkCard.astro";
+import GithubCard from "@/components/ui/GithubCard.astro";
+
+지난 [listen() 테스트 글](https://blog.kronglog.dev/blogs/fedify-cfworkers-listen-test/)에서는 `WorkersMessageQueue.listen()`이 왜 항상 `TypeError`를 던지는지 검증했고, 글 마지막에 다음 이슈로 #879를 예고했습니다.
+
+<GithubCard url="https://github.com/fedify-dev/fedify/issues/879" />
+
+이번 글에서는 그 약속대로, 같은 패키지의 `processMessage()`가 **락(lock)이 걸린 메시지를 어떻게 다루는지** 검증하는 과정을 정리합니다.
+
+---
+
+# #879 이슈 이해하기
+
+이슈 본문은 다음과 같습니다.
+
+> _@fedify/cfworkers_ uses KV locks to provide best-effort ordering for Workers Queues. If a lock already exists, the message must be retried later instead of being processed immediately.
+>
+> Add a test in _packages/cfworkers/src/mod.test.ts_ that verifies `WorkersMessageQueue.processMessage()` returns `shouldProcess: false` when the ordering key lock already exists.
+>
+> Suggested check: `mise run check-each cfworkers`.
+
+출처: Fedify [#879](https://github.com/fedify-dev/fedify/issues/879)
+
+한 줄로 요약하면 'KV 락이 이미 걸려 있으면 메시지를 재시도로 돌리는 동작을 테스트로 증명하라'는 것인데, 여기서 바로 의문이 듭니다.<br />
+왜 하필 <strong>최선형(best-effort)</strong>일까요? 왜 완벽하게 순서를 보장하지 못할까요?
+
+이 질문에 답하려면 먼저 Workers KV가 어떤 저장소인지 알아야 합니다.
+
+## <mark>Workers KV는 왜 "최선형" 순서 보장만 가능할까</mark>
+
+Cloudflare Workers KV는 공식 문서에서 다음과 같이 설명됩니다.
+
+<LinkCard url="https://developers.cloudflare.com/kv/" />
+
+> a global, low-latency, key-value data store for building dynamic and performant APIs and websites
+
+전 세계에 분산된 **저지연 키-값 저장소**라는 뜻인데, 이 저지연을 얻는 대신 강한 일관성(strong consistency)을 포기합니다.
+
+<LinkCard url="https://developers.cloudflare.com/kv/concepts/how-kv-works/" />
+
+> KV achieves high performance by being eventually-consistent. At the Cloudflare global network location at which changes are made, these changes are usually immediately visible. In other global network locations changes may take up to 60 seconds or more to be visible as their cached versions of the data time-out.
+
+한 지역에서 값을 쓰면 그 지역에서는 바로 보이지만, 다른 지역에서는 <Tooltip note="데이터가 결국에는(eventually) 모든 곳에서 같아지지만, 그 시점까지는 지역마다 다른 값을 볼 수 있는 일관성 모델">최종적 일관성(eventual consistency)</Tooltip>때문에 **최대 60초 이상** 걸려서야 같은 값을 보게 될 수 있습니다.
+
+Fedify 공식 문서도 이 특성을 그대로 반영해서 순서 보장의 한계를 명시합니다.
+
+<LinkCard url="https://fedify.dev/manual/mq#ordering-guarantees" />
+
+> `WorkersMessageQueue` requires a Workers KV namespace to be provided for ordering key locks. Due to Workers KV's eventual consistency, the ordering guarantee is best-effort.
+
+실제로 `@fedify/cfworkers` 소스 코드에도 같은 경고가 주석으로 남아 있습니다.
+
+<LinkCard url="https://github.com/fedify-dev/fedify/blob/main/packages/cfworkers/src/mod.ts" />
+
+```typescript
+// packages/cfworkers/src/mod.ts
+
+export interface WorkersMessageQueueOptions {
+  /**
+   * The KV namespace to use for ordering key locks.  If not provided, ordering
+   * keys will not be supported.
+   *
+   * Note: Cloudflare Workers KV has eventual consistency, so ordering key
+   * guarantees are best-effort.  For strict ordering requirements, consider
+   * using Durable Objects.
+   */
+  readonly orderingKv?: WorkersKvNamespaceLike<string>;
+}
+```
+
+더 들어가보면, `processMessage()` 구현부에는 더 구체적인 이유가 적혀 있습니다.
+
+```typescript
+// Try to acquire lock
+// Note: Workers KV doesn't support atomic CAS, so there's a race condition
+// window.  This is best-effort ordering.
+await this.#orderingKv.put(lockKey, Date.now().toString(), {
+  expirationTtl: this.#orderingLockTtl,
+});
+```
+
+<Tooltip note="Compare-And-Swap. '현재 값이 A일 때만 B로 바꿔라'처럼, 읽기와 쓰기를 하나의 원자적(atomic) 동작으로 묶는 연산">CAS(Compare-And-Swap)</Tooltip>는 '락이 없을 때만 락을 건다'는 동작을 한
+번에 원자적으로 처리하는 방법입니다.
+<br />
+Workers KV에는 이 연산이 없기 때문에, `get()`으로 락이 없음을 확인한 직후 다른 요청이 끼어들어 똑같이 락이 없다고 판단하고 동시에 `put()`을 호출할 수 있는 <strong>경쟁 상태(race condition) 창</strong>
+이 생깁니다.
+
+정리하면, Workers KV는 (1) 쓰기가 다른 지역에 반영되기까지 지연이 있고, (2) 읽기·쓰기를 한 번에 묶는 CAS 연산이 없기 때문에, `@fedify/cfworkers`의 락은 "반드시 보장"이 아니라 "최대한 지켜본다"는 뜻의 최선형으로 설계되어 있습니다.
+
+## 이슈 내용 하나씩 뜯어보기
+
+이제 이슈 문장을 하나씩 뜯어보겠습니다.
+
+> "_@fedify/cfworkers_ uses KV locks to provide best-effort ordering for Workers Queues."
+
+→ `@fedify/cfworkers`는 Workers Queues의 순서를 보장하기 위해 KV 락을 쓰는데, 앞서 본 대로 그 보장 수준은 최선형입니다.
+
+> "If a lock already exists, the message must be retried later instead of being processed immediately."
+
+→ 락이 이미 존재한다면, 메시지는 즉시 처리되지 않고 나중에 재시도되어야 합니다.
+
+> "Add a test in _packages/cfworkers/src/mod.test.ts_ that verifies `WorkersMessageQueue.processMessage()` returns `shouldProcess: false` when the ordering key lock already exists."
+
+→ 순서 키(ordering key) 락이 이미 존재할 때 `WorkersMessageQueue.processMessage()`가 `shouldProcess: false`를 반환하는지 검증하는 테스트를 `packages/cfworkers/src/mod.test.ts`에 추가하라는 지시입니다.
+
+---
+
+# 테스트 작성 과정
+
+## 검증 목표
+
+이슈가 요구하는 것은 명확합니다.
+
+1. ordering key로 락을 건 상태를 만든다
+2. 같은 ordering key로 다시 `processMessage()`를 호출했을 때 `shouldProcess: false`가 반환되는지 확인한다
+
+`processMessage()`의 실제 락 판정 로직은 다음과 같습니다.
+
+```typescript
+// packages/cfworkers/src/mod.ts
+
+async processMessage(rawMessage: any): Promise<ProcessMessageResult> {
+  const wrapped = rawMessage as WrappedMessage;
+  const orderingKey = wrapped.__fedify_ordering_key__;
+  const message = "__fedify_payload__" in wrapped
+    ? wrapped.__fedify_payload__
+    : rawMessage;
+
+  if (orderingKey == null || this.#orderingKv == null) {
+    return { shouldProcess: true, message };
+  }
+
+  const lockKey = this.#getOrderingLockKey(orderingKey);
+
+  const existing = await this.#orderingKv.get(lockKey);
+  if (existing != null) {
+    return { shouldProcess: false };
+  }
+
+  await this.#orderingKv.put(lockKey, Date.now().toString(), {
+    expirationTtl: this.#orderingLockTtl,
+  });
+
+  const release = async (): Promise<void> => {
+    await this.#orderingKv!.delete(lockKey);
+  };
+
+  return { shouldProcess: true, message, release };
+}
+```
+
+제가 검증해야 할 분기는 `existing != null`일 때 `{ shouldProcess: false }`만 반환하고, `message`와 `release`는 주지 않는다는 부분입니다.
+
+<br />
+
+## 레포에 이미 있던 테스트 두 벌
+
+이슈를 받고 바로 새 테스트를 짜기 전에, 레포에 비슷한 테스트가 있는지부터 찾아봤습니다. 두 벌이 있었습니다.
+
+<br />
+
+### `test/mq.test.ts`의 스텁 기반 테스트
+
+이 파일은 실제 Cloudflare Workers 런타임을 흉내내는 환경(`cloudflare:test`)에서 도는 테스트입니다.<br />
+여기엔 이미 같은 제목의 테스트가 있었습니다.
+
+```typescript
+// packages/cfworkers/test/mq.test.ts
+
+it("returns shouldProcess=false when lock exists", async () => {
+  const getSpy = vi.spyOn(env.KV1, "get").mockResolvedValue("locked");
+
+  const queue = new WorkersMessageQueue(env.Q1, { orderingKv: env.KV1 });
+  const result = await queue.processMessage({
+    __fedify_ordering_key__: "key1",
+    __fedify_payload__: { data: "test" },
+  });
+
+  expect(result.shouldProcess).toBe(false);
+  expect(result.message).toBeUndefined();
+  expect(result.release).toBeUndefined();
+
+  getSpy.mockRestore();
+});
+```
+
+`vi.spyOn(env.KV1, "get").mockResolvedValue("locked")`는 실제 KV의 `get()` 메서드를 가로채서, 무엇을 묻든 무조건 `"locked"`라고 답하게 만듭니다.
+
+<br />
+
+### `src/mod.test.ts`의 `release()` 테스트
+
+반면 유닛 테스트 파일에는 락을 스텁이 아니라 직접 만든 가짜 KV 저장소로 재현하는 테스트가 있었습니다.
+
+```typescript
+// packages/cfworkers/src/mod.test.ts
+
+it("processMessage() - release() frees the ordering lock", async () => {
+  const orderingKv = new MockKvNamespace();
+  const queue = new WorkersMessageQueue(mockQueue, { orderingKv });
+
+  const first = await queue.processMessage({
+    __fedify_ordering_key__: "actor-1",
+    __fedify_payload__: { id: "first" },
+  });
+
+  expect(first.shouldProcess).toBe(true);
+  expect(orderingKv.entries.has("__fedify_ordering_actor-1")).toBe(true);
+
+  await first.release?.();
+
+  expect(orderingKv.entries.has("__fedify_ordering_actor-1")).toBe(false);
+
+  const second = await queue.processMessage({
+    __fedify_ordering_key__: "actor-1",
+    __fedify_payload__: { id: "second" },
+  });
+
+  expect(second.shouldProcess).toBe(true);
+});
+```
+
+`MockKvNamespace`는 KV의 `get`/`put`/`delete`를 실제로 구현한 가짜 저장소입니다.<br />
+`processMessage()`를 두 번 호출해서, 첫 호출이 만든 락을 `release()`로 해제하면 두 번째 호출이 다시 `shouldProcess: true`를 받는지까지 실제 상태로 확인합니다.
+
+제가 작성할 테스트는 이 구조를 그대로 가져가되, `release()`를 호출하지 않고 바로 두 번째 메시지를 보내면 된다는 걸 알 수 있었습니다.
+
+## 최종 테스트 코드
+
+```typescript
+// packages/cfworkers/src/mod.test.ts
+
+it("processMessage() - returns shouldProcess=false when lock exists", async () => {
+  const orderingKv = new MockKvNamespace();
+  const queue = new WorkersMessageQueue(mockQueue, { orderingKv });
+
+  const first = await queue.processMessage({
+    __fedify_ordering_key__: "key1",
+    __fedify_payload__: { id: "first" },
+  });
+
+  expect(first.shouldProcess).toBe(true);
+  expect(first.message).toEqual({ id: "first" });
+
+  const second = await queue.processMessage({
+    __fedify_ordering_key__: "key1",
+    __fedify_payload__: { id: "second" },
+  });
+
+  expect(second.shouldProcess).toBe(false);
+  expect(second.message).toBeUndefined();
+  expect(second.release).toBeUndefined();
+});
+```
+
+**동작 설명**
+
+- `'first'` 메시지가 `processMessage()`를 통과하면서 `key1`에 대한 락을 실제로 생성합니다 (`shouldProcess: true`).
+- 락을 해제하지 않은 채 같은 `key1`로 `'second'` 메시지를 보내면, `processMessage()`가 자기 자신이 직전에 만든 락을 다시 읽어서 `shouldProcess: false`를 돌려줍니다.
+- 이때 `message`와 `release`는 `undefined`인데, 처리하지 않을 메시지에 release 콜백을 쥐어주면 호출하는 쪽이 실수로 아직 유효한 락을 지울 수 있기 때문입니다.
+
+## <mark>vi.spyOn()과 vi.fn(), 그리고 스텁이 놓치는 것</mark>
+
+앞서 본 두 테스트의 차이를 짚고 넘어가고 싶습니다.<br />
+Vitest는 "가짜로 답하게 만드는" 도구로 `vi.fn()`과 `vi.spyOn()` 두 가지를 제공합니다.
+
+<LinkCard url="https://vitest.dev/api/vi.html" />
+
+> [vi.fn] Creates a spy on a function, but can also be initiated without one. Every time a function is invoked, it stores its call arguments, returns, and instances.
+
+> [vi.spyOn] Creates a spy on a method or getter/setter of an object similar to `vi.fn()`. It returns a mock function.
+
+정리하면, `vi.fn()`은 독립된 가짜 함수를 새로 만드는 것이고, `vi.spyOn()`은 이미 존재하는 객체의 메서드를 가로채서 호출 여부를 기록하거나 반환값을 바꿔치기하는 것입니다.
+
+`test/mq.test.ts`의 테스트는 `vi.spyOn(env.KV1, "get")`으로 KV의 `get()` 자체를 가로채서 무조건 `"locked"`를 반환하도록 만들었습니다.<br />
+이 테스트는 'get()이 락 값을 반환하면 processMessage()가 shouldProcess: false를 돌려준다'는 분기 자체는 확실히 검증합니다.
+
+하지만 PR 본문에서 직접 밝혔듯, 이 방식에는 빈틈이 있습니다.
+
+> _test/mq.test.ts already covers that branch, but it stubs `get()` to return a lock unconditionally, so the lock key itself is never exercised._
+
+`get()`을 통째로 가짜 답변으로 바꿔버리면, `processMessage()`가 자기 자신이 쓴 키를 제대로 다시 읽어오는지는 테스트되지 않습니다.<br />
+극단적으로 말하면 `put()`이 완전히 다른 키에 락을 저장하는 버그가 있어도 이 테스트는 통과합니다. `get()`의 답을 이미 정해놨기 때문입니다.
+
+그래서 제가 작성한 테스트는 `MockKvNamespace`라는, `get`/`put`/`delete`가 전부 실제로 동작하는 가짜 저장소(fake)를 쓰고, `processMessage()`를 두 번 실제로 호출하는 방식을 택했습니다.<br />
+이렇게 하면 PR 본문의 다음 문장처럼 '쓴 키와 읽은 키가 같다'는 것까지 자연스럽게 증명됩니다.
+
+> _That also proves the key `processMessage()` writes is the one it later reads back._
+
+이 "스텁으로 답을 정해두는 것"과 "진짜 상태를 가진 가짜 객체로 동작을 재현하는 것"의 구분은 Vitest 문서가 직접 설명하는 개념은 아니고, 테스트 더블(test double) 일반론에 가깝습니다.<br />
+다만 이번 PR에서는 이 차이가 실제로 버그를 가를 수 있다는 걸 직접 확인했습니다. 락 체크 분기(`if (existing != null)`)를 `if (false)`로 바꿔보면 제가 작성한 테스트만 `expected true to be false`로 실패하고, 되돌리면 다시 통과합니다. 테스트가 공허하게(vacuously) 통과하는 게 아니라는 걸 이렇게 확인했습니다.
+
+{/* ![PR #1019 설명에 적은 non-vacuous 확인 절차](/images/fedify-cfworkers-lock-test/1.png) */}
+
+---
+
+# 멘토 리뷰와 머지
+
+<GithubCard url="https://github.com/fedify-dev/fedify/pull/1019" />
+
+PR 본문에 적은 체크 내역 그대로 가져왔습니다.
+
+> - `mise run check-each cfworkers` — passes.
+> - `vitest run` — 44 tests pass across 3 files.
+> - Confirmed the test is not vacuous: replacing the lock check in `processMessage()` with `if (false)` makes it fail with `expected true to be false`, and it passes again once reverted.
+
+리뷰는 Fedify 메인테이너 dahlia(Hong Minhee)님이 "Thanks!" 한 마디로 바로 승인했고, 그대로 머지됐습니다.
+
+{/* ![dahlia의 PR 승인 화면](/images/fedify-cfworkers-lock-test/2.png) */}
+
+## 후기
+
+첫 이슈였던 #881 때는 PR 본문의 표현 하나까지 리뷰에서 되짚었던 것과 달리, 이번엔 같은 파일·같은 `describe` 블록을 확장하는 작업이어서 리뷰는 한마디로 끝났습니다.<br />
+그만큼 테스트 자체가 탄탄한지는 리뷰어가 아니라 제가 먼저 확인해야 했습니다.
+
+이번 작업에서 가장 크게 남는 건 두 가지입니다.
+
+Workers KV는 지역 간 전파에 최대 60초 이상 걸릴 수 있고, 락을 거는 `get()` → `put()` 사이에 CAS가 없어 경쟁 상태 창이 열립니다.<br />
+그래서 `@fedify/cfworkers`의 락은 "반드시"가 아니라 "최선을 다해" 순서를 지키도록 설계되어 있다는 걸, 소스 코드 주석을 보고서야 정확히 알았습니다.
+
+다른 하나는 `vi.spyOn()`으로 `get()`의 답을 미리 정해두는 것과, `MockKvNamespace`처럼 진짜 상태를 가진 가짜 객체로 `put()` → `get()`을 실제로 왕복시키는 것은 서로 다른 확신을 준다는 점입니다.<br />
+스텁은 분기 하나는 확실히 잡아내지만, 그 분기로 가는 길(쓴 키와 읽은 키가 같은지)은 증명하지 못합니다. PR을 올리기 전에 락 체크 분기를 일부러 깨뜨려 제가 작성한 테스트만 실패하는 걸 확인하고 나서야, 이 테스트가 공허하게 통과하는 게 아니라는 확신이 들었습니다.
+
+다음에는 같은 패키지 안에서 이어지는 다른 이슈를 정리해볼 생각입니다.
