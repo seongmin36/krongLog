@@ -1,5 +1,5 @@
 overrides:
-  vite: "^7"
+  vite: "^8"
 
 allowBuilds:
   esbuild: true
