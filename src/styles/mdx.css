@@ -14,27 +14,31 @@
     @apply mt-8 mb-3 text-xl;
   }
 
-  /* 섹션 앵커 링크: 평소엔 숨기고 헤딩에 hover할 때만 노출 */
+  & :where(h1, h2, h3) {
+    scroll-margin-top: 80px;
+  }
+
   & .heading-anchor {
-    @apply ml-1.5 no-underline;
+    @apply no-underline;
+    /* typography가 :where(a)에 color·font-weight를 걸므로 헤딩 값으로 되돌린다 */
+    color: inherit;
+    font-weight: inherit;
+  }
+  & .heading-anchor svg {
+    @apply ml-2;
+    display: inline-block;
+    vertical-align: middle;
     color: var(--color-muted);
-    font-weight: 400;
     opacity: 0;
-    transition:
-      opacity 0.15s ease,
-      color 0.15s ease;
+    transition: opacity 0.15s ease;
   }
-  & :where(h1, h2, h3, h4):hover .heading-anchor,
-  & .heading-anchor:focus-visible {
-    opacity: 1;
+  & .heading-anchor:hover svg,
+  & .heading-anchor:focus-visible svg {
+    opacity: 0.75;
   }
-  & .heading-anchor:hover {
-    color: var(--color-primary);
-  }
-  /* 터치 기기에선 hover가 없으므로 항상 옅게 보여준다 */
   @media (hover: none) {
-    & .heading-anchor {
-      opacity: 0.4;
+    & .heading-anchor svg {
+      opacity: 0.5;
     }
   }
 
@@ -109,7 +113,7 @@
   background-color: var(--color-blockquote-surface-dark);
 }
 
-/* 링크: hover 시에만 underline (헤딩 섹션 앵커는 자체 스타일을 쓰므로 제외) */
+/* 링크: hover 시에만 underline */
 .prose a:not(.not-prose, .not-prose *, .heading-anchor) {
   @apply text-primary dark:text-dark-text no-underline hover:underline;
 }
@@ -120,7 +124,7 @@
  * 색: style-tokens — 라이트 text-gray-900, 다크 --color-card-title-dark
  */
 .card-preview-title {
-  @apply text-[15px] leading-snug font-bold text-gray-900 dark:text-card-title-dark;
+  @apply dark:text-card-title-dark text-[15px] leading-snug font-bold text-gray-900;
   font-family: "KaKao Big", "KaKao Big Fallback", sans-serif;
 }
 

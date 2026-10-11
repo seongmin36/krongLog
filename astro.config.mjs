@@ -7,7 +7,7 @@ import vercel from "@astrojs/vercel";
 import icon from "astro-icon";
 import svgr from "vite-plugin-svgr";
 import { satteri, satteriHeadingIdsPlugin } from "@astrojs/markdown-satteri";
-import { defineHastPlugin } from "satteri";
+import { defineHastPlugin, htmlToHast } from "satteri";
 import {
   transformerMetaHighlight,
   transformerMetaWordHighlight,
@@ -27,9 +27,6 @@ function transformerCodeBlock() {
   };
 }
 
-// 코드블록 래퍼 구조(언어탭 + copy 버튼)를 만든다.
-// mdx.css의 .code-block-wrapper / .code-block-header / .code-block-body /
-// .copy-btn 스타일과 CodeBlock.astro의 복사 스크립트가 이 구조에 의존한다.
 function buildCodeBlockWrapper(node, lang) {
   const langTab = lang
     ? {
@@ -107,9 +104,6 @@ function buildCodeBlockWrapper(node, lang) {
   };
 }
 
-// Sätteri hast 플러그인: <pre>를 래퍼 구조로 교체한다.
-// Astro는 Shiki 하이라이팅을 사용자 hast 플러그인보다 먼저 실행하므로,
-// transformerCodeBlock()이 심어둔 data-lang을 여기서 읽을 수 있다.
 function satteriCodeBlock() {
   return defineHastPlugin({
     name: "code-block-wrapper",
@@ -123,26 +117,49 @@ function satteriCodeBlock() {
   });
 }
 
-// Sätteri hast 플러그인: h1~h4에 섹션 앵커 링크를 붙인다.
-// satteriHeadingIdsPlugin()이 먼저 실행되어야 node.properties.id를 읽을 수 있다.
+const LINK_ICON_SVG =
+  '<path d="m12.11 15.39-3.88 3.88a2.52 2.52 0 0 1-3.5 0 2.47 2.47 0 0 1 0-3.5l3.88-3.88a1 1 0 1 0-1.42-1.42l-3.88 3.89a4.48 4.48 0 0 0 6.33 6.33l3.89-3.88a1 1 0 0 0-1.42-1.42m8.58-12.08a4.49 4.49 0 0 0-6.33 0l-3.89 3.88a1 1 0 1 0 1.42 1.42l3.88-3.88a2.52 2.52 0 0 1 3.5 0 2.47 2.47 0 0 1 0 3.5l-3.88 3.88a1 1 0 0 0 0 1.42 1 1 0 0 0 1.42 0l3.88-3.89a4.49 4.49 0 0 0 0-6.33M8.83 15.17a1 1 0 0 0 .71.29 1 1 0 0 0 .71-.29l4.92-4.92a1 1 0 1 0-1.42-1.42l-4.92 4.92a1 1 0 0 0 0 1.42"/>';
+
+const linkIconChildren = htmlToHast(LINK_ICON_SVG, {
+  fragment: true,
+  space: "svg",
+}).children;
+
 function satteriAutolinkHeadings() {
   return defineHastPlugin({
     name: "autolink-headings",
     element: {
-      filter: ["h1", "h2", "h3", "h4"],
-      visit(node, ctx) {
+      filter: ["h1", "h2", "h3"],
+      visit(node) {
         const id = node.properties?.id;
         if (typeof id !== "string" || id.length === 0) return;
-        ctx.appendChild(node, {
+        return {
           type: "element",
-          tagName: "a",
-          properties: {
-            className: ["heading-anchor"],
-            href: `#${id}`,
-            "aria-label": `${ctx.textContent(node)} 섹션 링크`,
-          },
-          children: [{ type: "text", value: "#" }],
-        });
+          tagName: node.tagName,
+          properties: node.properties,
+          children: [
+            {
+              type: "element",
+              tagName: "a",
+              properties: { className: ["heading-anchor"], href: `#${id}` },
+              children: [
+                ...node.children,
+                {
+                  type: "element",
+                  tagName: "svg",
+                  properties: {
+                    width: "20",
+                    height: "20",
+                    viewBox: "0 0 24 24",
+                    fill: "currentColor",
+                    "aria-hidden": "true",
+                  },
+                  children: linkIconChildren,
+                },
+              ],
+            },
+          ],
+        };
       },
     },
   });
@@ -206,11 +223,9 @@ export default defineConfig({
     },
     processor: satteri({
       features: {
-        // `## 제목 {#custom-id}` 형태로 앵커 ID를 직접 지정할 수 있다.
         headingAttributes: true,
       },
-      // 순서 주의: Astro는 heading ID 플러그인을 사용자 플러그인 "뒤"에 붙이므로,
-      // autolink가 id를 읽으려면 satteriHeadingIdsPlugin()을 직접 맨 앞에 둬야 한다.
+      // satteriHeadingIdsPlugin()이 먼저 와야 autolink가 id를 읽을 수 있다
       hastPlugins: [
         satteriHeadingIdsPlugin(),
         satteriCodeBlock(),
