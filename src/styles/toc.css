@@ -1,0 +1,141 @@
+/*
+ * 글 목차 (Notion 스타일)
+ * 기본은 짧은 막대만 보이고, 영역에 hover하면 제목이 좌측으로 펼쳐진다.
+ * 본문(720px) 양옆 여백이 확보되는 xl(1280px) 이상에서만 노출한다.
+ */
+.toc {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .toc {
+    position: fixed;
+    top: 50%;
+    right: 2rem;
+    z-index: 30;
+    display: block;
+    max-height: 70vh;
+    overflow-y: auto;
+    transform: translateY(-50%);
+    /* 접힌 상태의 빈 영역이 본문 클릭을 가리지 않도록 */
+    pointer-events: none;
+    scrollbar-width: none;
+  }
+  .toc::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.toc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: fit-content;
+  margin: 0 0 0 auto;
+  padding: 0;
+  list-style: none;
+  pointer-events: auto;
+}
+
+.toc-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  color: var(--color-muted);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.toc-text {
+  box-sizing: border-box;
+  display: block;
+  flex: 0 0 auto;
+  width: 0;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0;
+  transition:
+    width 0.28s ease,
+    opacity 0.2s ease;
+}
+
+.toc:hover .toc-text,
+.toc:focus-within .toc-text {
+  width: 12.5rem;
+  opacity: 1;
+}
+
+/* 펼친 제목은 # / ## / ### 순으로 들여쓴다. 막대는 오른쪽에 그대로 맞춘다. */
+.toc:hover .toc-link.depth-2 .toc-text,
+.toc:focus-within .toc-link.depth-2 .toc-text {
+  padding-left: 0.75rem;
+}
+.toc:hover .toc-link.depth-3 .toc-text,
+.toc:focus-within .toc-link.depth-3 .toc-text {
+  padding-left: 1.5rem;
+}
+
+.toc-dash {
+  display: flex;
+  flex: 0 0 1.5rem;
+  align-items: center;
+  justify-content: flex-end;
+  width: 1.5rem;
+  height: 2px;
+}
+.toc-dash::after {
+  content: "";
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+  transition:
+    width 0.2s ease,
+    background-color 0.15s ease;
+}
+.toc-dash.depth-1::after {
+  width: 1.5rem;
+}
+.toc-dash.depth-2::after {
+  width: 1rem;
+}
+.toc-dash.depth-3::after {
+  width: 0.5rem;
+}
+
+.toc-link:hover {
+  color: var(--color-description);
+}
+.toc-link.is-active {
+  color: var(--color-primary);
+}
+.toc-link.is-active .toc-dash::after {
+  background: var(--color-primary);
+}
+
+.dark .toc-link {
+  color: var(--color-muted-dark);
+}
+.dark .toc-link:hover {
+  color: var(--color-dark-description);
+}
+.dark .toc-link.is-active {
+  color: var(--color-dark-text);
+}
+.dark .toc-link.is-active .toc-dash::after {
+  background: var(--color-dark-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toc-text,
+  .toc-dash,
+  .toc-dash::after,
+  .toc-link {
+    transition: none;
+  }
+}
