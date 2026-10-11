@@ -14,6 +14,30 @@
     @apply mt-8 mb-3 text-xl;
   }
 
+  /* 섹션 앵커 링크: 평소엔 숨기고 헤딩에 hover할 때만 노출 */
+  & .heading-anchor {
+    @apply ml-1.5 no-underline;
+    color: var(--color-muted);
+    font-weight: 400;
+    opacity: 0;
+    transition:
+      opacity 0.15s ease,
+      color 0.15s ease;
+  }
+  & :where(h1, h2, h3, h4):hover .heading-anchor,
+  & .heading-anchor:focus-visible {
+    opacity: 1;
+  }
+  & .heading-anchor:hover {
+    color: var(--color-primary);
+  }
+  /* 터치 기기에선 hover가 없으므로 항상 옅게 보여준다 */
+  @media (hover: none) {
+    & .heading-anchor {
+      opacity: 0.4;
+    }
+  }
+
   & p {
     @apply text-dark leading-relaxed;
     font-family: "KaKao Small", "KaKao Big Fallback", sans-serif;
@@ -85,8 +109,8 @@
   background-color: var(--color-blockquote-surface-dark);
 }
 
-/* 링크: hover 시에만 underline */
-.prose a:not(.not-prose, .not-prose *) {
+/* 링크: hover 시에만 underline (헤딩 섹션 앵커는 자체 스타일을 쓰므로 제외) */
+.prose a:not(.not-prose, .not-prose *, .heading-anchor) {
   @apply text-primary dark:text-dark-text no-underline hover:underline;
 }
 
