@@ -27,7 +27,11 @@
   & .heading-anchor svg {
     @apply ml-2;
     display: inline-block;
+    /* 헤딩 글자 크기에 비례(h1/h2/h3). 시각 중심이 아래로 처져 보여 살짝 올린다 */
+    width: 1em;
+    height: 1em;
     vertical-align: middle;
+    transform: translateY(-0.08em);
     color: var(--color-muted);
     opacity: 0;
     transition: opacity 0.15s ease;
