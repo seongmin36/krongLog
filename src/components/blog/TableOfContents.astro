@@ -1,0 +1,85 @@
+---
+import type { MarkdownHeading } from "astro";
+import "@/styles/toc.css";
+
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+// 본문 헤딩 규칙(#, ##, ###)과 앵커 범위를 맞춘다.
+const items = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
+---
+
+{
+  items.length > 1 && (
+    <nav class="toc" aria-label="목차">
+      <ul class="toc-list">
+        {items.map((h) => (
+          <li>
+            <a
+              class={`toc-link depth-${h.depth}`}
+              href={`#${h.slug}`}
+              data-toc-slug={h.slug}
+            >
+              <span class="toc-text">{h.text}</span>
+              <span class={`toc-dash depth-${h.depth}`} aria-hidden="true" />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<script>
+  const links = document.querySelectorAll<HTMLAnchorElement>(".toc-link");
+  if (links.length > 0) {
+    const bySlug = new Map<string, HTMLAnchorElement>();
+    for (const link of links) {
+      const slug = link.dataset.tocSlug;
+      if (slug) bySlug.set(slug, link);
+    }
+
+    const targets = [...bySlug.keys()]
+      .map((slug) => document.getElementById(slug))
+      .filter((el): el is HTMLElement => el !== null);
+
+    // 화면에 보이는 헤딩 중 가장 위쪽 것을 현재 위치로 본다.
+    const visible = new Set<string>();
+
+    const markActive = () => {
+      let current: string | undefined;
+      for (const el of targets) {
+        if (visible.has(el.id)) {
+          current = el.id;
+          break;
+        }
+      }
+      // 보이는 헤딩이 없으면(섹션 본문을 읽는 중) 마지막으로 지나친 헤딩을 유지
+      if (!current) {
+        for (const el of targets) {
+          if (el.getBoundingClientRect().top <= 100) current = el.id;
+        }
+      }
+      for (const [slug, link] of bySlug) {
+        link.classList.toggle("is-active", slug === current);
+      }
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        }
+        markActive();
+      },
+      { rootMargin: "-80px 0px -70% 0px" },
+    );
+
+    for (const el of targets) observer.observe(el);
+    markActive();
+  }
+</script>
