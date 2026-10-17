@@ -14,7 +14,9 @@
     right: 2rem;
     z-index: 30;
     display: block;
+    padding-left: 15rem;
     max-height: 70vh;
+    overflow-x: hidden;
     overflow-y: auto;
     transform: translateY(-50%);
     /* 접힌 상태의 빈 영역이 본문 클릭을 가리지 않도록 */
@@ -38,21 +40,23 @@
 }
 
 .toc-link {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: 0.5rem;
+  min-height: 1.4em;
   color: var(--color-muted);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 .toc-text {
+  position: absolute;
+  top: 50%;
+  right: 1.5rem;
+  padding-right: 0.5rem;
   box-sizing: border-box;
-  display: block;
-  flex: 0 0 auto;
-  width: 0;
-  min-width: 0;
+  width: 13rem;
   overflow: hidden;
   font-size: 0.8125rem;
   line-height: 1.4;
@@ -60,25 +64,36 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   opacity: 0;
+  pointer-events: none;
+  transform: translate(0.25rem, -50%);
   transition:
-    width 0.28s ease,
-    opacity 0.2s ease;
+    opacity 0.28s ease,
+    transform 0.28s ease;
+}
+
+.toc-link.depth-2 .toc-text {
+  padding-left: 0.75rem;
+}
+
+.toc-link.depth-3 .toc-text {
+  padding-left: 1.5rem;
 }
 
 .toc:hover .toc-text,
 .toc:focus-within .toc-text {
-  width: 12.5rem;
   opacity: 1;
+  pointer-events: auto;
+  transform: translate(0, -50%);
 }
 
-/* 펼친 제목은 # / ## / ### 순으로 들여쓴다. 막대는 오른쪽에 그대로 맞춘다. */
-.toc:hover .toc-link.depth-2 .toc-text,
-.toc:focus-within .toc-link.depth-2 .toc-text {
-  padding-left: 0.75rem;
-}
-.toc:hover .toc-link.depth-3 .toc-text,
-.toc:focus-within .toc-link.depth-3 .toc-text {
-  padding-left: 1.5rem;
+.toc:hover .toc-link::before,
+.toc:focus-within .toc-link::before {
+  content: "";
+  position: absolute;
+  right: -0.5rem;
+  top: -0.5rem;
+  bottom: -0.5rem;
+  width: 15.5rem;
 }
 
 .toc-dash {
