@@ -121,9 +121,6 @@ const tagsJson = (post: CollectionEntry<"post">) =>
           class="view-all-line bg-primary dark:bg-dark-text absolute top-[25.5px] left-0 h-px w-full"
           aria-hidden="true"></span>
       </span>
-      <span class="text-muted-alpha dark:text-muted-dark font-mono text-xs">
-        {String(posts.length).padStart(2, "0")}
-      </span>
       <span
         class="border-border text-dark group-hover:border-primary group-hover:text-primary dark:border-border-dark dark:group-hover:border-dark-text dark:group-hover:text-dark-text inline-flex size-9 items-center justify-center overflow-hidden rounded-full border transition-colors duration-200 dark:text-gray-50"
         aria-hidden="true"
@@ -165,34 +162,22 @@ const tagsJson = (post: CollectionEntry<"post">) =>
 </div>
 
 <style>
-  /* 전체 글 보기: 밑줄은 오른쪽으로 사라졌다 왼쪽부터 다시 그려지고, 화살표는 빠져나갔다 다시 들어옴 */
+  /* 전체 글 보기: 밑줄은 호버 시 왼쪽부터 그려지고 벗어나면 오른쪽으로 사라짐, 화살표는 빠져나갔다 다시 들어옴 */
+  .view-all-line {
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
   .view-all:hover .view-all-line,
   .view-all:focus-visible .view-all-line {
-    animation: view-all-line 0.6s cubic-bezier(0.65, 0, 0.35, 1);
+    transform: scaleX(1);
+    transform-origin: left;
   }
 
   .view-all:hover .view-all-arrow,
   .view-all:focus-visible .view-all-arrow {
     animation: view-all-arrow 0.5s cubic-bezier(0.65, 0, 0.35, 1);
-  }
-
-  @keyframes view-all-line {
-    0% {
-      transform: scaleX(1);
-      transform-origin: right;
-    }
-    50% {
-      transform: scaleX(0);
-      transform-origin: right;
-    }
-    51% {
-      transform: scaleX(0);
-      transform-origin: left;
-    }
-    100% {
-      transform: scaleX(1);
-      transform-origin: left;
-    }
   }
 
   @keyframes view-all-arrow {
@@ -211,8 +196,10 @@ const tagsJson = (post: CollectionEntry<"post">) =>
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .view-all:hover .view-all-line,
-    .view-all:focus-visible .view-all-line,
+    .view-all-line {
+      transition: none;
+    }
+
     .view-all:hover .view-all-arrow,
     .view-all:focus-visible .view-all-arrow {
       animation: none;
