@@ -1,0 +1,60 @@
+/* 필터 칩 (전체 글 페이지 · 홈 공용) */
+.chip {
+  display: inline-flex;
+  cursor: pointer;
+  align-items: center;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 0.5rem 0.9375rem;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-description);
+  transition:
+    background-color 0.12s ease,
+    color 0.12s ease,
+    border-color 0.12s ease;
+}
+.dark .chip {
+  border-color: var(--color-border-dark);
+  color: var(--color-gray-200);
+}
+.chip:hover {
+  background-color: var(--color-hover-overlay-light);
+}
+.dark .chip:hover {
+  background-color: var(--color-hover-overlay-dark);
+}
+.chip-active {
+  background: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}
+.dark .chip-active {
+  background: var(--color-dark-text);
+  color: var(--color-dark);
+  border-color: var(--color-dark-text);
+}
+.chip-active:hover {
+  background: var(--color-primary);
+}
+.dark .chip-active:hover {
+  background: var(--color-dark-text);
+}
+
+/* 칩 옆 개수 표시 (홈 태그 필터) */
+.chip-count {
+  margin-left: 0.5rem;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-muted-alpha);
+}
+.dark .chip-count {
+  color: var(--color-muted-dark);
+}
+.chip-active .chip-count {
+  color: var(--color-chip-count-active);
+}
+.dark .chip-active .chip-count {
+  color: var(--color-dark);
+}

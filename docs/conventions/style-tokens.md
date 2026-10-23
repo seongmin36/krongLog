@@ -48,6 +48,7 @@
 | `--color-muted-alpha`          | `rgba(113,113,130,0.6)`  | 흐린 보조 텍스트(날짜·카운트) |
 | `--color-primary-surface`      | `rgba(59,122,87,0.06)`   | 활성 항목 배경(라이트)        |
 | `--color-primary-surface-dark` | `rgba(240,168,184,0.12)` | 활성 항목 배경(다크)          |
+| `--color-chip-count-active`    | `rgba(255,255,255,0.7)`  | 활성 칩 개수 텍스트(라이트)   |
 
 ### 검색바
 
