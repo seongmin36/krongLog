@@ -1,6 +1,5 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import Tag from "@/components/ui/Tag.astro";
 import { blogPostPath } from "@/lib/blog-url";
 import { formatDotDate } from "@/lib/format-date";
 
@@ -33,10 +32,8 @@ const { title, date, tags } = post.data;
 
   {
     tags && tags.length > 0 ? (
-      <span class="col-start-2 flex flex-wrap gap-1.5 md:col-start-auto md:justify-end">
-        {tags.map((tag) => (
-          <Tag name={tag} />
-        ))}
+      <span class="text-description/70 dark:text-muted col-start-2 font-mono text-xs md:col-start-auto md:text-[12.5px] md:whitespace-nowrap">
+        {tags.map((tag) => `#${tag}`).join(" ")}
       </span>
     ) : (
       <span class="hidden md:block" aria-hidden="true" />
