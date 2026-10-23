@@ -2,8 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import FeaturedPost from "@/components/blog/FeaturedPost.astro";
 import PostCard from "@/components/blog/PostCard.astro";
-import PostIndexRow from "@/components/blog/PostIndexRow.astro";
-import Pagination from "@/components/ui/Pagination.astro";
+import "@/styles/caret.css";
 import "@/styles/chip.css";
 
 interface Props {
@@ -14,20 +13,12 @@ interface Props {
 /** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 (모바일은 MOBILE_GRID_SIZE) */
 const GRID_SIZE = 6;
 const MOBILE_GRID_SIZE = 4;
-/** 인덱스 목록 페이지당 개수 */
-const INDEX_PAGE_SIZE = 4;
 
 const { posts, topTags } = Astro.props;
 
-// JS 실행 전 기본 배치(데스크톱 기준): 0 → 대표글, 1~GRID_SIZE → 카드, 이후 → 인덱스 1페이지
+// JS 실행 전 기본 배치(데스크톱 기준): 0 → 대표글, 1~GRID_SIZE → 카드
 const slotOf = (i: number) =>
-  i === 0
-    ? "featured"
-    : i <= GRID_SIZE
-      ? "card"
-      : i <= GRID_SIZE + INDEX_PAGE_SIZE
-        ? "index"
-        : "none";
+  i === 0 ? "featured" : i <= GRID_SIZE ? "card" : "none";
 const tagsJson = (post: CollectionEntry<"post">) =>
   JSON.stringify(post.data.tags ?? []);
 ---
@@ -37,7 +28,6 @@ const tagsJson = (post: CollectionEntry<"post">) =>
   class="pb-16 sm:pb-24"
   data-grid-size={GRID_SIZE}
   data-mobile-grid-size={MOBILE_GRID_SIZE}
-  data-index-page-size={INDEX_PAGE_SIZE}
 >
   <!-- 태그 필터 칩 -->
   <div
@@ -114,32 +104,32 @@ const tagsJson = (post: CollectionEntry<"post">) =>
     }
   </section>
 
-  <!-- 인덱스 -->
-  <section
-    aria-labelledby="home-index-title"
-    class="pt-14 lg:pt-20"
-    data-home-section="index"
-    hidden={posts.length <= 1 + GRID_SIZE}
-  >
+  <!-- 끄적임 (출시 예정) -->
+  <section aria-labelledby="home-notes-title" class="pt-14 lg:pt-20">
     <h2
-      id="home-index-title"
+      id="home-notes-title"
       class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tracking-[0.14em] uppercase"
     >
-      Index
+      끄적임
     </h2>
-    <div class="border-border dark:border-border-dark mt-4 border-t">
-      {
-        posts.map((post, i) => (
-          <div
-            data-home-slot="index"
-            hidden={slotOf(i) !== "index"}
-          >
-            <PostIndexRow post={post} rank={i + 1} />
-          </div>
-        ))
-      }
+    <div
+      class="border-border dark:border-border-dark mt-4 rounded-2xl border border-dashed px-6 py-10 sm:px-10 sm:py-14"
+    >
+      <p class="font-mono text-[13px] tracking-[0.04em]">
+        <span class="text-primary dark:text-dark-text">~/kronglog</span>{" "}
+        <span class="text-muted-alpha dark:text-muted-dark">$ ls notes/</span>
+      </p>
+      <p
+        class="text-dark mt-4 text-xl leading-[1.4] font-bold tracking-[-0.03em] sm:text-[26px] dark:text-gray-50"
+      >
+        곧 '끄적임'이 출시 예정입니다.<span
+          class="caret bg-primary dark:bg-dark-text"
+          aria-hidden="true"></span>
+      </p>
+      <p class="text-description dark:text-dark-description mt-3 text-[14.5px] leading-[1.75]">
+        짧은 생각과 메모를 모아 둘 공간을 열심히 끄적이는 중입니다.
+      </p>
     </div>
-    <Pagination id="home-pagination" />
   </section>
 </div>
 
@@ -147,14 +137,8 @@ const tagsJson = (post: CollectionEntry<"post">) =>
   const root = document.getElementById("home-posts")!;
   const gridSize = Number(root.dataset.gridSize) || 6;
   const mobileGridSize = Number(root.dataset.mobileGridSize) || 4;
-  const indexPageSize = Number(root.dataset.indexPageSize) || 4;
   const mobileQuery = window.matchMedia("(max-width: 639.98px)");
   const chips = root.querySelectorAll<HTMLButtonElement>("[data-home-chip]");
-  const paginationEl = document.getElementById("home-pagination") as
-    | (HTMLElement & {
-        updatePagination?: (current: number, total: number) => void;
-      })
-    | null;
 
   const slots = (name: string) => [
     ...root.querySelectorAll<HTMLElement>(`[data-home-slot="${name}"]`),
@@ -164,13 +148,11 @@ const tagsJson = (post: CollectionEntry<"post">) =>
 
   const featured = slots("featured");
   const cards = slots("card");
-  const rows = slots("index");
   const postTags: string[][] = featured.map((item) =>
     JSON.parse(item.dataset.postTags ?? "[]"),
   );
 
   let activeTag = "";
-  let currentPage = 1;
 
   function render() {
     // 배치는 JS가 담당하므로 초기 렌더용 모바일 숨김 클래스 제거
@@ -179,43 +161,20 @@ const tagsJson = (post: CollectionEntry<"post">) =>
     const matched = featured
       .map((_, i) => i)
       .filter((i) => activeTag === "" || postTags[i].includes(activeTag));
-    const indexItems = matched.slice(1 + cardCount);
-    const totalPages = Math.max(
-      1,
-      Math.ceil(indexItems.length / indexPageSize),
-    );
-    currentPage = Math.min(currentPage, totalPages);
-
-    const pageStart = (currentPage - 1) * indexPageSize;
-    const visibleRows = new Set(
-      indexItems.slice(pageStart, pageStart + indexPageSize),
-    );
 
     featured.forEach((item, i) => {
       const rank = matched.indexOf(i);
       item.hidden = rank !== 0;
       cards[i].hidden = !(rank >= 1 && rank <= cardCount);
-      rows[i].hidden = !visibleRows.has(i);
-
-      if (!rows[i].hidden) {
-        const rankEl = rows[i].querySelector("[data-rank]");
-        if (rankEl) rankEl.textContent = String(rank + 1).padStart(2, "0");
-      }
     });
 
     section("featured").hidden = matched.length < 1;
     section("card").hidden = matched.length < 2;
-    section("index").hidden = indexItems.length === 0;
-    if (paginationEl) {
-      paginationEl.hidden = totalPages <= 1;
-      paginationEl.updatePagination?.(currentPage, totalPages);
-    }
   }
 
   chips.forEach((chip) =>
     chip.addEventListener("click", () => {
       activeTag = chip.dataset.homeChip ?? "";
-      currentPage = 1;
       chips.forEach((c) => {
         const on = c === chip;
         c.classList.toggle("chip-active", on);
@@ -225,19 +184,6 @@ const tagsJson = (post: CollectionEntry<"post">) =>
     }),
   );
 
-  paginationEl?.addEventListener("paginate", (e) => {
-    const { direction } = (e as CustomEvent<{ direction: "prev" | "next" }>)
-      .detail;
-    currentPage =
-      direction === "prev" ? Math.max(1, currentPage - 1) : currentPage + 1;
-    render();
-  });
-
-  mobileQuery.addEventListener("change", () => {
-    currentPage = 1;
-    render();
-  });
-
-  // Pagination 스크립트(updatePagination 등록)가 먼저 실행되도록 DOM 준비 후 초기 렌더
-  document.addEventListener("DOMContentLoaded", render, { once: true });
+  mobileQuery.addEventListener("change", render);
+  render();
 </script>

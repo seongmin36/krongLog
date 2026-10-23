@@ -1,5 +1,6 @@
 ---
 import { formatDotDate } from "@/lib/format-date";
+import "@/styles/caret.css";
 
 interface Props {
   postCount: number;
@@ -24,7 +25,7 @@ const { postCount, lastUpdated } = Astro.props;
     >
       배운 것을 쌓아,<br />
       <span class="text-muted dark:text-muted-dark">조금씩</span> 단단해지는 중<span
-        class="home-caret bg-primary dark:bg-dark-text"
+        class="caret bg-primary dark:bg-dark-text"
         aria-hidden="true"></span>
     </h1>
 
@@ -44,26 +45,3 @@ const { postCount, lastUpdated } = Astro.props;
   </div>
 </section>
 
-<style>
-  /* 텍스트 입력창 캐럿 */
-  .home-caret {
-    display: inline-block;
-    width: 0.08em;
-    height: 0.8em;
-    margin-left: 0.08em;
-    vertical-align: -0.06em;
-    animation: home-caret-blink 1s step-end infinite;
-  }
-
-  @keyframes home-caret-blink {
-    50% {
-      opacity: 0;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .home-caret {
-      animation: none;
-    }
-  }
-</style>
