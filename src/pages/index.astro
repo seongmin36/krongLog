@@ -9,6 +9,17 @@ const allPosts = await getCollection("post");
 const sortedPosts = allPosts.sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );
+
+// 필터 칩: 글 수 기준 상위 태그
+const tagCounts = new Map<string, number>();
+for (const post of sortedPosts) {
+  for (const tag of post.data.tags ?? []) {
+    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+  }
+}
+const topTags = [...tagCounts.entries()]
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 10);
 ---
 
 <BaseLayout
@@ -20,5 +31,5 @@ const sortedPosts = allPosts.sort(
     postCount={sortedPosts.length}
     lastUpdated={sortedPosts[0].data.date}
   />
-  <HomePosts posts={sortedPosts} />
+  <HomePosts posts={sortedPosts} topTags={topTags} />
 </BaseLayout>

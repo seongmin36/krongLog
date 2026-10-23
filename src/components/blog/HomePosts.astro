@@ -3,63 +3,175 @@ import type { CollectionEntry } from "astro:content";
 import FeaturedPost from "@/components/blog/FeaturedPost.astro";
 import PostCard from "@/components/blog/PostCard.astro";
 import PostIndexRow from "@/components/blog/PostIndexRow.astro";
+import "@/styles/chip.css";
 
 interface Props {
   posts: CollectionEntry<"post">[];
+  topTags: [string, number][];
 }
 
 /** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 */
 const GRID_SIZE = 6;
 
-const { posts } = Astro.props;
-const [featured] = posts;
-const gridPosts = posts.slice(1, 1 + GRID_SIZE);
-const indexPosts = posts.slice(1 + GRID_SIZE);
+const { posts, topTags } = Astro.props;
+
+// 필터 전 기본 배치: 0 → 대표글, 1~GRID_SIZE → 카드, 나머지 → 인덱스
+const slotOf = (i: number) =>
+  i === 0 ? "featured" : i <= GRID_SIZE ? "card" : "index";
+const tagsJson = (post: CollectionEntry<"post">) =>
+  JSON.stringify(post.data.tags ?? []);
 ---
 
-<div class="pb-16 sm:pb-24">
-  <!-- 대표글 -->
-  {
-    featured && (
-      <section
-        aria-label="최근 글"
-        class="border-border dark:border-border-dark border-b pb-10 lg:pb-16"
+<div id="home-posts" class="pb-16 sm:pb-24" data-grid-size={GRID_SIZE}>
+  <!-- 태그 필터 칩 -->
+  <div
+    class="-mx-4 overflow-x-auto px-4 pt-4 pb-8 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pt-0 lg:pb-10 [&::-webkit-scrollbar]:hidden"
+  >
+    <div
+      class="flex w-max gap-2 lg:w-auto lg:flex-wrap"
+      role="group"
+      aria-label="태그 필터"
+    >
+      <button
+        type="button"
+        class="chip chip-active shrink-0"
+        data-home-chip=""
+        aria-pressed="true"
       >
-        <FeaturedPost post={featured} rank={1} priorityLcp />
-      </section>
-    )
-  }
+        전체<span class="chip-count font-mono">{posts.length}</span>
+      </button>
+      {
+        topTags.map(([tag, count]) => (
+          <button
+            type="button"
+            class="chip shrink-0"
+            data-home-chip={tag}
+            aria-pressed="false"
+          >
+            {tag}
+            <span class="chip-count font-mono">{count}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- 대표글 -->
+  <section
+    aria-label="최근 글"
+    class="border-border dark:border-border-dark border-b pb-10 lg:pb-16"
+    data-home-section="featured"
+  >
+    {
+      posts.map((post, i) => (
+        <div
+          data-home-slot="featured"
+          data-post-tags={tagsJson(post)}
+          hidden={slotOf(i) !== "featured"}
+        >
+          <FeaturedPost post={post} rank={1} priorityLcp={i === 0} />
+        </div>
+      ))
+    }
+  </section>
 
   <!-- 카드 그리드 -->
-  {
-    gridPosts.length > 0 && (
-      <section
-        aria-label="최근 글 목록"
-        class="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:pt-16"
-      >
-        {gridPosts.map((post) => (
+  <section
+    aria-label="최근 글 목록"
+    class="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:pt-16"
+    data-home-section="card"
+    hidden={posts.length <= 1}
+  >
+    {
+      posts.map((post, i) => (
+        <div
+          class="flex flex-col"
+          data-home-slot="card"
+          data-post-tags={tagsJson(post)}
+          hidden={slotOf(i) !== "card"}
+        >
           <PostCard post={post} />
-        ))}
-      </section>
-    )
-  }
+        </div>
+      ))
+    }
+  </section>
 
   <!-- 인덱스 -->
-  {
-    indexPosts.length > 0 && (
-      <section aria-labelledby="home-index-title" class="pt-14 lg:pt-20">
-        <h2
-          id="home-index-title"
-          class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tracking-[0.14em] uppercase"
-        >
-          Index
-        </h2>
-        <div class="border-border dark:border-border-dark mt-4 border-t">
-          {indexPosts.map((post, i) => (
-            <PostIndexRow post={post} rank={i + 2 + GRID_SIZE} />
-          ))}
-        </div>
-      </section>
-    )
-  }
+  <section
+    aria-labelledby="home-index-title"
+    class="pt-14 lg:pt-20"
+    data-home-section="index"
+    hidden={posts.length <= 1 + GRID_SIZE}
+  >
+    <h2
+      id="home-index-title"
+      class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tracking-[0.14em] uppercase"
+    >
+      Index
+    </h2>
+    <div class="border-border dark:border-border-dark mt-4 border-t">
+      {
+        posts.map((post, i) => (
+          <div
+            data-home-slot="index"
+            data-post-tags={tagsJson(post)}
+            hidden={slotOf(i) !== "index"}
+          >
+            <PostIndexRow post={post} rank={i + 1} />
+          </div>
+        ))
+      }
+    </div>
+  </section>
 </div>
+
+<script>
+  const root = document.getElementById("home-posts")!;
+  const gridSize = Number(root.dataset.gridSize) || 6;
+  const chips = root.querySelectorAll<HTMLButtonElement>("[data-home-chip]");
+
+  const slots = (name: string) => [
+    ...root.querySelectorAll<HTMLElement>(`[data-home-slot="${name}"]`),
+  ];
+  const section = (name: string) =>
+    root.querySelector<HTMLElement>(`[data-home-section="${name}"]`)!;
+
+  const featured = slots("featured");
+  const cards = slots("card");
+  const rows = slots("index");
+
+  function applyFilter(tag: string) {
+    let rank = 0;
+
+    featured.forEach((item, i) => {
+      const tags: string[] = JSON.parse(item.dataset.postTags ?? "[]");
+      const matched = tag === "" || tags.includes(tag);
+      if (matched) rank++;
+
+      item.hidden = !(matched && rank === 1);
+      cards[i].hidden = !(matched && rank > 1 && rank <= 1 + gridSize);
+      rows[i].hidden = !(matched && rank > 1 + gridSize);
+
+      if (!rows[i].hidden) {
+        const rankEl = rows[i].querySelector("[data-rank]");
+        if (rankEl) rankEl.textContent = String(rank).padStart(2, "0");
+      }
+    });
+
+    section("featured").hidden = rank < 1;
+    section("card").hidden = rank < 2;
+    section("index").hidden = rank < 2 + gridSize;
+  }
+
+  chips.forEach((chip) =>
+    chip.addEventListener("click", () => {
+      const tag = chip.dataset.homeChip ?? "";
+      chips.forEach((c) => {
+        const on = c === chip;
+        c.classList.toggle("chip-active", on);
+        c.setAttribute("aria-pressed", String(on));
+      });
+      applyFilter(tag);
+    }),
+  );
+</script>
