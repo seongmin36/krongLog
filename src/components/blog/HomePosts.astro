@@ -1,0 +1,65 @@
+---
+import type { CollectionEntry } from "astro:content";
+import FeaturedPost from "@/components/blog/FeaturedPost.astro";
+import PostCard from "@/components/blog/PostCard.astro";
+import PostIndexRow from "@/components/blog/PostIndexRow.astro";
+
+interface Props {
+  posts: CollectionEntry<"post">[];
+}
+
+/** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 */
+const GRID_SIZE = 6;
+
+const { posts } = Astro.props;
+const [featured] = posts;
+const gridPosts = posts.slice(1, 1 + GRID_SIZE);
+const indexPosts = posts.slice(1 + GRID_SIZE);
+---
+
+<div class="pb-16 sm:pb-24">
+  <!-- 대표글 -->
+  {
+    featured && (
+      <section
+        aria-label="최근 글"
+        class="border-border dark:border-border-dark border-b pb-10 lg:pb-16"
+      >
+        <FeaturedPost post={featured} rank={1} priorityLcp />
+      </section>
+    )
+  }
+
+  <!-- 카드 그리드 -->
+  {
+    gridPosts.length > 0 && (
+      <section
+        aria-label="최근 글 목록"
+        class="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:pt-16"
+      >
+        {gridPosts.map((post) => (
+          <PostCard post={post} />
+        ))}
+      </section>
+    )
+  }
+
+  <!-- 인덱스 -->
+  {
+    indexPosts.length > 0 && (
+      <section aria-labelledby="home-index-title" class="pt-14 lg:pt-20">
+        <h2
+          id="home-index-title"
+          class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tracking-[0.14em] uppercase"
+        >
+          Index
+        </h2>
+        <div class="border-border dark:border-border-dark mt-4 border-t">
+          {indexPosts.map((post, i) => (
+            <PostIndexRow post={post} rank={i + 2 + GRID_SIZE} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</div>

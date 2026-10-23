@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import HomeHero from "@/components/blog/HomeHero.astro";
-import PostCard from "@/components/blog/PostCard.astro";
+import HomePosts from "@/components/blog/HomePosts.astro";
 import { getCollection } from "astro:content";
 
 // 모든 포스트를 가져와서 날짜 기준 내림차순 정렬
@@ -20,15 +20,5 @@ const sortedPosts = allPosts.sort(
     postCount={sortedPosts.length}
     lastUpdated={sortedPosts[0].data.date}
   />
-
-  <!-- 포스트 카드 섹션 -->
-  <section class="pb-16 sm:pb-20">
-    <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-      {
-        sortedPosts.map((post, i) => (
-          <PostCard post={post} priorityLcp={i === 0} />
-        ))
-      }
-    </div>
-  </section>
+  <HomePosts posts={sortedPosts} />
 </BaseLayout>
