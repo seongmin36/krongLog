@@ -31,15 +31,18 @@ const { postCount, lastUpdated } = Astro.props;
 
     <!-- 글 수 · 최근 업데이트 -->
     <div
-      class="border-border dark:border-border-dark flex items-baseline gap-3 border-t pt-5 sm:flex-col sm:items-end sm:gap-2 sm:border-t-0 sm:pt-0 sm:pb-3"
+      class="border-border dark:border-border-dark flex items-baseline justify-between gap-3 border-t pt-5 sm:flex-col sm:items-end sm:justify-start sm:gap-2 sm:border-t-0 sm:pt-0 sm:pb-3"
     >
-      <p
-        class="text-dark font-mono text-[40px] leading-none font-bold tracking-[-0.04em] sm:text-[56px] dark:text-gray-50"
-      >
-        {String(postCount).padStart(2, "0")}
+      <p class="flex items-baseline gap-1">
+        <span
+          class="text-dark font-mono text-[40px] leading-none font-bold tracking-[-0.04em] sm:text-[56px] dark:text-gray-50"
+        >
+          {String(postCount).padStart(2, "0")}
+        </span>
+        <span class="text-description dark:text-muted text-sm">개의 기록</span>
       </p>
       <p class="text-description dark:text-muted text-[13px]">
-        개의 기록, 최근 업데이트 {formatDotDate(lastUpdated)}
+        최근 업데이트 {formatDotDate(lastUpdated)}
       </p>
     </div>
   </div>
