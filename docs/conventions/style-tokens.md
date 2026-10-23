@@ -49,6 +49,7 @@
 | `--color-primary-surface`      | `rgba(59,122,87,0.06)`   | 활성 항목 배경(라이트)        |
 | `--color-primary-surface-dark` | `rgba(240,168,184,0.12)` | 활성 항목 배경(다크)          |
 | `--color-chip-count-active`    | `rgba(255,255,255,0.7)`  | 활성 칩 개수 텍스트(라이트)   |
+| `--color-latest-badge-surface` | `#eaf2f4`                | 홈 대표글 LATEST 배지 배경    |
 
 ### 검색바
 
