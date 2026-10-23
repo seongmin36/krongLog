@@ -1,0 +1,21 @@
+/* 텍스트 입력창 캐럿 (색상은 bg-* 클래스로 지정) */
+.caret {
+  display: inline-block;
+  width: 0.08em;
+  height: 0.8em;
+  margin-left: 0.08em;
+  vertical-align: -0.06em;
+  animation: caret-blink 1s step-end infinite;
+}
+
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    animation: none;
+  }
+}

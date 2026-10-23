@@ -1,6 +1,7 @@
 ---
 import Tag from "@/components/ui/Tag.astro";
 import { blogPostPath } from "@/lib/blog-url";
+import { formatDotDate } from "@/lib/format-date";
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import placeholderImage from "@/assets/img-default.png";
@@ -22,7 +23,7 @@ interface Props {
 const { post, priorityLcp = false } = Astro.props;
 const { title, description, date, tags, image } = post.data;
 
-const formattedDate = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}.${String(date.getDate()).padStart(2, "0")}`;
+const formattedDate = formatDotDate(date);
 
 const cardImageSizes =
   "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, min(400px, 33vw)";

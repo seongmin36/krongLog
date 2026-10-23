@@ -35,6 +35,8 @@ html {
   --color-border-dark: rgba(255, 255, 255, 0.08);
   --color-primary-surface: rgba(59, 122, 87, 0.06);
   --color-primary-surface-dark: rgba(240, 168, 184, 0.12);
+  --color-chip-count-active: rgba(255, 255, 255, 0.7);
+  --color-latest-badge-surface: #eaf2f4;
 
   /* 검색바 (Figma: 라이트/다크 기본·활성화) */
   --color-search-surface: #fafafa;

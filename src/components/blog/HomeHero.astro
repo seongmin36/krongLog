@@ -1,0 +1,50 @@
+---
+import { formatDotDate } from "@/lib/format-date";
+import "@/styles/caret.css";
+
+interface Props {
+  postCount: number;
+  lastUpdated: Date;
+}
+
+const { postCount, lastUpdated } = Astro.props;
+---
+
+<section class="pt-12 pb-8 sm:pt-20 sm:pb-14">
+  <!-- 터미널 프롬프트 -->
+  <p class="font-mono text-[13px] tracking-[0.04em]">
+    <span class="text-primary dark:text-dark-text">~/kronglog</span>{" "}
+    <span class="text-muted-alpha dark:text-muted-dark">$ cat recent.md</span>
+  </p>
+
+  <div
+    class="mt-5 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between"
+  >
+    <h1
+      class="text-dark text-4xl leading-[1.18] font-bold tracking-[-0.04em] sm:text-[64px] sm:leading-[1.12] dark:text-gray-50"
+    >
+      배운 것을 쌓아,<br />
+      <span class="text-muted dark:text-muted-dark">조금씩</span> 단단해지는 중<span
+        class="caret bg-primary dark:bg-dark-text"
+        aria-hidden="true"></span>
+    </h1>
+
+    <!-- 글 수 · 최근 업데이트 -->
+    <div
+      class="border-border dark:border-border-dark flex items-baseline justify-between gap-3 border-t pt-5 sm:flex-col sm:items-end sm:justify-start sm:gap-2 sm:-mb-1 sm:border-t-0 sm:pt-0"
+    >
+      <p class="flex items-baseline gap-1">
+        <span
+          class="text-dark font-mono text-[40px] leading-none font-bold tracking-[-0.04em] sm:text-[56px] dark:text-gray-50"
+        >
+          {String(postCount).padStart(2, "0")}
+        </span>
+        <span class="text-description dark:text-muted text-sm">개의 기록</span>
+      </p>
+      <p class="text-description dark:text-muted text-[13px]">
+        최근 업데이트 {formatDotDate(lastUpdated)}
+      </p>
+    </div>
+  </div>
+</section>
+

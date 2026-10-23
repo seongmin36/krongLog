@@ -1,0 +1,263 @@
+---
+import { Icon } from "astro-icon/components";
+import type { CollectionEntry } from "astro:content";
+import FeaturedPost from "@/components/blog/FeaturedPost.astro";
+import PostCard from "@/components/blog/PostCard.astro";
+import { blogsIndexPath } from "@/lib/blog-url";
+import "@/styles/caret.css";
+import "@/styles/chip.css";
+
+interface Props {
+  posts: CollectionEntry<"post">[];
+  topTags: [string, number][];
+}
+
+/** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 (모바일은 MOBILE_GRID_SIZE) */
+const GRID_SIZE = 6;
+const MOBILE_GRID_SIZE = 4;
+
+const { posts, topTags } = Astro.props;
+
+// JS 실행 전 기본 배치(데스크톱 기준): 0 → 대표글, 1~GRID_SIZE → 카드
+const slotOf = (i: number) =>
+  i === 0 ? "featured" : i <= GRID_SIZE ? "card" : "none";
+const tagsJson = (post: CollectionEntry<"post">) =>
+  JSON.stringify(post.data.tags ?? []);
+---
+
+<div
+  id="home-posts"
+  class="pb-16 sm:pb-24"
+  data-grid-size={GRID_SIZE}
+  data-mobile-grid-size={MOBILE_GRID_SIZE}
+>
+  <!-- 태그 필터 칩 -->
+  <div
+    class="-mx-4 overflow-x-auto px-4 pt-4 pb-8 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pt-0 lg:pb-10 [&::-webkit-scrollbar]:hidden"
+  >
+    <div
+      class="flex w-max gap-2 lg:w-auto lg:flex-wrap"
+      role="group"
+      aria-label="태그 필터"
+    >
+      <button
+        type="button"
+        class="chip chip-active shrink-0"
+        data-home-chip=""
+        aria-pressed="true"
+      >
+        전체<span class="chip-count font-mono">{posts.length}</span>
+      </button>
+      {
+        topTags.map(([tag, count]) => (
+          <button
+            type="button"
+            class="chip shrink-0"
+            data-home-chip={tag}
+            aria-pressed="false"
+          >
+            {tag}<span class="chip-count font-mono">{count}</span>
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  <!-- 대표글 -->
+  <section
+    aria-label="최근 글"
+    class="border-border dark:border-border-dark border-b pb-10 lg:pb-16"
+    data-home-section="featured"
+  >
+    {
+      posts.map((post, i) => (
+        <div
+          data-home-slot="featured"
+          data-post-tags={tagsJson(post)}
+          hidden={slotOf(i) !== "featured"}
+        >
+          <FeaturedPost post={post} rank={1} priorityLcp={i === 0} />
+        </div>
+      ))
+    }
+  </section>
+
+  <!-- 카드 그리드 -->
+  <section
+    aria-label="최근 글 목록"
+    class="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:pt-16"
+    data-home-section="card"
+    hidden={posts.length <= 1}
+  >
+    {
+      posts.map((post, i) => (
+        <div
+          class:list={[
+            "flex flex-col",
+            // JS 실행 전 모바일에서 MOBILE_GRID_SIZE 초과 카드 숨김 (초기화 시 제거)
+            i > MOBILE_GRID_SIZE && "max-sm:hidden",
+          ]}
+          data-home-slot="card"
+          hidden={slotOf(i) !== "card"}
+        >
+          <PostCard post={post} />
+        </div>
+      ))
+    }
+  </section>
+
+  <!-- 전체 글 보기 -->
+  <div class="mt-12 flex justify-center lg:mt-16">
+    <a
+      href={blogsIndexPath()}
+      class="view-all group inline-flex items-center gap-3 rounded-full py-2 pr-1 pl-2"
+      data-astro-prefetch
+    >
+      <span
+        class="text-dark relative text-[15px] leading-[22.5px] font-bold dark:text-gray-50"
+      >
+        전체 글 보기
+        <span
+          class="view-all-line bg-primary dark:bg-dark-text absolute top-[25.5px] left-0 h-px w-full"
+          aria-hidden="true"></span>
+      </span>
+      <span
+        class="border-border text-dark group-hover:border-primary group-hover:text-primary dark:border-border-dark dark:group-hover:border-dark-text dark:group-hover:text-dark-text inline-flex size-9 items-center justify-center overflow-hidden rounded-full border transition-colors duration-200 dark:text-gray-50"
+        aria-hidden="true"
+      >
+        <span class="view-all-arrow inline-flex">
+          <Icon name="lucide:arrow-right" width={16} height={16} />
+        </span>
+      </span>
+    </a>
+  </div>
+
+  <!-- 끄적임 (출시 예정) -->
+  <section aria-labelledby="home-notes-title" class="pt-14 lg:pt-20">
+    <h2
+      id="home-notes-title"
+      class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tracking-[0.14em] uppercase"
+    >
+      끄적임
+    </h2>
+    <div
+      class="border-border dark:border-border-dark mt-4 rounded-2xl border border-dashed px-6 py-10 sm:px-10 sm:py-14"
+    >
+      <p class="font-mono text-[13px] tracking-[0.04em]">
+        <span class="text-primary dark:text-dark-text">~/kronglog</span>{" "}
+        <span class="text-muted-alpha dark:text-muted-dark">$ ls notes/</span>
+      </p>
+      <p
+        class="text-dark mt-4 text-xl leading-[1.4] font-bold tracking-[-0.03em] sm:text-[26px] dark:text-gray-50"
+      >
+        곧 '끄적임'이 출시 예정입니다.<span
+          class="caret bg-primary dark:bg-dark-text"
+          aria-hidden="true"></span>
+      </p>
+      <p class="text-description dark:text-dark-description mt-3 text-[14.5px] leading-[1.75]">
+        짧은 생각과 메모를 모아 둘 공간을 열심히 끄적이는 중입니다.
+      </p>
+    </div>
+  </section>
+</div>
+
+<style>
+  /* 전체 글 보기: 밑줄은 호버 시 왼쪽부터 그려지고 벗어나면 오른쪽으로 사라짐, 화살표는 빠져나갔다 다시 들어옴 */
+  .view-all-line {
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  .view-all:hover .view-all-line,
+  .view-all:focus-visible .view-all-line {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .view-all:hover .view-all-arrow,
+  .view-all:focus-visible .view-all-arrow {
+    animation: view-all-arrow 0.5s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  @keyframes view-all-arrow {
+    0% {
+      transform: translateX(0);
+    }
+    45% {
+      transform: translateX(150%);
+    }
+    46% {
+      transform: translateX(-150%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .view-all-line {
+      transition: none;
+    }
+
+    .view-all:hover .view-all-arrow,
+    .view-all:focus-visible .view-all-arrow {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const root = document.getElementById("home-posts")!;
+  const gridSize = Number(root.dataset.gridSize) || 6;
+  const mobileGridSize = Number(root.dataset.mobileGridSize) || 4;
+  const mobileQuery = window.matchMedia("(max-width: 639.98px)");
+  const chips = root.querySelectorAll<HTMLButtonElement>("[data-home-chip]");
+
+  const slots = (name: string) => [
+    ...root.querySelectorAll<HTMLElement>(`[data-home-slot="${name}"]`),
+  ];
+  const section = (name: string) =>
+    root.querySelector<HTMLElement>(`[data-home-section="${name}"]`)!;
+
+  const featured = slots("featured");
+  const cards = slots("card");
+  const postTags: string[][] = featured.map((item) =>
+    JSON.parse(item.dataset.postTags ?? "[]"),
+  );
+
+  let activeTag = "";
+
+  function render() {
+    // 배치는 JS가 담당하므로 초기 렌더용 모바일 숨김 클래스 제거
+    cards.forEach((card) => card.classList.remove("max-sm:hidden"));
+    const cardCount = mobileQuery.matches ? mobileGridSize : gridSize;
+    const matched = featured
+      .map((_, i) => i)
+      .filter((i) => activeTag === "" || postTags[i].includes(activeTag));
+
+    featured.forEach((item, i) => {
+      const rank = matched.indexOf(i);
+      item.hidden = rank !== 0;
+      cards[i].hidden = !(rank >= 1 && rank <= cardCount);
+    });
+
+    section("featured").hidden = matched.length < 1;
+    section("card").hidden = matched.length < 2;
+  }
+
+  chips.forEach((chip) =>
+    chip.addEventListener("click", () => {
+      activeTag = chip.dataset.homeChip ?? "";
+      chips.forEach((c) => {
+        const on = c === chip;
+        c.classList.toggle("chip-active", on);
+        c.setAttribute("aria-pressed", String(on));
+      });
+      render();
+    }),
+  );
+
+  mobileQuery.addEventListener("change", render);
+  render();
+</script>
