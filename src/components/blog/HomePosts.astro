@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import FeaturedPost from "@/components/blog/FeaturedPost.astro";
 import PostCard from "@/components/blog/PostCard.astro";
 import PostIndexRow from "@/components/blog/PostIndexRow.astro";
+import Pagination from "@/components/ui/Pagination.astro";
 import "@/styles/chip.css";
 
 interface Props {
@@ -10,19 +11,34 @@ interface Props {
   topTags: [string, number][];
 }
 
-/** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 */
+/** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 (모바일은 MOBILE_GRID_SIZE) */
 const GRID_SIZE = 6;
+const MOBILE_GRID_SIZE = 4;
+/** 인덱스 목록 페이지당 개수 */
+const INDEX_PAGE_SIZE = 4;
 
 const { posts, topTags } = Astro.props;
 
-// 필터 전 기본 배치: 0 → 대표글, 1~GRID_SIZE → 카드, 나머지 → 인덱스
+// JS 실행 전 기본 배치(데스크톱 기준): 0 → 대표글, 1~GRID_SIZE → 카드, 이후 → 인덱스 1페이지
 const slotOf = (i: number) =>
-  i === 0 ? "featured" : i <= GRID_SIZE ? "card" : "index";
+  i === 0
+    ? "featured"
+    : i <= GRID_SIZE
+      ? "card"
+      : i <= GRID_SIZE + INDEX_PAGE_SIZE
+        ? "index"
+        : "none";
 const tagsJson = (post: CollectionEntry<"post">) =>
   JSON.stringify(post.data.tags ?? []);
 ---
 
-<div id="home-posts" class="pb-16 sm:pb-24" data-grid-size={GRID_SIZE}>
+<div
+  id="home-posts"
+  class="pb-16 sm:pb-24"
+  data-grid-size={GRID_SIZE}
+  data-mobile-grid-size={MOBILE_GRID_SIZE}
+  data-index-page-size={INDEX_PAGE_SIZE}
+>
   <!-- 태그 필터 칩 -->
   <div
     class="-mx-4 overflow-x-auto px-4 pt-4 pb-8 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pt-0 lg:pb-10 [&::-webkit-scrollbar]:hidden"
@@ -84,7 +100,11 @@ const tagsJson = (post: CollectionEntry<"post">) =>
     {
       posts.map((post, i) => (
         <div
-          class="flex flex-col"
+          class:list={[
+            "flex flex-col",
+            // JS 실행 전 모바일에서 MOBILE_GRID_SIZE 초과 카드 숨김 (초기화 시 제거)
+            i > MOBILE_GRID_SIZE && "max-sm:hidden",
+          ]}
           data-home-slot="card"
           hidden={slotOf(i) !== "card"}
         >
@@ -119,13 +139,22 @@ const tagsJson = (post: CollectionEntry<"post">) =>
         ))
       }
     </div>
+    <Pagination id="home-pagination" />
   </section>
 </div>
 
 <script>
   const root = document.getElementById("home-posts")!;
   const gridSize = Number(root.dataset.gridSize) || 6;
+  const mobileGridSize = Number(root.dataset.mobileGridSize) || 4;
+  const indexPageSize = Number(root.dataset.indexPageSize) || 4;
+  const mobileQuery = window.matchMedia("(max-width: 639.98px)");
   const chips = root.querySelectorAll<HTMLButtonElement>("[data-home-chip]");
+  const paginationEl = document.getElementById("home-pagination") as
+    | (HTMLElement & {
+        updatePagination?: (current: number, total: number) => void;
+      })
+    | null;
 
   const slots = (name: string) => [
     ...root.querySelectorAll<HTMLElement>(`[data-home-slot="${name}"]`),
@@ -140,37 +169,75 @@ const tagsJson = (post: CollectionEntry<"post">) =>
     JSON.parse(item.dataset.postTags ?? "[]"),
   );
 
-  function applyFilter(tag: string) {
-    let rank = 0;
+  let activeTag = "";
+  let currentPage = 1;
+
+  function render() {
+    // 배치는 JS가 담당하므로 초기 렌더용 모바일 숨김 클래스 제거
+    cards.forEach((card) => card.classList.remove("max-sm:hidden"));
+    const cardCount = mobileQuery.matches ? mobileGridSize : gridSize;
+    const matched = featured
+      .map((_, i) => i)
+      .filter((i) => activeTag === "" || postTags[i].includes(activeTag));
+    const indexItems = matched.slice(1 + cardCount);
+    const totalPages = Math.max(
+      1,
+      Math.ceil(indexItems.length / indexPageSize),
+    );
+    currentPage = Math.min(currentPage, totalPages);
+
+    const pageStart = (currentPage - 1) * indexPageSize;
+    const visibleRows = new Set(
+      indexItems.slice(pageStart, pageStart + indexPageSize),
+    );
 
     featured.forEach((item, i) => {
-      const matched = tag === "" || postTags[i].includes(tag);
-      if (matched) rank++;
-
-      item.hidden = !(matched && rank === 1);
-      cards[i].hidden = !(matched && rank > 1 && rank <= 1 + gridSize);
-      rows[i].hidden = !(matched && rank > 1 + gridSize);
+      const rank = matched.indexOf(i);
+      item.hidden = rank !== 0;
+      cards[i].hidden = !(rank >= 1 && rank <= cardCount);
+      rows[i].hidden = !visibleRows.has(i);
 
       if (!rows[i].hidden) {
         const rankEl = rows[i].querySelector("[data-rank]");
-        if (rankEl) rankEl.textContent = String(rank).padStart(2, "0");
+        if (rankEl) rankEl.textContent = String(rank + 1).padStart(2, "0");
       }
     });
 
-    section("featured").hidden = rank < 1;
-    section("card").hidden = rank < 2;
-    section("index").hidden = rank < 2 + gridSize;
+    section("featured").hidden = matched.length < 1;
+    section("card").hidden = matched.length < 2;
+    section("index").hidden = indexItems.length === 0;
+    if (paginationEl) {
+      paginationEl.hidden = totalPages <= 1;
+      paginationEl.updatePagination?.(currentPage, totalPages);
+    }
   }
 
   chips.forEach((chip) =>
     chip.addEventListener("click", () => {
-      const tag = chip.dataset.homeChip ?? "";
+      activeTag = chip.dataset.homeChip ?? "";
+      currentPage = 1;
       chips.forEach((c) => {
         const on = c === chip;
         c.classList.toggle("chip-active", on);
         c.setAttribute("aria-pressed", String(on));
       });
-      applyFilter(tag);
+      render();
     }),
   );
+
+  paginationEl?.addEventListener("paginate", (e) => {
+    const { direction } = (e as CustomEvent<{ direction: "prev" | "next" }>)
+      .detail;
+    currentPage =
+      direction === "prev" ? Math.max(1, currentPage - 1) : currentPage + 1;
+    render();
+  });
+
+  mobileQuery.addEventListener("change", () => {
+    currentPage = 1;
+    render();
+  });
+
+  // Pagination 스크립트(updatePagination 등록)가 먼저 실행되도록 DOM 준비 후 초기 렌더
+  document.addEventListener("DOMContentLoaded", render, { once: true });
 </script>
