@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import HomeHero from "@/components/blog/HomeHero.astro";
 import HomePosts from "@/components/blog/HomePosts.astro";
 import { getCollection } from "astro:content";
+import { countTopTags } from "@/lib/post-tags";
 
 // 모든 포스트를 가져와서 날짜 기준 내림차순 정렬
 const allPosts = await getCollection("post");
@@ -10,16 +11,17 @@ const sortedPosts = allPosts.sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );
 
-// 필터 칩: 글 수 기준 상위 태그
-const tagCounts = new Map<string, number>();
-for (const post of sortedPosts) {
-  for (const tag of post.data.tags ?? []) {
-    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-  }
-}
-const topTags = [...tagCounts.entries()]
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 10);
+const topTags = countTopTags(sortedPosts);
+
+// 최근 업데이트: 수정일(updatedDate)까지 포함한 가장 최신 날짜
+const lastUpdated = new Date(
+  Math.max(
+    0,
+    ...sortedPosts.map((post) =>
+      (post.data.updatedDate ?? post.data.date).getTime(),
+    ),
+  ),
+);
 ---
 
 <BaseLayout
@@ -27,9 +29,6 @@ const topTags = [...tagCounts.entries()]
   description="개발하면서 배운 것들을 기록합니다."
   ogType="website"
 >
-  <HomeHero
-    postCount={sortedPosts.length}
-    lastUpdated={sortedPosts[0].data.date}
-  />
+  <HomeHero postCount={sortedPosts.length} lastUpdated={lastUpdated} />
   <HomePosts posts={sortedPosts} topTags={topTags} />
 </BaseLayout>

@@ -48,8 +48,7 @@ const tagsJson = (post: CollectionEntry<"post">) =>
             data-home-chip={tag}
             aria-pressed="false"
           >
-            {tag}
-            <span class="chip-count font-mono">{count}</span>
+            {tag}<span class="chip-count font-mono">{count}</span>
           </button>
         ))
       }
@@ -87,7 +86,6 @@ const tagsJson = (post: CollectionEntry<"post">) =>
         <div
           class="flex flex-col"
           data-home-slot="card"
-          data-post-tags={tagsJson(post)}
           hidden={slotOf(i) !== "card"}
         >
           <PostCard post={post} />
@@ -114,7 +112,6 @@ const tagsJson = (post: CollectionEntry<"post">) =>
         posts.map((post, i) => (
           <div
             data-home-slot="index"
-            data-post-tags={tagsJson(post)}
             hidden={slotOf(i) !== "index"}
           >
             <PostIndexRow post={post} rank={i + 1} />
@@ -139,13 +136,15 @@ const tagsJson = (post: CollectionEntry<"post">) =>
   const featured = slots("featured");
   const cards = slots("card");
   const rows = slots("index");
+  const postTags: string[][] = featured.map((item) =>
+    JSON.parse(item.dataset.postTags ?? "[]"),
+  );
 
   function applyFilter(tag: string) {
     let rank = 0;
 
     featured.forEach((item, i) => {
-      const tags: string[] = JSON.parse(item.dataset.postTags ?? "[]");
-      const matched = tag === "" || tags.includes(tag);
+      const matched = tag === "" || postTags[i].includes(tag);
       if (matched) rank++;
 
       item.hidden = !(matched && rank === 1);

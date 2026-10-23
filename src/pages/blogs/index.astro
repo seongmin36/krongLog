@@ -2,21 +2,14 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PostsPage from "@/components/blog/PostsPage.astro";
 import { getCollection } from "astro:content";
+import { countTopTags } from "@/lib/post-tags";
 
 const allPosts = await getCollection("post");
 const sortedPosts = allPosts.sort(
   (a, b) => b.data.date.getTime() - a.data.date.getTime(),
 );
 
-const tagCounts = new Map<string, number>();
-for (const post of sortedPosts) {
-  for (const tag of post.data.tags ?? []) {
-    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-  }
-}
-const topTags = [...tagCounts.entries()]
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 10);
+const topTags = countTopTags(sortedPosts);
 
 const subTagsByLabel: Record<string, [string, number][]> = {};
 for (const [label] of topTags) {

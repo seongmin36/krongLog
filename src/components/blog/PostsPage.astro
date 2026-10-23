@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
 import { blogPostPath } from "@/lib/blog-url";
+import { formatDotDate } from "@/lib/format-date";
 import { PAGE_SIZE } from "@/lib/posts-page-pagination";
 import Pagination from "@/components/ui/Pagination.astro";
 import "@/styles/chip.css";
@@ -16,12 +17,6 @@ interface Props {
 
 const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
 
-function fmt(date: Date) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}.${m}.${d}`;
-}
 ---
 
 <div class="posts-page">
@@ -126,7 +121,7 @@ function fmt(date: Date) {
               data-post-title={post.data.title.toLowerCase()}
               data-post-tags={JSON.stringify(post.data.tags ?? [])}
             >
-              <span class="post-date">{fmt(post.data.date)}</span>
+              <span class="post-date">{formatDotDate(post.data.date)}</span>
               <span class="post-tag">{firstTag}</span>
               <span class="post-title-text">{post.data.title}</span>
             </a>
