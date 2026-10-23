@@ -1,7 +1,9 @@
 ---
+import { Icon } from "astro-icon/components";
 import type { CollectionEntry } from "astro:content";
 import FeaturedPost from "@/components/blog/FeaturedPost.astro";
 import PostCard from "@/components/blog/PostCard.astro";
+import { blogsIndexPath } from "@/lib/blog-url";
 import "@/styles/caret.css";
 import "@/styles/chip.css";
 
@@ -103,6 +105,33 @@ const tagsJson = (post: CollectionEntry<"post">) =>
       ))
     }
   </section>
+
+  <!-- 전체 글 보기 -->
+  <div class="mt-12 flex justify-center lg:mt-16">
+    <a
+      href={blogsIndexPath()}
+      class="group border-border text-dark hover:border-primary hover:text-primary dark:border-border-dark dark:hover:border-dark-text dark:hover:text-dark-text inline-flex items-center gap-4 rounded-full border py-2 pr-2 pl-6 text-[15px] font-bold tracking-[-0.02em] transition-colors duration-200 dark:text-gray-50"
+      data-astro-prefetch
+    >
+      <span>
+        전체 글 보기<span
+          class="text-muted-alpha dark:text-muted-dark ml-2 font-mono text-[12.5px] font-normal"
+          >{String(posts.length).padStart(2, "0")}</span
+        >
+      </span>
+      <span
+        class="bg-primary dark:bg-dark-text dark:text-dark inline-flex size-10 items-center justify-center rounded-full text-white"
+        aria-hidden="true"
+      >
+        <Icon
+          name="lucide:arrow-right"
+          width={18}
+          height={18}
+          class="transition-transform duration-200 group-hover:translate-x-0.5"
+        />
+      </span>
+    </a>
+  </div>
 
   <!-- 끄적임 (출시 예정) -->
   <section aria-labelledby="home-notes-title" class="pt-14 lg:pt-20">
