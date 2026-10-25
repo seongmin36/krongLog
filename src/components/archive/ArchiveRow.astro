@@ -41,20 +41,25 @@ const summary = entry.data.type === "quote" ? quote : archiveExcerpt(entry, 120)
     }
   </div>
 
-  {
-    tags && tags.length > 0 ? (
-      <span class="text-description/70 dark:text-muted col-start-2 font-mono text-xs md:col-start-auto md:text-[12.5px] md:whitespace-nowrap">
-        {tags.map((tag) => `#${tag}`).join(" ")}
-      </span>
-    ) : (
-      <span class="hidden md:block" aria-hidden="true" />
-    )
-  }
-
-  <time
-    datetime={date.toISOString()}
-    class="text-muted-alpha dark:text-muted-dark col-start-2 font-mono text-xs md:col-start-auto md:text-right md:text-[12.5px]"
+  <!-- 모바일: 태그(왼쪽)와 날짜(오른쪽)를 한 줄로. md 이상은 그리드 열로 풀어서 배치 -->
+  <div
+    class="col-start-2 flex items-baseline justify-between gap-3 md:contents"
   >
-    {formatKstDotDate(date)}
-  </time>
+    {
+      tags && tags.length > 0 ? (
+        <span class="text-description/70 dark:text-muted min-w-0 truncate font-mono text-xs md:text-[12.5px] md:whitespace-nowrap">
+          {tags.map((tag) => `#${tag}`).join(" ")}
+        </span>
+      ) : (
+        <span class="hidden md:block" aria-hidden="true" />
+      )
+    }
+
+    <time
+      datetime={date.toISOString()}
+      class="text-muted-alpha dark:text-muted-dark ml-auto shrink-0 font-mono text-xs md:ml-0 md:text-right md:text-[12.5px]"
+    >
+      {formatKstDotDate(date)}
+    </time>
+  </div>
 </a>
