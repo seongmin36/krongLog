@@ -39,7 +39,7 @@ input은 html의 `<input/>` 태그로도 충분하구요.
 
 이유는 input을 구현하기 위해 제가 사용했던 방법은 CJS 방식으로 'fs'모듈을 가져왔습니다.
 
-```js
+```ts
 const fs = require('fs');
 
 const input = fs.readFileSync(0, 'utf8').toString().trim();

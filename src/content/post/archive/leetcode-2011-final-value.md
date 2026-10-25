@@ -75,13 +75,15 @@ tags: ["알고리즘","LeetCode"]
 
 한 번 이 두 개의 메서드와 논리 연산자를 통해서 오늘의 문제를 해결해보겠습니다.
 
-    /**
-     * @param {string[]} operations
-     * @return {number}
-     */
-    function finalValueAfterOperations (operations) {
-        return operations.reduce((count, operation) => operation[1] === '+' ? ++count : --count, 0)
-    };
+```ts
+/**
+ * @param {string[]} operations
+ * @return {number}
+ */
+function finalValueAfterOperations (operations) {
+    return operations.reduce((count, operation) => operation[1] === '+' ? ++count : --count, 0)
+};
+```
 
 한 줄로 깔끔하게 구현이 되었는데, 사실 한 줄로 구현했다고 해서 절대적으로 잘 짠 코드라고 보기는 어렵다고 생각합니다.
 

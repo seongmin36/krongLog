@@ -61,14 +61,16 @@ React Compiler가 최적화할 파일을 탐색하고, 컴파일하기까지의 
 
 HIR은 사람이 읽기 쉬운 고수준 코드로, 각 표현식에 고유 **id**를 부여하고 정확한 타입 정보를 보존하는 역할을 합니다. 하지만 사람이 직접 읽진 않고 분석용으로 쓰입니다.
 
-    원본 JSX:
-    const data = fetchUser(id);
-    const name = data.name;
-    
-    HIR 표현:
-    HIR.Block #1:
-      ID1: data = Call(fetchUser(id))      // 타입: User | null
-      ID2: name = GetProperty(data, 'name') // 타입: string
+```ts
+원본 JSX:
+const data = fetchUser(id);
+const name = data.name;
+
+HIR 표현:
+HIR.Block #1:
+  ID1: data = Call(fetchUser(id))      // 타입: User | null
+  ID2: name = GetProperty(data, 'name') // 타입: string
+```
 
 HIR에서 중요한 점은 각 값의 생성/사용 위치를 **id**를 통해 명확히 추적할 수 있다는 것입니다. 컴파일러는 이 정보를 바탕으로 데이터 흐름을 분석합니다.
 

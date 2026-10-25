@@ -43,7 +43,7 @@ import LinkCard from "@/components/ui/LinkCard.astro";
 
 `setInterval()` 과 `setTimeout()`으로 구현해봅시다.
 
-```js
+```ts
 // setInterval 방식
 setInterval(async function poll() {
   const data = await fetch("/api");
@@ -83,7 +83,7 @@ poll();
 
 즉, React에서는 재귀 setTimeout()과 <strong>뒷처리(cleanup)함수</strong>로 구현하는 것이 상대적으로 안전합니다.
 
-```js
+```ts
 useEffect(() => {
   let cancelled = false;
 

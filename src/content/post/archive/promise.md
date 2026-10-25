@@ -51,32 +51,33 @@ Promise.allSettled()는 모든 Promise가 완료될 때까지 기다렸다가 �
 
 금일 배웠던 api 요청도 `/v2/pokemon/${id}`와 `/v2/pokemon-species/${id}`이 두 가지의 요청을 보냈기 때문에 <strong>Promise.allSettled()</strong>로 리팩토링을 해보았습니다.
 
-    try {
-        const [resResult, speciesResult] = await Promise.allSettled([
-          fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
-            next: { revalidate: 60 * 60 * 24 },
-          }),
-          fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`, {
-            next: { revalidate: 60 * 60 * 24 },
-          }),
-        ]);
-        if (resResult.status === "rejected") {
-          throw new Error(`포켓몬 데이터 요청이 실패했습니다. ${id}`);
-        }
-        if (!resResult.value.ok) {
-          throw new Error(`포켓몬 데이터를 가져오는데 실패했습니다. ${id}`);
-        }
-        const data = pokemonApiSchema.parse(await resResult.value.json());
-        let koName = "";
-        if (speciesResult.status === "fulfilled" && speciesResult.value.ok) {
-          const speciesData = pokemonSpeciesApiSchema.parse(
-            await speciesResult.value.json(),
-          );
-          koName =
-            speciesData.names.find((name) => name.language.name === "ko")?.name ??
-            "";
-        }
-    
+```ts
+try {
+    const [resResult, speciesResult] = await Promise.allSettled([
+      fetch(`https://pokeapi.co/api/v2/pokemon/${id}`, {
+        next: { revalidate: 60 * 60 * 24 },
+      }),
+      fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`, {
+        next: { revalidate: 60 * 60 * 24 },
+      }),
+    ]);
+    if (resResult.status === "rejected") {
+      throw new Error(`포켓몬 데이터 요청이 실패했습니다. ${id}`);
+    }
+    if (!resResult.value.ok) {
+      throw new Error(`포켓몬 데이터를 가져오는데 실패했습니다. ${id}`);
+    }
+    const data = pokemonApiSchema.parse(await resResult.value.json());
+    let koName = "";
+    if (speciesResult.status === "fulfilled" && speciesResult.value.ok) {
+      const speciesData = pokemonSpeciesApiSchema.parse(
+        await speciesResult.value.json(),
+      );
+      koName =
+        speciesData.names.find((name) => name.language.name === "ko")?.name ??
+        "";
+    }
+```
 
 위 코드는 결국 api 요청 상태에 대한 세부 케이스를 정의한 상태입니다.
 
