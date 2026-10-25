@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import ArchiveCard from "@/components/archive/ArchiveCard.astro";
+import ArchiveRow from "@/components/archive/ArchiveRow.astro";
 import { archiveIndexPath } from "@/lib/blog-url";
 import type { ArchiveEntry } from "@/lib/archive";
 
@@ -36,9 +36,9 @@ const { entries } = Astro.props;
         </a>
       </div>
 
-      <div class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+      <div class="border-border dark:border-border-dark mt-4 border-t">
         {entries.map((entry) => (
-          <ArchiveCard entry={entry} />
+          <ArchiveRow entry={entry} />
         ))}
       </div>
     </section>

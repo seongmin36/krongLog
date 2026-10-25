@@ -1,0 +1,60 @@
+---
+import { Icon } from "astro-icon/components";
+import { archivePostPath } from "@/lib/blog-url";
+import { formatKstDotDate } from "@/lib/format-date";
+import { archiveExcerpt, type ArchiveEntry } from "@/lib/archive";
+
+interface Props {
+  entry: ArchiveEntry;
+}
+
+const { entry } = Astro.props;
+const { title, date, icon, tags, quote } = entry.data;
+
+// 인용은 본문 대신 인용문을 요약으로 보여준다
+const summary = entry.data.type === "quote" ? quote : archiveExcerpt(entry, 120);
+---
+
+<a
+  href={archivePostPath(entry.id)}
+  class="group border-border hover:bg-hover-overlay-light dark:border-border-dark dark:hover:bg-hover-overlay-dark grid grid-cols-[24px_1fr] gap-x-3 gap-y-1.5 border-b px-2 py-5 transition-colors duration-150 md:grid-cols-[28px_1fr_auto_96px] md:items-center md:gap-x-6 md:py-6"
+  data-astro-prefetch
+>
+  <Icon
+    name={icon}
+    class="text-muted-alpha dark:text-muted-dark mt-0.5 size-[18px] md:mt-0"
+    aria-hidden="true"
+  />
+
+  <div class="min-w-0">
+    <h3
+      class="text-dark group-hover:text-primary dark:group-hover:text-dark-text truncate text-[16.5px] leading-normal font-bold tracking-[-0.02em] transition-colors duration-200 md:text-[18px] dark:text-gray-50"
+    >
+      {title}
+    </h3>
+    {
+      summary && (
+        <p class="text-description/70 dark:text-muted mt-1 truncate text-[13.5px]">
+          {summary}
+        </p>
+      )
+    }
+  </div>
+
+  {
+    tags && tags.length > 0 ? (
+      <span class="text-description/70 dark:text-muted col-start-2 font-mono text-xs md:col-start-auto md:text-[12.5px] md:whitespace-nowrap">
+        {tags.map((tag) => `#${tag}`).join(" ")}
+      </span>
+    ) : (
+      <span class="hidden md:block" aria-hidden="true" />
+    )
+  }
+
+  <time
+    datetime={date.toISOString()}
+    class="text-muted-alpha dark:text-muted-dark col-start-2 font-mono text-xs md:col-start-auto md:text-right md:text-[12.5px]"
+  >
+    {formatKstDotDate(date)}
+  </time>
+</a>
