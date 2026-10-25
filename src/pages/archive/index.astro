@@ -1,0 +1,17 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ArchiveHero from "@/components/archive/ArchiveHero.astro";
+import ArchiveList from "@/components/archive/ArchiveList.astro";
+import { getSortedArchive } from "@/lib/archive";
+
+const entries = await getSortedArchive();
+---
+
+<BaseLayout
+  title="아카이브 | Krong Dev."
+  description="블로그 글이 되기엔 가벼운 짧은 생각과 기록을 모아 둡니다."
+  ogType="website"
+>
+  <ArchiveHero total={entries.length} />
+  <ArchiveList entries={entries} />
+</BaseLayout>

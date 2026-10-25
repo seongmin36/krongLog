@@ -1,0 +1,26 @@
+---
+import ArchiveCard from "@/components/archive/ArchiveCard.astro";
+import type { ArchiveEntry } from "@/lib/archive";
+
+interface Props {
+  entries: ArchiveEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+<section aria-label="아카이브 목록" class="pb-24 sm:pb-32">
+  {
+    entries.length === 0 ? (
+      <p class="text-muted-alpha dark:text-muted-dark py-20 text-center text-sm">
+        아직 올라온 아카이브가 없습니다.
+      </p>
+    ) : (
+      <div class="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {entries.map((entry) => (
+          <ArchiveCard entry={entry} />
+        ))}
+      </div>
+    )
+  }
+</section>
