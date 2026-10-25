@@ -2,7 +2,7 @@
 title: "React v19로 나타난 정식 React Compiler v1"
 date: 2026-03-25T17:04:02+09:00
 icon: "lucide:atom"
-tags: ["배움일기","React"]
+tags: ["배움일기", "React"]
 ---
 
 ---
@@ -31,21 +31,14 @@ React 업데이트 중 가장 눈에 띄는 기능이었습니다.
 
 React Compiler가 최적화할 파일을 탐색하고, 컴파일하기까지의 과정을 보면,
 
-*   Babel + babel-plugin-react-compiler
-    
+- Babel + babel-plugin-react-compiler
 
-*   JSX 소스 코드
-    
-*   HIR(High-level IR) 생성
-    
-*   CFG(Control Flow Graph) 분석
-    
-*   데이터 흐름 분석 (DFA)
-    
-*   최적화 결정
-    
-*   useMemo() 자동 삽입)
-    
+- JSX 소스 코드
+- HIR(High-level IR) 생성
+- CFG(Control Flow Graph) 분석
+- 데이터 흐름 분석 (DFA)
+- 최적화 결정
+- useMemo() 자동 삽입)
 
 단계로 이루어집니다.
 
@@ -80,34 +73,29 @@ HIR에서 중요한 점은 각 값의 생성/사용 위치를 **id**를 통해 �
 
 다음 단계인 DFA에서는 각 값의 생명주기를 분석하는 단계인데, 컴파일러는 각 HIR 노드의 생성, 사용, 변경 패턴을 추적합니다.
 
-위 개념을 오늘 배웠던 '**ex01\_expensiveCalc.jsx**'에서 `slowSum(n)`을 예시로 들자면,
+위 개념을 오늘 배웠던 '**ex01_expensiveCalc.jsx**'에서 `slowSum(n)`을 예시로 들자면,
 
 1.  `slowSum(n)`을 호출합니다. -> HIR로 ID를 부여합니다.
-    
 2.  `<h1>{value}</h1>` 텍스트 노드에서 사용됨을 파악합니다.
-    
 3.  현재 `slowSum(n)`은 state 변수인 'n'에만 의존한다고 분석합니다.
-    
 4.  함수 내부에 부작용(`console.log()` 등)을 파악합니다. -> 만약에 없다면 순수하다고 판단하여 ~~
-    
 5.  `slowSum(n)`은 state 변수 n에만 의존적이기 때문에 n 변경 시에만 재계산합니다.
-    
 
 이런 내용들은 **DFA**에서 아래와 같은 정보를 만듭니다.
 
-value : ID 33 (예시)
+- value : ID 33 (예시)
 
-생성 : N1 - slowSum(n) -> N1이라는 예시 id
+- 생성 : N1 - slowSum(n) -> N1이라는 예시 id
 
-사용 : JSX 노드
+- 사용 : JSX 노드
 
-deps: \[n\] -> state 변수
+- deps: \[n\] -> state 변수
 
-pure: true -> 순수성
+- pure: true -> 순수성
 
-readOnly: true
+- readOnly: true
 
-recomputeOn: n 변경시 재계산
+- recomputeOn: n 변경시 재계산
 
 이러한 결과들을 바탕으로 메모이제이션 필요성을 판단합니다.
 
@@ -128,14 +116,11 @@ React Compiler는 최적화에 성공하지 않더라도 <strong>"작동하는 �
 실제로 이 라이브러리를 수업에서 실습한 내용을 바탕으로 사용해보았습니다.
 
 1.  설치: `npm i eslint-plugin-react-compiler`
-    
-2.  package.json에서 lint 명령어 설정 -> 잘 돌아가는지 확인하기 위해서 lint 경로를 '/07\_useMemo/\*.jsx' 로 제한했습니다.
-    
+2.  package.json에서 lint 명령어 설정 -> 잘 돌아가는지 확인하기 위해서 lint 경로를 '/07_useMemo/\*.jsx' 로 제한했습니다.
 
 ![](../../../assets/archive/react-compiler-v1/1.webp)
 
 3.  eslint.config.js에서 eslint-plugin-react-compiler 설정
-    
 
 ![](../../../assets/archive/react-compiler-v1/2.webp)
 
@@ -146,10 +131,9 @@ React Compiler는 최적화에 성공하지 않더라도 <strong>"작동하는 �
 다행히도 잘 최적화가 되고 있는 것 같습니다.
 
 4.  반대로 억지로 lint 규칙에 위배되도록(React Compiler가 작동하지 않도록) 바꿔보겠습니다.
-    
 
     const [meta] = useState({ clicks: 0 });
-      meta.clicks += 1;
+    meta.clicks += 1;
 
 화면이 렌더링 될때마다 clicks 값이 계속 증가하도록 만들어 보았습니다.
 
@@ -173,6 +157,6 @@ React Compiler는 최적화에 성공하지 않더라도 <strong>"작동하는 �
 
 따라서 완벽한 코드베이스에서 React Compiler가 빛나기 때문에 잘 선택하고 고려해야 할 문제라고 생각합니다.
 
-오늘 **느낀점** : 다양한 기술이 새로 도입되면 그에 따른 문제들이 어디서나 나타나기 마련인데, 그럴 때 어떻게 **잘 우회해서 할 지 or 버릴지**를 생각해보는 것이 중요할 것 같습니다. 또, React Compiler가 잘 잡아줘서 비즈니스 로직에 집중할 수 있는 것은 큰 장점이지만, 그렇게까지 연산 최적화를 신경써볼만한 규모의 프로젝트를 진행해본 적이 없고, 프론트엔드에서 스냅샷, E2E 테스트 코드를 작성해본 경험이 없기 때문에 크게 체감익 되지는 않습니다.
+오늘 **느낀점** : 다양한 기술이 새로 도입되면 그에 따른 문제들이 어디서나 나타나기 마련인데, 그럴 때 어떻게 **잘 우회해서 할 지 or 버릴지**를 생각해보는 것이 중요할 것 같습니다. 또, React Compiler가 잘 잡아줘서 비즈니스 로직에 집중할 수 있는 것은 큰 장점이지만, 그렇게까지 연산 최적화를 신경써볼만한 규모의 프로젝트를 진행해본 적이 없고, 프론트엔드에서 스냅샷, E2E 테스트 코드를 작성해본 경험이 없기 때문에 크게 체감이 되지는 않습니다.
 
 매번 React, Vite, TypeScript 등 다양한 프로덕트가 업데이트 함에 따라 매번 새로운 것을 배우고 접해야합니다. 개발자의 숙명이니 만큼 기존 기술을 탄탄하게 배우면서 새로운 기술을 잘 적용할 줄 아는 것은 매우 고단하고 평생 그 프로세스를 거쳐야 합니다. 물리 법칙은 그렇게 쉽게 바뀌지 않는데 말이죠. 꾸준히 재미를 갖고 배우는 것이 답인 것 같습니다. 화이팅합시다.
