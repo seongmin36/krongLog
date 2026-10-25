@@ -16,8 +16,11 @@ html {
 
 @theme {
   --font-sans: "KaKao Big", "KaKao Small", sans-serif;
-  /* 인용문: 시스템 Georgia (한글은 본문 폰트로 대체) */
-  --font-quote: Georgia, "KaKao Big", serif;
+  /* 인용문: 영문은 Georgia → Linux·Android의 이탤릭 serif, 한글은 본문 폰트.
+     한국어 환경의 serif는 이탤릭 없는 CJK 명조로 잡힐 수 있어 이름을 먼저 나열 */
+  --font-quote:
+    Georgia, "Noto Serif", "DejaVu Serif", "Liberation Serif",
+    "KaKao Big Hangul", serif;
 
   --color-primary: #3b7a57;
   --color-description: #4b5563;
