@@ -25,6 +25,7 @@ export const ARCHIVE_FILTER_TAGS = [
   "코딩테스트",
   "회고",
   "TIL",
+  "사용후기",
 ] as const;
 
 /** 이 시각(KST, 시)부터 다음 날 NIGHT_UNTIL_HOUR시 전까지 쓴 글은 다크 카드 */
