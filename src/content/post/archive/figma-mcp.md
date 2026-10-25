@@ -2,7 +2,7 @@
 title: "Figma MCP"
 date: 2026-04-17T16:56:40+09:00
 icon: "lucide:figma"
-tags: ["배움일기","Figma"]
+tags: ["배움일기","사용후기","Figma"]
 ---
 
 ---
