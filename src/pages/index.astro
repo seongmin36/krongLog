@@ -15,8 +15,8 @@ const sortedPosts = allPosts.sort(
 
 const topTags = countTopTags(sortedPosts);
 
-// 홈에는 최신 아카이브 5개만 노출
-const latestArchive = (await getSortedArchive()).slice(0, 5);
+// 홈에는 최신 아카이브 4개만 노출
+const latestArchive = (await getSortedArchive()).slice(0, 4);
 
 // 최근 업데이트: 수정일(updatedDate)까지 포함한 가장 최신 날짜
 const lastUpdated = new Date(
