@@ -4,20 +4,18 @@ export const partial = true;
 
 import ArchiveCard from "@/components/archive/ArchiveCard.astro";
 import {
-  buildArchiveFilters,
-  chunkEntries,
-  filterByTag,
+  buildArchiveFeeds,
   getSortedArchive,
   type ArchiveEntry,
 } from "@/lib/archive";
 
 export async function getStaticPaths() {
-  const entries = await getSortedArchive();
+  const feeds = buildArchiveFeeds(await getSortedArchive());
 
-  return buildArchiveFilters(entries).flatMap(({ key, tag }) =>
-    chunkEntries(filterByTag(entries, tag)).map((chunk, index) => ({
+  return feeds.flatMap(({ key, pages }) =>
+    pages.map((entries, index) => ({
       params: { key, page: String(index + 1) },
-      props: { entries: chunk },
+      props: { entries },
     })),
   );
 }

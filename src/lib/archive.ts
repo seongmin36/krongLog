@@ -6,14 +6,14 @@ export type ArchiveEntry = CollectionEntry<"archive">;
 /** 카드·상세 표현 방식. headline은 본문 없이 제목만 있는 글 */
 export type ArchiveVariant = "note" | "headline" | "image" | "quote";
 
-export interface ArchiveFilter {
-  /** 정적 조각 경로에 쓰는 키 (all, t0, t1 …) */
+/** 필터 칩 하나에 해당하는 목록 (전체 또는 태그별) */
+export interface ArchiveFeed {
+  /** 정적 조각 경로에 쓰는 키: 전체는 all, 태그는 글 수 순위대로 t0, t1 … */
   key: string;
-  /** null이면 전체 */
-  tag: string | null;
+  /** 칩 라벨 (전체, #태그) */
   label: string;
-  /** 해당 필터의 조각(페이지) 수 */
-  totalPages: number;
+  /** ARCHIVE_PAGE_SIZE씩 나눈 묶음 */
+  pages: ArchiveEntry[][];
 }
 
 /** 한 번에 불러오는 카드 수 */
@@ -84,30 +84,28 @@ export function archiveTilt(id: string): string {
   return `${TILTS[hash % TILTS.length]}deg`;
 }
 
-export function chunkEntries<T>(items: T[], size = ARCHIVE_PAGE_SIZE): T[][] {
-  const chunks: T[][] = [];
-  for (let i = 0; i < items.length; i += size) {
-    chunks.push(items.slice(i, i + size));
+function chunkEntries(entries: ArchiveEntry[]): ArchiveEntry[][] {
+  const pages: ArchiveEntry[][] = [];
+  for (let i = 0; i < entries.length; i += ARCHIVE_PAGE_SIZE) {
+    pages.push(entries.slice(i, i + ARCHIVE_PAGE_SIZE));
   }
-  return chunks;
+  return pages;
 }
 
-export function filterByTag(
-  entries: ArchiveEntry[],
-  tag: string | null,
-): ArchiveEntry[] {
-  return tag === null
-    ? entries
-    : entries.filter((entry) => entry.data.tags?.includes(tag));
-}
-
-/** 전체 + 상위 태그 필터 목록 */
-export function buildArchiveFilters(entries: ArchiveEntry[]): ArchiveFilter[] {
+/**
+ * 전체 + 상위 태그 피드. 목록 페이지(1페이지)와 정적 조각 라우트(전 페이지)가
+ * 같은 결과를 쓰므로 칩의 페이지 수와 실제 조각 수가 항상 일치한다
+ */
+export function buildArchiveFeeds(entries: ArchiveEntry[]): ArchiveFeed[] {
   const tags = countTopTags(entries, ARCHIVE_TAG_LIMIT).map(([tag]) => tag);
-  return [null, ...tags].map((tag, i) => ({
-    key: tag === null ? "all" : `t${i - 1}`,
-    tag,
-    label: tag === null ? "전체" : `#${tag}`,
-    totalPages: chunkEntries(filterByTag(entries, tag)).length,
-  }));
+  return [
+    { key: "all", label: "전체", pages: chunkEntries(entries) },
+    ...tags.map((tag, index) => ({
+      key: `t${index}`,
+      label: `#${tag}`,
+      pages: chunkEntries(
+        entries.filter((entry) => entry.data.tags?.includes(tag)),
+      ),
+    })),
+  ];
 }

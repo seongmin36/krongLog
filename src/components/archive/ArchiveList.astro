@@ -1,17 +1,18 @@
 ---
 import ArchiveCard from "@/components/archive/ArchiveCard.astro";
 import { archiveChunkPath } from "@/lib/blog-url";
-import type { ArchiveEntry, ArchiveFilter } from "@/lib/archive";
+import type { ArchiveFeed } from "@/lib/archive";
 import "@/styles/chip.css";
 import "@/styles/reveal.css";
 
 interface Props {
-  /** 전체 필터의 첫 묶음 (나머지는 스크롤 시 HTML 조각으로 불러옴) */
-  entries: ArchiveEntry[];
-  filters: ArchiveFilter[];
+  /** 첫 번째는 전체 피드. 전체의 1페이지만 바로 렌더링하고 나머지는 스크롤 시 HTML 조각으로 불러옴 */
+  feeds: ArchiveFeed[];
 }
 
-const { entries, filters } = Astro.props;
+const { feeds } = Astro.props;
+const [allFeed] = feeds;
+const entries = allFeed?.pages[0] ?? [];
 
 const moreButtonClass =
   "border-border text-dark hover:border-primary hover:text-primary dark:border-border-dark dark:hover:border-dark-text dark:hover:text-dark-text inline-flex items-center rounded-full border px-6 py-2.5 text-sm font-bold transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 dark:text-gray-50";
@@ -35,17 +36,17 @@ const moreButtonClass =
           class="flex flex-wrap gap-2"
           role="group"
           aria-label="태그 필터"
-          hidden={filters.length <= 1}
+          hidden={feeds.length <= 1}
         >
-          {filters.map((filter, index) => (
+          {feeds.map((feed, index) => (
             <button
               type="button"
               class:list={["chip", index === 0 && "chip-active"]}
-              data-archive-chip={filter.key}
-              data-pages={filter.totalPages}
+              data-archive-chip={feed.key}
+              data-pages={feed.pages.length}
               aria-pressed={index === 0 ? "true" : "false"}
             >
-              {filter.label}
+              {feed.label}
             </button>
           ))}
         </div>
@@ -74,7 +75,7 @@ const moreButtonClass =
             type="button"
             class={moreButtonClass}
             data-archive-more
-            hidden={(filters[0]?.totalPages ?? 0) <= 1}
+            hidden={(allFeed?.pages.length ?? 0) <= 1}
           >
             더 보기
           </button>
