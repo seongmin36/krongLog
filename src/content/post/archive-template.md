@@ -19,6 +19,7 @@ type: quote # 선택. 인용 글만 (quote, author 함께)
 ```
 
 - 본문 이미지는 `src/assets/archive/{slug}/`에 두고 상대 경로로 넣습니다. 외부 이미지 URL은 쓰지 않습니다.
+- 목록 필터 칩은 `배움일기`, `알고리즘`, `코딩테스트`, `회고`, `TIL`만 노출합니다(`src/lib/archive.ts`의 `ARCHIVE_FILTER_TAGS`).
 
 ---
 

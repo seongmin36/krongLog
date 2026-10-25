@@ -1,6 +1,5 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import { getKstHour } from "@/lib/format-date";
-import { countTopTags } from "@/lib/post-tags";
 
 export type ArchiveEntry = CollectionEntry<"archive">;
 
@@ -9,7 +8,7 @@ export type ArchiveVariant = "note" | "night" | "image" | "quote";
 
 /** 필터 칩 하나에 해당하는 목록 (전체 또는 태그별) */
 export interface ArchiveFeed {
-  /** 정적 조각 경로에 쓰는 키: 전체는 all, 태그는 글 수 순위대로 t0, t1 … */
+  /** 정적 조각 경로에 쓰는 키: 전체는 all, 태그는 ARCHIVE_FILTER_TAGS 순서대로 t0, t1 … */
   key: string;
   /** 칩 라벨 (전체, #태그) */
   label: string;
@@ -19,8 +18,14 @@ export interface ArchiveFeed {
 
 /** 한 번에 불러오는 카드 수 */
 export const ARCHIVE_PAGE_SIZE = 12;
-/** 필터 칩으로 노출하는 상위 태그 수 */
-export const ARCHIVE_TAG_LIMIT = 12;
+/** 필터 칩으로 노출하는 태그 (이 순서대로, 글이 있는 태그만) */
+export const ARCHIVE_FILTER_TAGS = [
+  "배움일기",
+  "알고리즘",
+  "코딩테스트",
+  "회고",
+  "TIL",
+] as const;
 
 /** 이 시각(KST, 시)부터 다음 날 NIGHT_UNTIL_HOUR시 전까지 쓴 글은 다크 카드 */
 const NIGHT_FROM_HOUR = 18;
@@ -101,19 +106,20 @@ function chunkEntries(entries: ArchiveEntry[]): ArchiveEntry[][] {
 }
 
 /**
- * 전체 + 상위 태그 피드. 목록 페이지(1페이지)와 정적 조각 라우트(전 페이지)가
+ * 전체 + 지정 태그 피드. 목록 페이지(1페이지)와 정적 조각 라우트(전 페이지)가
  * 같은 결과를 쓰므로 칩의 페이지 수와 실제 조각 수가 항상 일치한다
  */
 export function buildArchiveFeeds(entries: ArchiveEntry[]): ArchiveFeed[] {
-  const tags = countTopTags(entries, ARCHIVE_TAG_LIMIT).map(([tag]) => tag);
+  const tagFeeds = ARCHIVE_FILTER_TAGS.map((tag, index) => ({
+    key: `t${index}`,
+    label: `#${tag}`,
+    pages: chunkEntries(
+      entries.filter((entry) => entry.data.tags?.includes(tag)),
+    ),
+  }));
   return [
     { key: "all", label: "전체", pages: chunkEntries(entries) },
-    ...tags.map((tag, index) => ({
-      key: `t${index}`,
-      label: `#${tag}`,
-      pages: chunkEntries(
-        entries.filter((entry) => entry.data.tags?.includes(tag)),
-      ),
-    })),
+    // 아직 글이 없는 태그는 빈 목록이 되므로 칩을 숨긴다
+    ...tagFeeds.filter((feed) => feed.pages.length > 0),
   ];
 }
