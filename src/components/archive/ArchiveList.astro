@@ -194,7 +194,27 @@ const moreButtonClass =
         : failed
           ? "다시 시도"
           : "더 보기";
-      status!.textContent = loading ? "" : `${cards.length}개 표시 중`;
+    }
+
+    // 더 보기 버튼이 화면 근처에 오면 자동으로 다음 묶음을 불러온다
+    const autoLoad = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && !failed) {
+          void loadNext();
+        }
+      },
+      { rootMargin: "0px 0px 600px 0px" },
+    );
+    let autoLoadReady = false;
+
+    /**
+     * 교차 상태가 바뀔 때만 콜백이 오므로, 불러온 뒤에도 버튼이 화면 근처에 남아 있으면
+     * 다시 관찰해서 콜백을 한 번 더 받는다 (높은 화면에서 자동 로딩이 멈추지 않도록)
+     */
+    function watchMore() {
+      if (!autoLoadReady) return;
+      autoLoad.unobserve(moreButton!);
+      if (!moreButton!.hidden) autoLoad.observe(moreButton!);
     }
 
     async function fetchChunk(key: string, page: number) {
@@ -240,12 +260,16 @@ const moreButtonClass =
           placeCard(card);
           track(card);
         });
+        status!.textContent = `${cards.length}개 표시 중`;
       } catch {
-        if (version === feedVersion) failed = true;
+        if (version !== feedVersion) return;
+        failed = true;
+        status!.textContent = "불러오지 못했습니다. 다시 시도해 주세요.";
       } finally {
         if (version === feedVersion) {
           loading = false;
           syncMore();
+          watchMore();
         }
       }
     }
@@ -326,29 +350,14 @@ const moreButtonClass =
     layoutColumns();
     syncMore();
 
-    // 더 보기 버튼이 화면 근처에 오면 자동으로 다음 묶음을 불러온다
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting) && !failed) {
-          void loadNext();
-        }
-      },
-      { rootMargin: "0px 0px 600px 0px" },
-    );
-
     restoreState()
       .catch(() => undefined)
       .finally(() => {
         cards.forEach(track);
         grid.dataset.ready = "";
-        observer.observe(moreButton);
+        autoLoadReady = true;
+        watchMore();
       });
-
-    // 불러온 뒤에도 버튼이 화면 근처면 계속 이어서 불러오도록 다시 관찰
-    new MutationObserver(() => {
-      observer.unobserve(moreButton);
-      observer.observe(moreButton);
-    }).observe(moreButton, { attributes: true, attributeFilter: ["hidden"] });
   }
 
   const root = document.querySelector<HTMLElement>("[data-archive-root]");
