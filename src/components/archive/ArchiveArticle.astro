@@ -41,13 +41,13 @@ const neighborTitleClass =
     아카이브 목록
   </a>
 
-  <article class="mx-auto mt-14 max-w-[640px] sm:mt-20">
+  <article class="mx-auto mt-14 max-w-160 sm:mt-20">
     <header>
       <!-- 아이콘 · 날짜 · 시간 -->
       <div
         class="text-muted-alpha dark:text-muted-dark flex items-center gap-3 text-[13px]"
       >
-        <Icon name={icon} class="size-[22px] shrink-0" aria-hidden="true" />
+        <Icon name={icon} class="size-5.5 shrink-0" aria-hidden="true" />
         <time datetime={date.toISOString()} class="flex items-center gap-3">
           <span>{formatKstDotDate(date)}</span>
           <span class="bg-muted-alpha size-1 rounded-full" aria-hidden="true"
@@ -149,7 +149,7 @@ const neighborTitleClass =
               <span class={neighborTitleClass}>
                 <Icon
                   name={older.data.icon}
-                  class="mt-[3px] size-4 shrink-0"
+                  class="mt-0.75 size-4 shrink-0"
                   aria-hidden="true"
                 />
                 <span class="line-clamp-2 break-keep">{older.data.title}</span>
@@ -177,7 +177,7 @@ const neighborTitleClass =
               <span class:list={[neighborTitleClass, "justify-end"]}>
                 <Icon
                   name={newer.data.icon}
-                  class="mt-[3px] size-4 shrink-0"
+                  class="mt-0.75 size-4 shrink-0"
                   aria-hidden="true"
                 />
                 <span class="line-clamp-2 break-keep">{newer.data.title}</span>
