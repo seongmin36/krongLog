@@ -43,7 +43,8 @@ const neighborTitleClass =
     아카이브 목록
   </a>
 
-  <article class="mx-auto mt-14 max-w-160 sm:mt-20">
+  <!-- 본문 폭은 블로그 글(720px)과 동일 -->
+  <article class="mx-auto mt-14 max-w-[720px] sm:mt-20">
     <header>
       <!-- 아이콘 · 날짜 · 시간 -->
       <div
@@ -98,8 +99,8 @@ const neighborTitleClass =
             alt={title}
             format="webp"
             quality={85}
-            widths={[640, 960, 1280]}
-            sizes="(max-width: 703px) 100vw, 640px"
+            widths={[720, 1080, 1440]}
+            sizes="(max-width: 767px) 100vw, 720px"
             class="aspect-4/3 h-auto w-full object-cover"
             priority
           />
