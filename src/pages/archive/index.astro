@@ -2,9 +2,15 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ArchiveHero from "@/components/archive/ArchiveHero.astro";
 import ArchiveList from "@/components/archive/ArchiveList.astro";
-import { getSortedArchive } from "@/lib/archive";
+import {
+  buildArchiveFilters,
+  chunkEntries,
+  getSortedArchive,
+} from "@/lib/archive";
 
 const entries = await getSortedArchive();
+const filters = buildArchiveFilters(entries);
+const [firstChunk = []] = chunkEntries(entries);
 ---
 
 <BaseLayout
@@ -13,5 +19,5 @@ const entries = await getSortedArchive();
   ogType="website"
 >
   <ArchiveHero total={entries.length} />
-  <ArchiveList entries={entries} />
+  <ArchiveList entries={firstChunk} filters={filters} />
 </BaseLayout>
