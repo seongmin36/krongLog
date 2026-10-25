@@ -6,7 +6,6 @@ import { formatKstMonthDay, formatKstTime } from "@/lib/format-date";
 import {
   archiveExcerpt,
   archiveTilt,
-  archiveTodoItems,
   archiveVariant,
   type ArchiveEntry,
 } from "@/lib/archive";
@@ -20,7 +19,6 @@ const { title, date, icon, tags, image, quote, author } = entry.data;
 
 const variant = archiveVariant(entry);
 const excerpt = archiveExcerpt(entry);
-const todoItems = archiveTodoItems(entry).slice(0, 5);
 const isHeadline = variant === "headline";
 const isQuote = variant === "quote";
 
@@ -104,42 +102,7 @@ const titleClass = isHeadline
             {title}
           </h3>
 
-          {variant === "todo" && todoItems.length > 0 && (
-            <ul class="mt-3 flex flex-col gap-2">
-              {todoItems.map((item) => (
-                <li class="flex items-start gap-2.5 text-sm leading-normal">
-                  <span
-                    class:list={[
-                      "mt-[3px] flex size-4 shrink-0 items-center justify-center rounded-[4px] border",
-                      item.done
-                        ? "border-primary bg-primary text-white"
-                        : "border-gray-300 dark:border-gray-600",
-                    ]}
-                  >
-                    {item.done && (
-                      <Icon
-                        name="lucide:check"
-                        class="size-3"
-                        aria-hidden="true"
-                      />
-                    )}
-                  </span>
-                  <span
-                    class:list={[
-                      "dark:text-dark-description",
-                      item.done
-                        ? "text-description/60 line-through"
-                        : "text-description",
-                    ]}
-                  >
-                    {item.text}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {excerpt && variant !== "todo" && (
+          {excerpt && (
             <p
               class:list={[
                 "text-description dark:text-dark-description mt-2 text-[14.5px] leading-[1.75]",

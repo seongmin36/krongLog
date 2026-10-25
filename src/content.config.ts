@@ -25,8 +25,8 @@ const archive = defineCollection({
         date: z.coerce.date(),
         // iconify 아이콘 이름 (예: lucide:coffee)
         icon: z.string().default("lucide:pencil-line"),
-        // note: 일반 · quote: 인용 · todo: 체크리스트
-        type: z.enum(["note", "quote", "todo"]).default("note"),
+        // note: 일반 · quote: 인용
+        type: z.enum(["note", "quote"]).default("note"),
         quote: z.string().optional(),
         author: z.string().optional(),
         tags: z.array(z.string()).optional(),

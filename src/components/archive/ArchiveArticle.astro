@@ -8,7 +8,6 @@ import {
   archiveVariant,
   type ArchiveEntry,
 } from "@/lib/archive";
-import "@/styles/archive.css";
 
 interface Props {
   entry: ArchiveEntry;
@@ -108,7 +107,7 @@ const neighborTitleClass =
 
     {
       archiveHasBody(entry) && (
-        <div class="prose prose-blog archive-prose mt-8 text-[17px]">
+        <div class="prose prose-blog mt-8 text-[17px]">
           <slot />
         </div>
       )

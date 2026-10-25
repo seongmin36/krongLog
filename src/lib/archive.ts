@@ -4,12 +4,7 @@ import { countTopTags } from "@/lib/post-tags";
 export type ArchiveEntry = CollectionEntry<"archive">;
 
 /** 카드·상세 표현 방식. headline은 본문 없이 제목만 있는 글 */
-export type ArchiveVariant = "note" | "headline" | "image" | "quote" | "todo";
-
-export interface ArchiveTodoItem {
-  done: boolean;
-  text: string;
-}
+export type ArchiveVariant = "note" | "headline" | "image" | "quote";
 
 export interface ArchiveFilter {
   /** 정적 조각 경로에 쓰는 키 (all, t0, t1 …) */
@@ -39,7 +34,6 @@ export async function getSortedArchive(): Promise<ArchiveEntry[]> {
 function plainBody(entry: ArchiveEntry): string {
   return (entry.body ?? "")
     .replace(/^\s*(import|export)\s.+$/gm, " ")
-    .replace(/^\s*[-*]\s+\[[ xX]\]\s+.*$/gm, " ")
     .replace(/<br\s*\/?>/gi, " ")
     .replace(/<[^>]+>/g, " ")
     .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
@@ -51,27 +45,19 @@ function plainBody(entry: ArchiveEntry): string {
 export function archiveVariant(entry: ArchiveEntry): ArchiveVariant {
   const { type, image } = entry.data;
   if (type === "quote") return "quote";
-  if (type === "todo") return "todo";
   if (image) return "image";
   return plainBody(entry) === "" ? "headline" : "note";
 }
 
-/** 상세 페이지에 렌더링할 본문(글 또는 체크리스트)이 있는지 */
+/** 상세 페이지에 렌더링할 본문이 있는지 */
 export function archiveHasBody(entry: ArchiveEntry): boolean {
-  return plainBody(entry) !== "" || archiveTodoItems(entry).length > 0;
+  return plainBody(entry) !== "";
 }
 
 /** 카드·메타 설명용 본문 발췌 */
 export function archiveExcerpt(entry: ArchiveEntry, maxLength = 240): string {
   const text = plainBody(entry);
   return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
-}
-
-/** `- [x] 할 일` 형태의 체크리스트 항목 */
-export function archiveTodoItems(entry: ArchiveEntry): ArchiveTodoItem[] {
-  return [...(entry.body ?? "").matchAll(/^\s*[-*]\s+\[([ xX])\]\s+(.+)$/gm)].map(
-    ([, mark, text]) => ({ done: mark !== " ", text: text.trim() }),
-  );
 }
 
 /** 카드 기울기 (예: "-1.2deg") */
