@@ -1,6 +1,6 @@
 ---
 title: "HTMLAttributes로 props 타입 지정하기"
-date: 2026-02-28T02:53:25+09:00
+date: 2026-02-28T02:38:37+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","TypeScript"]
 ---

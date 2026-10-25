@@ -1,6 +1,6 @@
 ---
 title: ".nvmrc"
-date: 2026-08-28T19:01:09+09:00
+date: 2026-08-28T13:28:20+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","Node.js"]
 ---

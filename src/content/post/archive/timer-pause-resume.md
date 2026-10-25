@@ -1,6 +1,6 @@
 ---
 title: "setInterval()을 정지했다가 다시 시작하면?"
-date: 2026-03-20T22:51:12+09:00
+date: 2026-03-20T20:55:27+09:00
 icon: "lucide:timer"
 tags: ["TIL","JavaScript"]
 ---

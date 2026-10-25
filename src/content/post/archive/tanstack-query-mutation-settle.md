@@ -1,6 +1,6 @@
 ---
 title: "invalidateQuery를 return 해야하는 이유와 영원히 pending인 Promise"
-date: 2026-08-05T23:37:27+09:00
+date: 2026-08-06T01:28:12+09:00
 icon: "lucide:atom"
 tags: ["TIL","TanStack Query"]
 ---

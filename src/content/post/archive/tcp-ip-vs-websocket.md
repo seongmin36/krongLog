@@ -1,6 +1,6 @@
 ---
 title: "TCP/IP 소켓과 WebSocket의 특징"
-date: 2026-02-24T21:41:52+09:00
+date: 2026-02-24T19:40:57+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","Network"]
 ---

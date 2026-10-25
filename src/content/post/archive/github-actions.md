@@ -1,6 +1,6 @@
 ---
 title: "Github Actions란?"
-date: 2026-06-30T22:56:57+09:00
+date: 2026-06-30T16:30:52+09:00
 icon: "lucide:git-pull-request"
 tags: ["TIL","GitHub Actions"]
 ---

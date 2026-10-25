@@ -1,6 +1,6 @@
 ---
 title: "이벤트 루프란?"
-date: 2026-03-16T19:08:22+09:00
+date: 2026-03-16T19:56:58+09:00
 icon: "lucide:timer"
 tags: ["TIL","JavaScript"]
 ---

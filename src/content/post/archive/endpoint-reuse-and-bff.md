@@ -1,6 +1,6 @@
 ---
 title: "엔드포인트 재사용과 BFF"
-date: 2026-10-03T02:03:56+09:00
+date: 2026-10-02T12:04:57+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","Next.js"]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "예상 가능한 에러와 예상 불가능한 에러 처리"
-date: 2026-02-27T00:43:53+09:00
+date: 2026-02-26T11:09:19+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","TypeScript"]
 ---

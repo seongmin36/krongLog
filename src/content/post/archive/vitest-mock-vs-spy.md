@@ -1,6 +1,6 @@
 ---
 title: "vitest의 mocking vs spy"
-date: 2026-08-30T23:02:28+09:00
+date: 2026-08-30T21:03:33+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","Vitest"]
 ---

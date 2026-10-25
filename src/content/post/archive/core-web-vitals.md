@@ -1,6 +1,6 @@
 ---
 title: "Core Web Vitals"
-date: 2026-08-13T01:53:49+09:00
+date: 2026-08-12T11:28:56+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","성능"]
 ---

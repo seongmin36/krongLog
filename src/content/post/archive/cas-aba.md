@@ -1,6 +1,6 @@
 ---
 title: "CAS(Compare and Swap)와 ABA 문제"
-date: 2026-10-06T01:02:38+09:00
+date: 2026-10-05T14:29:18+09:00
 icon: "lucide:timer"
 tags: ["TIL","동시성"]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "Unity가 Web에서 어떻게 통신하는가?"
-date: 2026-06-12T00:54:54+09:00
+date: 2026-06-11T11:36:43+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","Unity"]
 ---

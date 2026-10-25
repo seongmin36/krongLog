@@ -1,6 +1,6 @@
 ---
 title: "CommonJS와 ESM의 차이"
-date: 2026-02-23T19:14:08+09:00
+date: 2026-02-23T23:46:41+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","JavaScript"]
 ---

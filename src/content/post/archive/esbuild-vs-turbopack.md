@@ -1,6 +1,6 @@
 ---
 title: "esbuild는 Turbopack을 대체하는 것일까?"
-date: 2026-08-29T01:18:11+09:00
+date: 2026-08-28T21:06:51+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","번들러"]
 ---

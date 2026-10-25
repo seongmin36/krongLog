@@ -1,6 +1,6 @@
 ---
 title: "assertion signature와 non-null assertion"
-date: 2026-05-06T20:28:01+09:00
+date: 2026-05-06T14:43:13+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","TypeScript"]
 ---

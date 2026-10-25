@@ -1,6 +1,6 @@
 ---
 title: "window.matchMedia와 CSS 미디어 쿼리"
-date: 2026-02-27T20:42:05+09:00
+date: 2026-02-27T23:32:31+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","CSS"]
 ---

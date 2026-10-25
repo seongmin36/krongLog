@@ -1,6 +1,6 @@
 ---
 title: "Omit 타입"
-date: 2026-05-15T23:53:52+09:00
+date: 2026-05-15T19:52:16+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","TypeScript"]
 ---

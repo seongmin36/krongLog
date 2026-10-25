@@ -1,6 +1,6 @@
 ---
 title: "모노레포에서 ESLint tsconfigRootDir 지정하기"
-date: 2026-05-10T19:08:43+09:00
+date: 2026-05-10T23:11:11+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","ESLint"]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "zustand의 useShallow와 Immer"
-date: 2026-07-08T02:58:32+09:00
+date: 2026-07-07T19:02:36+09:00
 icon: "lucide:atom"
 tags: ["TIL","Zustand"]
 ---

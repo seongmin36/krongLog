@@ -1,6 +1,6 @@
 ---
 title: "forwardRef"
-date: 2026-05-09T19:57:15+09:00
+date: 2026-05-09T10:52:23+09:00
 icon: "lucide:atom"
 tags: ["TIL","React"]
 ---

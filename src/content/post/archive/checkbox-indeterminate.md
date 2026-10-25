@@ -1,6 +1,6 @@
 ---
 title: "checkbox의 indeterminate 속성"
-date: 2026-09-09T02:56:46+09:00
+date: 2026-09-08T23:03:33+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","HTML"]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "앰비언트 모듈과 모듈 확장 파일"
-date: 2026-02-27T02:52:33+09:00
+date: 2026-02-26T16:52:50+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","TypeScript"]
 ---

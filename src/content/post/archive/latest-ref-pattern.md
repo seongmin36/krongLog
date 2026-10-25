@@ -1,6 +1,6 @@
 ---
 title: "latest Ref 패턴과 useEffectEvent()"
-date: 2026-10-23T01:08:26+09:00
+date: 2026-10-22T19:02:30+09:00
 icon: "lucide:atom"
 tags: ["TIL","React"]
 ---

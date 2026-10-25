@@ -1,6 +1,6 @@
 ---
 title: "HMR이란? 번들러별 HMR 구현 방식"
-date: 2026-03-16T21:01:28+09:00
+date: 2026-03-17T02:17:28+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","번들러"]
 ---

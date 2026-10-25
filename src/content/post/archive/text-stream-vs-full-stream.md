@@ -1,6 +1,6 @@
 ---
 title: "textStream과 fullStream"
-date: 2026-06-16T22:55:12+09:00
+date: 2026-06-16T16:11:21+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","AI"]
 ---

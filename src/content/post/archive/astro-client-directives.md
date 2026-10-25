@@ -1,6 +1,6 @@
 ---
 title: "Astro의 client 지시어와 nanostores"
-date: 2026-02-27T19:12:57+09:00
+date: 2026-02-27T14:23:49+09:00
 icon: "lucide:atom"
 tags: ["TIL","Astro"]
 ---

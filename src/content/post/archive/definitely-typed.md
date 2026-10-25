@@ -1,6 +1,6 @@
 ---
 title: "Definitely Typed(DT)"
-date: 2026-07-07T20:40:52+09:00
+date: 2026-07-07T12:16:09+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","TypeScript"]
 ---

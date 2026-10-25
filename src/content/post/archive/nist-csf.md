@@ -1,6 +1,6 @@
 ---
 title: "CSF(Cyber Security Framework)란?"
-date: 2026-08-21T21:48:14+09:00
+date: 2026-08-22T00:35:37+09:00
 icon: "lucide:key-round"
 tags: ["TIL","보안"]
 ---

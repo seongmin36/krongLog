@@ -1,6 +1,6 @@
 ---
 title: "BaseUI와 RadixUI는 무엇이 다를까?"
-date: 2026-03-05T00:49:26+09:00
+date: 2026-03-04T16:31:56+09:00
 icon: "lucide:atom"
 tags: ["TIL","React"]
 ---

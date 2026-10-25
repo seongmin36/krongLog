@@ -1,6 +1,6 @@
 ---
 title: "enabled gate란?"
-date: 2026-09-30T23:32:47+09:00
+date: 2026-10-01T00:41:34+09:00
 icon: "lucide:atom"
 tags: ["TIL","TanStack Query"]
 ---

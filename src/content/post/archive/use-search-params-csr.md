@@ -1,6 +1,6 @@
 ---
 title: "useSearchParams()가 왜 페이지 전체를 CSR로 바꿀까?"
-date: 2026-10-22T23:36:51+09:00
+date: 2026-10-22T14:30:42+09:00
 icon: "lucide:atom"
 tags: ["TIL","Next.js"]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "CloudFront가 401을 캐싱했던 문제"
-date: 2026-10-02T01:46:11+09:00
+date: 2026-10-01T13:08:07+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","AWS"]
 ---

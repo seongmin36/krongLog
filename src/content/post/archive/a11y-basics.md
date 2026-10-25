@@ -1,6 +1,6 @@
 ---
 title: "a11y와 focusable=\"false\""
-date: 2026-02-27T22:22:54+09:00
+date: 2026-02-27T23:58:30+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","접근성"]
 ---

@@ -1,6 +1,6 @@
 ---
 title: "원시 타입(Primitive Type)"
-date: 2026-03-11T20:08:19+09:00
+date: 2026-03-11T21:56:26+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","TypeScript"]
 ---

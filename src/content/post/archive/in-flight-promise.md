@@ -1,6 +1,6 @@
 ---
 title: "in-flight promise란?"
-date: 2026-09-22T20:08:52+09:00
+date: 2026-09-23T00:18:53+09:00
 icon: "lucide:timer"
 tags: ["TIL","인증"]
 ---

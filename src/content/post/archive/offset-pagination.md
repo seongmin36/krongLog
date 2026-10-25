@@ -1,6 +1,6 @@
 ---
 title: "offset 기반 페이지네이션"
-date: 2026-08-05T20:31:19+09:00
+date: 2026-08-05T10:27:05+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","API"]
 ---

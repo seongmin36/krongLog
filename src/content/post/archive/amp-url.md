@@ -1,6 +1,6 @@
 ---
 title: "AMP URL이란?"
-date: 2026-10-07T20:11:33+09:00
+date: 2026-10-07T15:06:38+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","웹"]
 ---

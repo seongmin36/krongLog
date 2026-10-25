@@ -1,6 +1,6 @@
 ---
 title: "axios interceptor의 주 역할"
-date: 2026-05-10T20:26:02+09:00
+date: 2026-05-11T01:18:19+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","Axios"]
 ---

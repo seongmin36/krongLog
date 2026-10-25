@@ -1,6 +1,6 @@
 ---
 title: "display: table-cell에서 width: 1px"
-date: 2026-07-03T23:04:34+09:00
+date: 2026-07-03T12:56:39+09:00
 icon: "lucide:code-xml"
 tags: ["TIL","CSS"]
 ---
