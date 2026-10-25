@@ -1,0 +1,46 @@
+---
+import { Icon } from "astro-icon/components";
+import ArchiveCard from "@/components/archive/ArchiveCard.astro";
+import { archiveIndexPath } from "@/lib/blog-url";
+import type { ArchiveEntry } from "@/lib/archive";
+
+interface Props {
+  /** 최신순 아카이브 */
+  entries: ArchiveEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+{
+  entries.length > 0 && (
+    <section aria-labelledby="home-archive-title" class="pt-14 lg:pt-20">
+      <div class="flex items-end justify-between gap-4">
+        <h2
+          id="home-archive-title"
+          class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tracking-[0.14em] uppercase"
+        >
+          아카이브
+        </h2>
+        <a
+          href={archiveIndexPath()}
+          class="group text-description hover:text-primary dark:text-dark-description dark:hover:text-dark-text inline-flex items-center gap-1.5 text-sm font-bold transition-colors duration-200"
+          data-astro-prefetch
+        >
+          전체 보기
+          <Icon
+            name="lucide:arrow-right"
+            class="size-4 transition-transform duration-200 group-hover:translate-x-0.5"
+            aria-hidden="true"
+          />
+        </a>
+      </div>
+
+      <div class="mt-6 grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
+        {entries.map((entry) => (
+          <ArchiveCard entry={entry} />
+        ))}
+      </div>
+    </section>
+  )
+}
