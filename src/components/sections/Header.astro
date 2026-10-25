@@ -1,12 +1,13 @@
 ---
 import NavLink from "@/components/sections/NavLink.astro";
-import { blogsIndexPath } from "@/lib/blog-url";
+import { archiveIndexPath, blogsIndexPath } from "@/lib/blog-url";
 import { AppIcon } from "@/components/ui/AppIcons";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV_ITEMS = [
   // { href: "/about", label: "개발자 소개" },
   { href: blogsIndexPath(), label: "전체 글" },
+  { href: archiveIndexPath(), label: "아카이브" },
 ] as const;
 ---
 

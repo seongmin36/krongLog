@@ -6,7 +6,9 @@ type Props = HTMLAttributes<"a">;
 const { href, class: className, ...props } = Astro.props;
 const { pathname } = Astro.url;
 
-const isActive = pathname === href || pathname.startsWith(`${href}/`);
+// href가 "/blogs/"처럼 슬래시로 끝나도 하위 경로(/blogs/slug/)에서 활성 처리
+const basePath = href?.toString().endsWith("/") ? `${href}` : `${href}/`;
+const isActive = pathname === href || pathname.startsWith(basePath);
 ---
 
 <a
