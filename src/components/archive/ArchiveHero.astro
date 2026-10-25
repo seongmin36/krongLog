@@ -1,6 +1,4 @@
 ---
-import "@/styles/reveal.css";
-
 interface Props {
   total: number;
 }
@@ -10,7 +8,7 @@ const { total } = Astro.props;
 
 <section class="pt-12 pb-10 sm:pt-20 sm:pb-12">
   <p
-    class="reveal text-primary dark:text-dark-text text-[13px] font-bold tracking-[0.08em]"
+    class="text-primary dark:text-dark-text text-[13px] font-bold tracking-[0.08em]"
   >
     ARCHIVE
   </p>
@@ -20,15 +18,13 @@ const { total } = Astro.props;
   >
     <div>
       <h1
-        class="reveal text-dark text-4xl leading-[1.2] font-bold tracking-[-0.04em] sm:text-[44px] dark:text-gray-50"
-        style="--reveal-delay: 70ms"
+        class="text-dark text-4xl leading-[1.2] font-bold tracking-[-0.04em] sm:text-[44px] dark:text-gray-50"
       >
         끄적끄적,<br />
         <span class="text-muted dark:text-muted-dark">정리 안 된 생각들.</span>
       </h1>
       <p
-        class="reveal text-description dark:text-muted mt-5 max-w-115 text-[15px] leading-[1.75]"
-        style="--reveal-delay: 140ms"
+        class="text-description dark:text-muted mt-5 max-w-115 text-[15px] leading-[1.75]"
       >
         블로그 글이 되기엔 조금 가볍거나, 가볍게 남기고 싶은 이야기. 틀려도 되고
         짧아도 되는 곳이에요.
@@ -36,7 +32,7 @@ const { total } = Astro.props;
     </div>
 
     <!-- 글 수 -->
-    <p class="reveal flex items-baseline gap-1.5" style="--reveal-delay: 210ms">
+    <p class="flex items-baseline gap-1.5">
       <span
         class="text-dark font-mono text-[56px] leading-none font-bold tracking-[-0.04em] dark:text-gray-50"
       >

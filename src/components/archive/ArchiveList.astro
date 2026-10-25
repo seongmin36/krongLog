@@ -32,10 +32,9 @@ const moreButtonClass =
       <>
         <!-- 태그 필터 칩 -->
         <div
-          class="reveal flex flex-wrap gap-2"
+          class="flex flex-wrap gap-2"
           role="group"
           aria-label="태그 필터"
-          style="--reveal-delay: 280ms"
           hidden={filters.length <= 1}
         >
           {filters.map((filter, index) => (
