@@ -22,6 +22,8 @@ pnpm typecheck    # astro check (Astro + TypeScript 진단)
 
 **콘텐츠 컬렉션:** 블로그 포스트는 `src/content/post/blog/**/*.{md,mdx}` 경로에 위치하며, `src/content.config.ts`에서 glob으로 로드됩니다. 스키마 필수 필드는 `title`과 `date`이며, 선택 필드는 `description`, `updatedDate`, `tags`입니다. `image`는 스키마상 선택이지만 모든 포스트에 포함하는 것을 원칙으로 합니다.
 
+**아카이브:** 짧은 글은 `src/content/post/archive/*.{md,mdx}`(컬렉션 `archive`, `/archive/`)에 위치하며, 작성 규칙(frontmatter·구분선·아이콘·링크 블록)은 `src/content/post/archive-template.md`를 따릅니다.
+
 **태그 (`tags`):** 포스트당 **2~3개**, **큰 규모 → 구체적 주제** 순. 일반 글 예: `["Backend", "Nest.js", "TypeORM"]`. leetcode 주간 회고는 첫 태그 `알고리즘` 고정 후 핵심 개념 (`["알고리즘", "Hash", "DP"]` 등). 상세 규칙은 `src/content/post/blog-template.md`, `src/content/post/algorithm-post-template.md` 참고.
 
 **라우팅:**
