@@ -20,8 +20,9 @@ interface Props {
 const { entry, older, newer } = Astro.props;
 const { title, date, icon, tags, image, quote, author } = entry.data;
 
-const isHeadline = archiveVariant(entry) === "headline";
-const showQuote = entry.data.type === "quote" && Boolean(quote);
+const variant = archiveVariant(entry);
+const isHeadline = variant === "headline";
+const isQuote = variant === "quote";
 
 const neighborClass =
   "hover:bg-hover-overlay-light dark:hover:bg-hover-overlay-dark flex min-w-0 flex-col rounded-[14px] p-4 transition-colors duration-150";
@@ -69,7 +70,7 @@ const neighborTitleClass =
     </header>
 
     {
-      showQuote && (
+      isQuote && (
         <figure class="border-primary/20 bg-primary/5 dark:border-dark-text/25 dark:bg-primary-surface-dark mt-8 rounded-2xl border px-8 py-9">
           <Icon
             name="lucide:quote"

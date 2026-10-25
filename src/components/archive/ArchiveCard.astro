@@ -8,6 +8,7 @@ import {
   archiveTilt,
   archiveVariant,
   type ArchiveEntry,
+  type ArchiveVariant,
 } from "@/lib/archive";
 
 interface Props {
@@ -19,23 +20,36 @@ const { title, date, icon, tags, image, quote, author } = entry.data;
 
 const variant = archiveVariant(entry);
 const excerpt = archiveExcerpt(entry);
-const isHeadline = variant === "headline";
 const isQuote = variant === "quote";
 
-const shellClass = isHeadline
-  ? "border-transparent bg-dark px-7 py-8 dark:border-border-dark dark:bg-black/40"
-  : isQuote
-    ? "border-primary/20 bg-primary/5 px-7 py-8 dark:border-dark-text/25 dark:bg-primary-surface-dark"
-    : "border-border bg-white p-6 dark:border-border-dark dark:bg-white/4";
-const metaClass = isHeadline
-  ? "text-white/50"
-  : "text-muted-alpha dark:text-muted-dark";
-const tagClass = isHeadline
-  ? "text-white/60"
-  : "text-description/70 dark:text-muted";
-const titleClass = isHeadline
-  ? "mt-5 text-2xl leading-[1.45] tracking-[-0.02em] text-white"
-  : "text-dark group-hover:text-primary dark:group-hover:text-dark-text mt-4 text-[18px] leading-[1.45] tracking-[-0.015em] dark:text-gray-50";
+/** 기본 흰 카드 (note · image) */
+const plainTone = {
+  shell: "border-border bg-white p-6 dark:border-border-dark dark:bg-white/4",
+  meta: "text-muted-alpha dark:text-muted-dark",
+  tag: "text-description/70 dark:text-muted",
+  title:
+    "text-dark group-hover:text-primary dark:group-hover:text-dark-text mt-4 text-[18px] leading-[1.45] tracking-[-0.015em] dark:text-gray-50",
+};
+
+/** 변형별 카드 톤 */
+const tones: Record<ArchiveVariant, typeof plainTone> = {
+  note: plainTone,
+  image: plainTone,
+  headline: {
+    shell:
+      "border-transparent bg-dark px-7 py-8 dark:border-border-dark dark:bg-black/40",
+    meta: "text-white/50",
+    tag: "text-white/60",
+    title: "mt-5 text-2xl leading-[1.45] tracking-[-0.02em] text-white",
+  },
+  // 제목은 sr-only라 title 톤은 쓰지 않음
+  quote: {
+    ...plainTone,
+    shell:
+      "border-primary/20 bg-primary/5 px-7 py-8 dark:border-dark-text/25 dark:bg-primary-surface-dark",
+  },
+};
+const tone = tones[variant];
 ---
 
 <article
@@ -47,12 +61,12 @@ const titleClass = isHeadline
     href={archivePostPath(entry.id)}
     class:list={[
       "group hover:border-primary hover:shadow-primary/40 dark:hover:border-dark-text dark:hover:shadow-dark-text/30 block rotate-(--tilt) rounded-2xl border transition-[rotate,translate,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-[0_6px_28px_-2px] motion-reduce:transition-none",
-      shellClass,
+      tone.shell,
     ]}
     data-astro-prefetch
   >
     <!-- 아이콘 · 날짜 -->
-    <div class:list={["flex items-center gap-2 text-xs", metaClass]}>
+    <div class:list={["flex items-center gap-2 text-xs", tone.meta]}>
       <Icon name={icon} class="size-3.75 shrink-0" aria-hidden="true" />
       <time datetime={date.toISOString()}>
         {formatKstMonthDay(date)} · {formatKstTime(date)}
@@ -96,7 +110,7 @@ const titleClass = isHeadline
           <h3
             class:list={[
               "font-bold transition-colors duration-200",
-              titleClass,
+              tone.title,
             ]}
           >
             {title}
@@ -118,7 +132,7 @@ const titleClass = isHeadline
 
     {
       tags && tags.length > 0 && (
-        <p class:list={["mt-5 flex flex-wrap gap-x-1.5 text-xs", tagClass]}>
+        <p class:list={["mt-5 flex flex-wrap gap-x-1.5 text-xs", tone.tag]}>
           {tags.map((tag) => (
             <span>#{tag}</span>
           ))}
