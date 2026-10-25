@@ -2,8 +2,10 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import HomeHero from "@/components/blog/HomeHero.astro";
 import HomePosts from "@/components/blog/HomePosts.astro";
+import HomeArchive from "@/components/archive/HomeArchive.astro";
 import { getCollection } from "astro:content";
 import { countTopTags } from "@/lib/post-tags";
+import { getSortedArchive } from "@/lib/archive";
 
 // 모든 포스트를 가져와서 날짜 기준 내림차순 정렬
 const allPosts = await getCollection("post");
@@ -12,6 +14,9 @@ const sortedPosts = allPosts.sort(
 );
 
 const topTags = countTopTags(sortedPosts);
+
+// 홈에는 최신 아카이브 4개만 노출
+const latestArchive = (await getSortedArchive()).slice(0, 4);
 
 // 최근 업데이트: 수정일(updatedDate)까지 포함한 가장 최신 날짜
 const lastUpdated = new Date(
@@ -30,5 +35,8 @@ const lastUpdated = new Date(
   ogType="website"
 >
   <HomeHero postCount={sortedPosts.length} lastUpdated={lastUpdated} />
-  <HomePosts posts={sortedPosts} topTags={topTags} />
+  <div class="pb-16 sm:pb-24">
+    <HomePosts posts={sortedPosts} topTags={topTags} />
+    <HomeArchive entries={latestArchive} />
+  </div>
 </BaseLayout>

@@ -4,7 +4,6 @@ import type { CollectionEntry } from "astro:content";
 import FeaturedPost from "@/components/blog/FeaturedPost.astro";
 import PostCard from "@/components/blog/PostCard.astro";
 import { blogsIndexPath } from "@/lib/blog-url";
-import "@/styles/caret.css";
 import "@/styles/chip.css";
 
 interface Props {
@@ -27,7 +26,6 @@ const tagsJson = (post: CollectionEntry<"post">) =>
 
 <div
   id="home-posts"
-  class="pb-16 sm:pb-24"
   data-grid-size={GRID_SIZE}
   data-mobile-grid-size={MOBILE_GRID_SIZE}
 >
@@ -131,34 +129,6 @@ const tagsJson = (post: CollectionEntry<"post">) =>
       </span>
     </a>
   </div>
-
-  <!-- 끄적임 (출시 예정) -->
-  <section aria-labelledby="home-notes-title" class="pt-14 lg:pt-20">
-    <h2
-      id="home-notes-title"
-      class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tracking-[0.14em] uppercase"
-    >
-      끄적임
-    </h2>
-    <div
-      class="border-border dark:border-border-dark mt-4 rounded-2xl border border-dashed px-6 py-10 sm:px-10 sm:py-14"
-    >
-      <p class="font-mono text-[13px] tracking-[0.04em]">
-        <span class="text-primary dark:text-dark-text">~/kronglog</span>{" "}
-        <span class="text-muted-alpha dark:text-muted-dark">$ ls notes/</span>
-      </p>
-      <p
-        class="text-dark mt-4 text-xl leading-[1.4] font-bold tracking-[-0.03em] sm:text-[26px] dark:text-gray-50"
-      >
-        곧 '끄적임'이 출시 예정입니다.<span
-          class="caret bg-primary dark:bg-dark-text"
-          aria-hidden="true"></span>
-      </p>
-      <p class="text-description dark:text-dark-description mt-3 text-[14.5px] leading-[1.75]">
-        짧은 생각과 메모를 모아 둘 공간을 열심히 끄적이는 중입니다.
-      </p>
-    </div>
-  </section>
 </div>
 
 <style>

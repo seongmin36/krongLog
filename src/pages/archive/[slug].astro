@@ -1,0 +1,39 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ArchiveArticle from "@/components/archive/ArchiveArticle.astro";
+import { archiveSummary, getSortedArchive } from "@/lib/archive";
+import { render } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getSortedArchive();
+
+  // entries는 최신순: 앞이 더 최근(다음), 뒤가 더 오래된(이전) 글
+  return entries.map((entry, index) => ({
+    params: { slug: entry.id },
+    props: {
+      entry,
+      newer: entries[index - 1],
+      older: entries[index + 1],
+    },
+  }));
+}
+
+const { entry, newer, older } = Astro.props;
+const { Content } = await render(entry);
+const { title, date, image } = entry.data;
+
+const description = archiveSummary(entry) || title;
+const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
+---
+
+<BaseLayout
+  title={`${title} | Krong Dev.`}
+  description={description}
+  ogImage={ogImage}
+  ogType="article"
+  articlePublished={date}
+>
+  <ArchiveArticle entry={entry} older={older} newer={newer}>
+    <Content />
+  </ArchiveArticle>
+</BaseLayout>

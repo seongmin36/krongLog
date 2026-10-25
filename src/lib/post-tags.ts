@@ -1,8 +1,6 @@
-import type { CollectionEntry } from "astro:content";
-
 /** 글 수 기준 내림차순 상위 태그 [태그, 글 수] */
 export function countTopTags(
-  posts: CollectionEntry<"post">[],
+  posts: { data: { tags?: string[] } }[],
   limit = 10,
 ): [string, number][] {
   const tagCounts = new Map<string, number>();

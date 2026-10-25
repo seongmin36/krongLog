@@ -24,6 +24,17 @@
   font-display: swap;
 }
 
+/* 인용문(--font-quote)의 한글 전용: 같은 파일을 한글 범위에만 적용해
+   영문은 Georgia나 OS 기본 serif 이탤릭으로 넘어가게 한다 */
+@font-face {
+  font-family: "KaKao Big Hangul";
+  src: url("/fonts/KakaoBigSans-Regular.subset.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  unicode-range: U+1100-11FF, U+3130-318F, U+AC00-D7AF;
+}
+
 @font-face {
   font-family: "KaKao Small";
   src: url("/fonts/KakaoSmallSans-Light.subset.woff2") format("woff2");

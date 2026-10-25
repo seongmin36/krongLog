@@ -242,5 +242,11 @@ export default defineConfig({
       entrypoint: "astro/assets/services/sharp",
     },
   },
-  integrations: [mdx(), react(), sitemap(), icon()],
+  integrations: [
+    mdx(),
+    react(),
+    // 아카이브 더 보기용 HTML 조각은 페이지가 아니므로 제외
+    sitemap({ filter: (page) => !page.includes("/archive/chunks/") }),
+    icon(),
+  ],
 });

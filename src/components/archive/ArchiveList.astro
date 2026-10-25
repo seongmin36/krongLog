@@ -1,0 +1,366 @@
+---
+import ArchiveCard from "@/components/archive/ArchiveCard.astro";
+import { archiveChunkPath } from "@/lib/blog-url";
+import type { ArchiveFeed } from "@/lib/archive";
+import "@/styles/chip.css";
+import "@/styles/reveal.css";
+
+interface Props {
+  /** 첫 번째는 전체 피드. 전체의 1페이지만 바로 렌더링하고 나머지는 스크롤 시 HTML 조각으로 불러옴 */
+  feeds: ArchiveFeed[];
+}
+
+const { feeds } = Astro.props;
+const [allFeed] = feeds;
+const entries = allFeed?.pages[0] ?? [];
+
+const moreButtonClass =
+  "border-border text-dark hover:border-primary hover:text-primary dark:border-border-dark dark:hover:border-dark-text dark:hover:text-dark-text inline-flex items-center rounded-full border px-6 py-2.5 text-sm font-bold transition-colors duration-200 disabled:cursor-wait disabled:opacity-60 dark:text-gray-50";
+---
+
+<section
+  aria-label="아카이브 목록"
+  class="pb-24 sm:pb-32"
+  data-archive-root
+  data-chunk-url={archiveChunkPath("{key}", "{page}")}
+>
+  {
+    entries.length === 0 ? (
+      <p class="text-muted-alpha dark:text-muted-dark py-20 text-center text-sm">
+        아직 올라온 아카이브가 없습니다.
+      </p>
+    ) : (
+      <>
+        <!-- 태그 필터 칩 -->
+        <div
+          class="flex flex-wrap gap-2"
+          role="group"
+          aria-label="태그 필터"
+          hidden={feeds.length <= 1}
+        >
+          {feeds.map((feed, index) => (
+            <button
+              type="button"
+              class:list={["chip", index === 0 && "chip-active"]}
+              data-archive-chip={feed.key}
+              data-pages={feed.pages.length}
+              aria-pressed={index === 0 ? "true" : "false"}
+            >
+              {feed.label}
+            </button>
+          ))}
+        </div>
+
+        <!-- 카드: JS가 화면 너비에 맞춰 열(masonry)로 나눠 담음. JS 없이는 격자 -->
+        <div class="mt-10">
+          <div
+            class="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            data-archive-grid
+          >
+            {entries.map((entry) => (
+              <ArchiveCard entry={entry} />
+            ))}
+          </div>
+        </div>
+        <noscript>
+          <style>
+            [data-archive-grid] {
+              visibility: visible !important;
+            }
+          </style>
+        </noscript>
+
+        <div class="mt-12 flex justify-center">
+          <button
+            type="button"
+            class={moreButtonClass}
+            data-archive-more
+            hidden={(allFeed?.pages.length ?? 0) <= 1}
+          >
+            더 보기
+          </button>
+        </div>
+        <p class="sr-only" aria-live="polite" data-archive-status></p>
+      </>
+    )
+  }
+</section>
+
+<style>
+  /* 열 배치가 끝나기 전에는 격자 → masonry 전환이 보이지 않도록 숨김 */
+  [data-archive-grid]:not([data-ready]) {
+    visibility: hidden;
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = "archive-list-state";
+  const GAP_CLASS = "gap-6";
+
+  interface SavedState {
+    key: string;
+    pages: number;
+    scrollY: number;
+  }
+
+  const columnQueries = [
+    { media: window.matchMedia("(min-width: 1024px)"), count: 3 },
+    { media: window.matchMedia("(min-width: 640px)"), count: 2 },
+  ];
+  const columnCount = () =>
+    columnQueries.find(({ media }) => media.matches)?.count ?? 1;
+
+  function init(root: HTMLElement) {
+    const grid = root.querySelector<HTMLElement>("[data-archive-grid]");
+    const moreButton = root.querySelector<HTMLButtonElement>(
+      "[data-archive-more]",
+    );
+    const status = root.querySelector<HTMLElement>("[data-archive-status]");
+    const chips = [
+      ...root.querySelectorAll<HTMLButtonElement>("[data-archive-chip]"),
+    ];
+    if (!grid || !moreButton || !status || chips.length === 0) return;
+
+    const urlTemplate = root.dataset.chunkUrl ?? "";
+    const htmlCache = new Map<string, string>();
+
+    let cards = [...grid.querySelectorAll<HTMLElement>("[data-archive-card]")];
+    let columns: HTMLElement[] = [];
+    let activeChip = chips[0];
+    let loadedPages = 1;
+    let totalPages = Number(activeChip.dataset.pages);
+    let loading = false;
+    let failed = false;
+    // 필터가 바뀌면 이전 요청의 결과를 버리기 위한 값
+    let feedVersion = 0;
+    // 뒤로가기 복원 때는 이미 본 카드이므로 애니메이션을 건너뛴다
+    let animate = true;
+
+    // 화면에 들어올 때 아래에서 위로 떠오르게: 같이 보이는 카드는 위쪽부터 시차를 둔다
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries
+          .filter((entry) => entry.isIntersecting)
+          .sort(
+            (a, b) =>
+              a.boundingClientRect.top - b.boundingClientRect.top ||
+              a.boundingClientRect.left - b.boundingClientRect.left,
+          )
+          .forEach((entry, rank) => {
+            const card = entry.target as HTMLElement;
+            card.style.setProperty(
+              "--reveal-delay",
+              `${Math.min(rank, 5) * 90}ms`,
+            );
+            card.classList.replace("reveal-pending", "reveal");
+            revealObserver.unobserve(card);
+          });
+      },
+      { rootMargin: "0px 0px -8% 0px" },
+    );
+
+    function track(card: HTMLElement) {
+      if (!animate) return;
+      card.classList.add("reveal-pending");
+      revealObserver.observe(card);
+    }
+
+    htmlCache.set("all/1", cards.map((card) => card.outerHTML).join(""));
+
+    /** 카드를 가장 낮은 열에 쌓는다 (추가돼도 기존 카드는 움직이지 않음) */
+    function placeCard(card: HTMLElement) {
+      const shortest = columns.reduce((a, b) =>
+        b.offsetHeight < a.offsetHeight ? b : a,
+      );
+      shortest.append(card);
+    }
+
+    function layoutColumns() {
+      grid!.className = `flex items-start ${GAP_CLASS}`;
+      columns = Array.from({ length: columnCount() }, () => {
+        const column = document.createElement("div");
+        column.className = `flex min-w-0 flex-1 flex-col ${GAP_CLASS}`;
+        return column;
+      });
+      grid!.replaceChildren(...columns);
+      cards.forEach(placeCard);
+    }
+
+    function syncMore() {
+      moreButton!.hidden = loadedPages >= totalPages;
+      moreButton!.disabled = loading;
+      moreButton!.setAttribute("aria-busy", String(loading));
+      moreButton!.textContent = loading
+        ? "불러오는 중…"
+        : failed
+          ? "다시 시도"
+          : "더 보기";
+    }
+
+    // 더 보기 버튼이 화면 근처에 오면 자동으로 다음 묶음을 불러온다
+    const autoLoad = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && !failed) {
+          void loadNext();
+        }
+      },
+      { rootMargin: "0px 0px 600px 0px" },
+    );
+    let autoLoadReady = false;
+
+    /**
+     * 교차 상태가 바뀔 때만 콜백이 오므로, 불러온 뒤에도 버튼이 화면 근처에 남아 있으면
+     * 다시 관찰해서 콜백을 한 번 더 받는다 (높은 화면에서 자동 로딩이 멈추지 않도록)
+     */
+    function watchMore() {
+      if (!autoLoadReady) return;
+      autoLoad.unobserve(moreButton!);
+      if (!moreButton!.hidden) autoLoad.observe(moreButton!);
+    }
+
+    async function fetchChunk(key: string, page: number) {
+      const id = `${key}/${page}`;
+      const cached = htmlCache.get(id);
+      if (cached !== undefined) return cached;
+
+      const response = await fetch(
+        urlTemplate.replace("{key}", key).replace("{page}", String(page)),
+      );
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const html = await response.text();
+      htmlCache.set(id, html);
+      return html;
+    }
+
+    function parseCards(html: string) {
+      const template = document.createElement("template");
+      template.innerHTML = html;
+      return [
+        ...template.content.querySelectorAll<HTMLElement>(
+          "[data-archive-card]",
+        ),
+      ];
+    }
+
+    async function loadNext() {
+      if (loading || loadedPages >= totalPages) return;
+      const version = feedVersion;
+      loading = true;
+      failed = false;
+      syncMore();
+      try {
+        const html = await fetchChunk(
+          activeChip.dataset.archiveChip!,
+          loadedPages + 1,
+        );
+        if (version !== feedVersion) return;
+        loadedPages += 1;
+        const next = parseCards(html);
+        cards.push(...next);
+        next.forEach((card) => {
+          placeCard(card);
+          track(card);
+        });
+        status!.textContent = `${cards.length}개 표시 중`;
+      } catch {
+        if (version !== feedVersion) return;
+        failed = true;
+        status!.textContent = "불러오지 못했습니다. 다시 시도해 주세요.";
+      } finally {
+        if (version === feedVersion) {
+          loading = false;
+          syncMore();
+          watchMore();
+        }
+      }
+    }
+
+    function activate(chip: HTMLButtonElement) {
+      chips.forEach((item) => {
+        const on = item === chip;
+        item.classList.toggle("chip-active", on);
+        item.setAttribute("aria-pressed", String(on));
+      });
+      activeChip = chip;
+      revealObserver.disconnect();
+      feedVersion += 1;
+      loading = false;
+      failed = false;
+      loadedPages = 0;
+      totalPages = Number(chip.dataset.pages);
+      cards = [];
+      layoutColumns();
+    }
+
+    async function selectChip(chip: HTMLButtonElement) {
+      if (chip === activeChip) return;
+      activate(chip);
+      syncMore();
+      await loadNext();
+    }
+
+    function saveState() {
+      const state: SavedState = {
+        key: activeChip.dataset.archiveChip!,
+        pages: loadedPages,
+        scrollY: window.scrollY,
+      };
+      try {
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        // 저장소를 쓸 수 없으면 복원만 포기한다
+      }
+    }
+
+    /** 상세에서 뒤로 왔을 때 불러온 묶음 수와 스크롤 위치를 복원 */
+    async function restoreState() {
+      const navigation = performance.getEntriesByType("navigation")[0] as
+        | PerformanceNavigationTiming
+        | undefined;
+      if (navigation?.type !== "back_forward") return;
+
+      let saved: SavedState | null = null;
+      try {
+        saved = JSON.parse(sessionStorage.getItem(STORAGE_KEY) ?? "null");
+      } catch {
+        return;
+      }
+      const chip = saved
+        ? chips.find((item) => item.dataset.archiveChip === saved.key)
+        : undefined;
+      if (!saved || !chip) return;
+
+      animate = false;
+      history.scrollRestoration = "manual";
+      if (chip !== activeChip) activate(chip);
+      while (loadedPages < Math.min(saved.pages, totalPages) && !failed) {
+        await loadNext();
+      }
+      window.scrollTo(0, saved.scrollY);
+    }
+
+    chips.forEach((chip) =>
+      chip.addEventListener("click", () => void selectChip(chip)),
+    );
+    moreButton.addEventListener("click", () => void loadNext());
+    columnQueries.forEach(({ media }) =>
+      media.addEventListener("change", layoutColumns),
+    );
+    window.addEventListener("pagehide", saveState);
+
+    layoutColumns();
+    syncMore();
+
+    restoreState()
+      .catch(() => undefined)
+      .finally(() => {
+        cards.forEach(track);
+        grid.dataset.ready = "";
+        autoLoadReady = true;
+        watchMore();
+      });
+  }
+
+  const root = document.querySelector<HTMLElement>("[data-archive-root]");
+  if (root) init(root);
+</script>

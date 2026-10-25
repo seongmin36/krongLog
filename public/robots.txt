@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /archive/chunks/
 
 Sitemap: https://blog.kronglog.dev/sitemap-index.xml

@@ -1,0 +1,30 @@
+---
+// 아카이브 목록 "더 보기"용 HTML 조각 (레이아웃 없이 카드만 렌더링)
+export const partial = true;
+
+import ArchiveCard from "@/components/archive/ArchiveCard.astro";
+import {
+  buildArchiveFeeds,
+  getSortedArchive,
+  type ArchiveEntry,
+} from "@/lib/archive";
+
+export async function getStaticPaths() {
+  const feeds = buildArchiveFeeds(await getSortedArchive());
+
+  return feeds.flatMap(({ key, pages }) =>
+    pages.map((entries, index) => ({
+      params: { key, page: String(index + 1) },
+      props: { entries },
+    })),
+  );
+}
+
+interface Props {
+  entries: ArchiveEntry[];
+}
+
+const { entries } = Astro.props;
+---
+
+{entries.map((entry) => <ArchiveCard entry={entry} />)}
