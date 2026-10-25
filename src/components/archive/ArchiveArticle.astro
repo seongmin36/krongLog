@@ -8,6 +8,7 @@ import {
   archiveVariant,
   type ArchiveEntry,
 } from "@/lib/archive";
+import "@/styles/reveal.css";
 
 interface Props {
   entry: ArchiveEntry;
@@ -34,7 +35,7 @@ const neighborTitleClass =
 <div class="pt-10 pb-24 sm:pt-14 sm:pb-32">
   <a
     href={archiveIndexPath()}
-    class="text-muted-alpha hover:text-primary dark:text-muted-dark dark:hover:text-dark-text inline-flex items-center gap-1.5 text-[13.5px] transition-colors duration-200"
+    class="reveal text-muted-alpha hover:text-primary dark:text-muted-dark dark:hover:text-dark-text inline-flex items-center gap-1.5 text-[13.5px] transition-colors duration-200"
     data-astro-prefetch
   >
     <Icon name="lucide:arrow-left" class="size-4" aria-hidden="true" />
@@ -45,7 +46,8 @@ const neighborTitleClass =
     <header>
       <!-- 아이콘 · 날짜 · 시간 -->
       <div
-        class="text-muted-alpha dark:text-muted-dark flex items-center gap-3 text-[13px]"
+        class="reveal text-muted-alpha dark:text-muted-dark flex items-center gap-3 text-[13px]"
+        style="--reveal-delay: 60ms"
       >
         <Icon name={icon} class="size-5.5 shrink-0" aria-hidden="true" />
         <time datetime={date.toISOString()} class="flex items-center gap-3">
@@ -58,11 +60,12 @@ const neighborTitleClass =
 
       <h1
         class:list={[
-          "text-dark mt-6 font-bold break-keep dark:text-gray-50",
+          "reveal text-dark mt-6 font-bold break-keep dark:text-gray-50",
           isHeadline
             ? "text-[44px] leading-[1.3] tracking-[-0.035em]"
             : "text-[34px] leading-[1.35] tracking-[-0.03em]",
         ]}
+        style="--reveal-delay: 120ms"
       >
         {title}
       </h1>
@@ -70,7 +73,7 @@ const neighborTitleClass =
 
     {
       showQuote && (
-        <figure class="border-primary/20 bg-primary/5 dark:border-dark-text/25 dark:bg-primary-surface-dark mt-8 rounded-2xl border px-8 py-9">
+        <figure style="--reveal-delay: 180ms" class="reveal border-primary/20 bg-primary/5 dark:border-dark-text/25 dark:bg-primary-surface-dark mt-8 rounded-2xl border px-8 py-9">
           <Icon
             name="lucide:quote"
             class="text-primary dark:text-dark-text size-7"
@@ -90,7 +93,10 @@ const neighborTitleClass =
 
     {
       image && (
-        <div class="mt-8 rotate-[-0.6deg] overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800">
+        <div
+          class="reveal mt-8 rotate-[-0.6deg] overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800"
+          style="--reveal-delay: 180ms"
+        >
           <Image
             src={image}
             alt={title}
@@ -107,7 +113,10 @@ const neighborTitleClass =
 
     {
       archiveHasBody(entry) && (
-        <div class="prose prose-blog mt-8 text-[17px]">
+        <div
+          class="reveal prose prose-blog mt-8 text-[17px]"
+          style="--reveal-delay: 240ms"
+        >
           <slot />
         </div>
       )
@@ -115,7 +124,10 @@ const neighborTitleClass =
 
     {
       tags && tags.length > 0 && (
-        <ul class="mt-10 flex flex-wrap gap-2">
+        <ul
+          class="reveal mt-10 flex flex-wrap gap-2"
+          style="--reveal-delay: 300ms"
+        >
           {tags.map((tag) => (
             <li class="border-primary/20 bg-primary/5 text-primary dark:border-dark-text/25 dark:bg-primary-surface-dark dark:text-dark-text rounded-full border px-3 py-1 text-[12.5px]">
               #{tag}
@@ -128,7 +140,8 @@ const neighborTitleClass =
     <!-- 이전 · 다음 -->
     <nav
       aria-label="이전·다음 아카이브"
-      class="border-border dark:border-border-dark mt-20 border-t pt-4"
+      class="reveal border-border dark:border-border-dark mt-20 border-t pt-4"
+      style="--reveal-delay: 360ms"
     >
       <div class="-mx-4 grid grid-cols-2 gap-2">
         {
