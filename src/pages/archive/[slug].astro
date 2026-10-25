@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import ArchiveArticle from "@/components/archive/ArchiveArticle.astro";
-import { archiveExcerpt, getSortedArchive } from "@/lib/archive";
+import { archiveSummary, getSortedArchive } from "@/lib/archive";
 import { render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -22,7 +22,7 @@ const { entry, newer, older } = Astro.props;
 const { Content } = await render(entry);
 const { title, date, image } = entry.data;
 
-const description = archiveExcerpt(entry, 120) || title;
+const description = archiveSummary(entry) || title;
 const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
 ---
 

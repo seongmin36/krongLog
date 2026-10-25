@@ -2,17 +2,16 @@
 import { Icon } from "astro-icon/components";
 import { archivePostPath } from "@/lib/blog-url";
 import { formatKstDotDate } from "@/lib/format-date";
-import { archiveExcerpt, type ArchiveEntry } from "@/lib/archive";
+import { archiveSummary, type ArchiveEntry } from "@/lib/archive";
 
 interface Props {
   entry: ArchiveEntry;
 }
 
 const { entry } = Astro.props;
-const { title, date, icon, tags, quote } = entry.data;
+const { title, date, icon, tags } = entry.data;
 
-// 인용은 본문 대신 인용문을 요약으로 보여준다
-const summary = entry.data.type === "quote" ? quote : archiveExcerpt(entry, 120);
+const summary = archiveSummary(entry);
 ---
 
 <a

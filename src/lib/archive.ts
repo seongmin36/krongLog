@@ -70,6 +70,13 @@ export function archiveExcerpt(entry: ArchiveEntry, maxLength = 240): string {
   return text.length > maxLength ? `${text.slice(0, maxLength)}…` : text;
 }
 
+/** 목록 행·메타 description용 요약. 인용은 본문 대신 인용문 */
+export function archiveSummary(entry: ArchiveEntry, maxLength = 120): string {
+  return archiveVariant(entry) === "quote"
+    ? (entry.data.quote ?? "")
+    : archiveExcerpt(entry, maxLength);
+}
+
 /** 카드 기울기 (예: "-1.2deg") */
 export function archiveTilt(id: string): string {
   let hash = 0;
