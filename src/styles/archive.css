@@ -1,0 +1,50 @@
+/* 아카이브 상세 본문: 마크다운 체크리스트(- [ ])를 카드와 같은 체크박스로 표시 */
+.archive-prose .contains-task-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.archive-prose .task-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  color: var(--color-description);
+}
+
+.archive-prose .task-list-item:has(> input:checked) {
+  color: var(--color-muted);
+  text-decoration: line-through;
+}
+
+.archive-prose .task-list-item > input {
+  appearance: none;
+  flex-shrink: 0;
+  width: 1rem;
+  height: 1rem;
+  margin: 0.45em 0 0;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 4px;
+  background: transparent;
+}
+
+.archive-prose .task-list-item > input:checked {
+  border-color: var(--color-primary);
+  background: var(--color-primary)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3.2 3.2L13 4.5'/%3E%3C/svg%3E")
+    center / 0.75rem no-repeat;
+}
+
+.dark .archive-prose .task-list-item {
+  color: var(--color-dark-description);
+}
+
+.dark .archive-prose .task-list-item:has(> input:checked) {
+  color: var(--color-muted-dark);
+}
+
+.dark .archive-prose .task-list-item > input {
+  border-color: var(--color-gray-600);
+}

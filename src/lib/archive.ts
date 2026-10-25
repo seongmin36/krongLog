@@ -56,6 +56,11 @@ export function archiveVariant(entry: ArchiveEntry): ArchiveVariant {
   return plainBody(entry) === "" ? "headline" : "note";
 }
 
+/** 상세 페이지에 렌더링할 본문(글 또는 체크리스트)이 있는지 */
+export function archiveHasBody(entry: ArchiveEntry): boolean {
+  return plainBody(entry) !== "" || archiveTodoItems(entry).length > 0;
+}
+
 /** 카드·메타 설명용 본문 발췌 */
 export function archiveExcerpt(entry: ArchiveEntry, maxLength = 240): string {
   const text = plainBody(entry);
