@@ -421,7 +421,7 @@ this.logger.info({ userId, ip, action: "login" }, "사용자가 로그인했습�
 
 ### 상황별 구조화 예시
 
-**1. 비즈니스 이벤트 (로그인, 결제 완료 등)**
+<strong>1. 비즈니스 이벤트 (로그인, 결제 완료 등)</strong>
 
 사용자 행위를 추적할 때는 핵심 식별자(`user`)와 행위(`action`)를 분리합니다.
 
@@ -437,7 +437,7 @@ this.logger.info(
 );
 ```
 
-**2. 외부 API 호출 (HTTP/gRPC 통신)**
+<strong>2. 외부 API 호출 (HTTP/gRPC 통신)</strong>
 
 외부 시스템과의 연동 로그는 나중에 "누구 책임인가"를 가릴 때 필수적입니다.<br />
 대상(`target`)과 소요 시간(`durationMs`)을 포함합니다.
@@ -455,7 +455,7 @@ this.logger.info(
 );
 ```
 
-**3. 에러 발생 (Catch 블록)**
+<strong>3. 에러 발생 (Catch 블록)</strong>
 
 에러 로그는 실패한 원인 정보(`payload`)와 에러의 실체(`err`)를 분리해야 원인 파악이 쉽습니다.<br />
 Pino는 객체 내에 `err` 또는 `error` key가 있으면 스택 트레이스를 **자동으로 직렬화**합니다.

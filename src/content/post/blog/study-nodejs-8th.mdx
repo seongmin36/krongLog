@@ -202,7 +202,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
  
 **첫째, 로그 레벨을 상태 코드로 분기합니다.** <br/>5xx는 `logger.error`, 4xx는 `logger.warn`으로 나눠 찍습니다. [운영 준비 편](https://blog.kronglog.dev/blogs/study-nodejs-5th-2)에서 정리한 로그 레벨 기준 그대로입니다. 5xx는 서버 자체의 문제라 즉시 조치가 필요한 반면, 4xx는 클라이언트 입력 문제라 경고 수준에서 추적만 하면 충분하기 때문입니다.
  
-**둘째, `exception.getResponse()`로 메시지를 추출합니다.** <br/>`exception.message`로 직접 접근하면 NestJS가 만든 기본 메시지가 나올 수 있는데, `getResponse()`는 개발자가 `throw new UnauthorizedException('비밀번호가 일치하지 않습니다.')`처럼 전달한 실제 메시지를 반환합니다. 문자열일 때와 객체일 때를 분기 처리해서 두 경우 모두 올바른 메시지가 추출되도록 했습니다.
+<strong>둘째, `exception.getResponse()`로 메시지를 추출합니다.</strong> <br/>`exception.message`로 직접 접근하면 NestJS가 만든 기본 메시지가 나올 수 있는데, `getResponse()`는 개발자가 `throw new UnauthorizedException('비밀번호가 일치하지 않습니다.')`처럼 전달한 실제 메시지를 반환합니다. 문자열일 때와 객체일 때를 분기 처리해서 두 경우 모두 올바른 메시지가 추출되도록 했습니다.
  
 <br />
 ### AllExceptionsFilter 구현

@@ -61,7 +61,7 @@ CSS의 `@font-face` 설정에 다음을 추가하면 브라우저에 FOUT 방식
 
 ## OTF와 TTF는 용량이 크다
 
-기본적으로 폰트 파일의 포맷은 **OTF(OpenType Font)** 또는 **TTF(TrueType Font)** 입니다. 둘 다 벡터 기반 폰트로 확대해도 깨지지 않으며, 차이는 곡선을 표현하는 방식과 고급 타이포그래피 기능 지원 여부에 있습니다.
+기본적으로 폰트 파일의 포맷은 <strong>OTF(OpenType Font)</strong> 또는 <strong>TTF(TrueType Font)</strong> 입니다. 둘 다 벡터 기반 폰트로 확대해도 깨지지 않으며, 차이는 곡선을 표현하는 방식과 고급 타이포그래피 기능 지원 여부에 있습니다.
 
 ### OTF와 TTF의 차이점은 뭘까?
 
@@ -138,11 +138,11 @@ Preload와 WOFF2까지 적용했지만, 한글 폰트는 여전히 무겁습니�
 
 정적 서브셋을 만들기 위해 다음 두 단계를 거쳤습니다.
 
-**1) 사용 문자 추출 스크립트**
+<strong>1) 사용 문자 추출 스크립트</strong>
 
 `scripts/generate-font-subset-text.mjs`에서 `src/content`, `pages`, `layouts`, `components`, `lib` 디렉토리를 스캔해 실제로 사용된 모든 문자를 모은 뒤, `public/fonts/subset-chars.txt`에 저장합니다.
 
-**2) 폰트 서브셋 생성 스크립트**
+<strong>2) 폰트 서브셋 생성 스크립트</strong>
 
 `scripts/font-subset.mjs`에서 4가지 폰트 파일(light, regular, bold, extrabold)에 대해 `pyftsubset`을 실행해 `public/fonts/*.subset.woff2`로 출력합니다.
 
@@ -157,7 +157,7 @@ const r = spawnSync("pyftsubset", [inputAbs, `--text-file=${textFile}`, "--flavo
 <Tooltip note="fonttools 패키지에 포함된 폰트 서브셋 도구.">`pyftsubset`</Tooltip>은 bash 명령어로 직접 실행하지 않고 Node.js 스크립트로 감싼 이유는, **프로젝트 내에서 실제로 사용된 문자만 자동으로
 추출해 매번 일관된 서브셋을 만들기 위해서**입니다. 수동으로 문자 집합을 관리하면 새 글을 쓸 때마다 누락이 생길 수 있습니다.
 
-**3) package.json 스크립트 등록**
+<strong>3) package.json 스크립트 등록</strong>
 
 빌드 파이프라인에 쉽게 통합할 수 있도록 npm script로 등록했습니다.
 
