@@ -42,6 +42,11 @@ export function formatKstMonthDay(date: Date): string {
   return `${month}.${day}`;
 }
 
+/** 0~23 (KST) */
+export function getKstHour(date: Date): number {
+  return Number(kstParts(date).hour);
+}
+
 /** 01:42 (KST) */
 export function formatKstTime(date: Date): string {
   const { hour, minute } = kstParts(date);

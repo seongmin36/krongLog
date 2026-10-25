@@ -1,10 +1,11 @@
 import { getCollection, type CollectionEntry } from "astro:content";
+import { getKstHour } from "@/lib/format-date";
 import { countTopTags } from "@/lib/post-tags";
 
 export type ArchiveEntry = CollectionEntry<"archive">;
 
-/** 카드·상세 표현 방식. headline은 본문 없이 제목만 있는 글 */
-export type ArchiveVariant = "note" | "headline" | "image" | "quote";
+/** 카드 표현 방식. night는 저녁(NIGHT_FROM_HOUR시) 이후에 쓴 글로 다크 카드 */
+export type ArchiveVariant = "note" | "night" | "image" | "quote";
 
 /** 필터 칩 하나에 해당하는 목록 (전체 또는 태그별) */
 export interface ArchiveFeed {
@@ -20,6 +21,9 @@ export interface ArchiveFeed {
 export const ARCHIVE_PAGE_SIZE = 12;
 /** 필터 칩으로 노출하는 상위 태그 수 */
 export const ARCHIVE_TAG_LIMIT = 12;
+
+/** 이 시각(KST, 시) 이후에 쓴 글은 다크 카드 */
+const NIGHT_FROM_HOUR = 18;
 
 /** 카드마다 살짝 다르게 기울이는 각도 (id 해시로 고정) */
 const TILTS = [-1.5, -1.2, -0.9, -0.6, -0.4, 0.3, 0.5, 0.8, 1.1, 1.4];
@@ -43,6 +47,8 @@ function plainBody(entry: ArchiveEntry): string {
       .replace(/<[^>]+>/g, " ")
       // 링크·이미지는 텍스트만
       .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+      // 구분선 (---)
+      .replace(/^\s*([-*_])(\s*\1){2,}\s*$/gm, " ")
       // 줄 머리 문법 (제목, 인용, 목록)만 지워 본문 속 #·> 기호는 남긴다
       .replace(/^\s*(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
       // 강조·인라인 코드 기호
@@ -53,10 +59,10 @@ function plainBody(entry: ArchiveEntry): string {
 }
 
 export function archiveVariant(entry: ArchiveEntry): ArchiveVariant {
-  const { type, image } = entry.data;
+  const { type, image, date } = entry.data;
   if (type === "quote") return "quote";
   if (image) return "image";
-  return plainBody(entry) === "" ? "headline" : "note";
+  return getKstHour(date) >= NIGHT_FROM_HOUR ? "night" : "note";
 }
 
 /** 상세 페이지에 렌더링할 본문이 있는지 */

@@ -20,9 +20,10 @@ interface Props {
 const { entry, older, newer } = Astro.props;
 const { title, date, icon, tags, image, quote, author } = entry.data;
 
-const variant = archiveVariant(entry);
-const isHeadline = variant === "headline";
-const isQuote = variant === "quote";
+const hasBody = archiveHasBody(entry);
+const isQuote = archiveVariant(entry) === "quote";
+// 본문 없이 제목만 있는 글은 제목을 크게
+const isTitleOnly = !hasBody && !isQuote && !image;
 
 const neighborClass =
   "hover:bg-hover-overlay-light dark:hover:bg-hover-overlay-dark flex min-w-0 flex-col rounded-[14px] p-4 transition-colors duration-150";
@@ -60,7 +61,7 @@ const neighborTitleClass =
       <h1
         class:list={[
           "text-dark mt-6 font-bold break-keep dark:text-gray-50",
-          isHeadline
+          isTitleOnly
             ? "text-[44px] leading-[1.3] tracking-[-0.035em]"
             : "text-[34px] leading-[1.35] tracking-[-0.03em]",
         ]}
@@ -107,7 +108,7 @@ const neighborTitleClass =
     }
 
     {
-      archiveHasBody(entry) && (
+      hasBody && (
         <div class="prose prose-blog mt-8 text-[17px]">
           <slot />
         </div>
