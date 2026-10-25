@@ -32,14 +32,24 @@ export async function getSortedArchive(): Promise<ArchiveEntry[]> {
 
 /** 마크다운·MDX 문법을 걷어낸 본문 텍스트 */
 function plainBody(entry: ArchiveEntry): string {
-  return (entry.body ?? "")
-    .replace(/^\s*(import|export)\s.+$/gm, " ")
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
-    .replace(/[`*_~>#]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    (entry.body ?? "")
+      // 코드 블록
+      .replace(/^```[\s\S]*?^```/gm, " ")
+      // MDX import·export, 표현식·주석({/* */})
+      .replace(/^\s*(import|export)\s.+$/gm, " ")
+      .replace(/\{[^}]*\}/g, " ")
+      // HTML·컴포넌트 태그 (<br /> 포함)
+      .replace(/<[^>]+>/g, " ")
+      // 링크·이미지는 텍스트만
+      .replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
+      // 줄 머리 문법 (제목, 인용, 목록)만 지워 본문 속 #·> 기호는 남긴다
+      .replace(/^\s*(#{1,6}|>|[-*+]|\d+\.)\s+/gm, "")
+      // 강조·인라인 코드 기호
+      .replace(/\*+|~~|`/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 export function archiveVariant(entry: ArchiveEntry): ArchiveVariant {
