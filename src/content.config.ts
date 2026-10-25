@@ -16,7 +16,7 @@ const post = defineCollection({
 });
 
 const archive = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/archive" }),
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/post/archive" }),
   schema: ({ image }) =>
     z
       .object({
