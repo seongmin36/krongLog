@@ -1,7 +1,7 @@
 ---
 title: "타입스크립트 & 기본 렌더링 방식과 Next.js"
 date: 2026-04-07T17:57:36+09:00
-icon: "lucide:code-xml"
+icon: "lucide:atom"
 tags: ["배움일기", "Next.js"]
 ---
 

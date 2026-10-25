@@ -1,7 +1,7 @@
 ---
 title: "낙관적 업데이트(Optimistic Update)"
 date: 2026-04-06T17:08:26+09:00
-icon: "lucide:zap"
+icon: "lucide:atom"
 tags: ["배움일기","React"]
 ---
 

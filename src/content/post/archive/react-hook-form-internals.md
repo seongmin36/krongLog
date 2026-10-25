@@ -1,7 +1,7 @@
 ---
 title: "RHF 동작원리"
 date: 2026-04-03T18:28:47+09:00
-icon: "lucide:clipboard-list"
+icon: "lucide:atom"
 tags: ["배움일기","React"]
 ---
 

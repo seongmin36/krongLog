@@ -47,7 +47,8 @@ title: "..."
 | 로그인·보안·인증 등 개인정보가 들어간 주제      | `lucide:key-round`                            |
 | Promise·동시성 등 타이밍에 대한 주제            | `lucide:timer`                                |
 | DOM·알고리즘 등 구조에 대한 주제                | `lucide:network`                              |
-| Figma·database(Supabase)·React 등 명확한 주제   | 주제에 맞는 아이콘 (`figma`, `database`, `atom` …) |
+| React·Next.js·프론트엔드 라이브러리(React Hook Form 등) | `lucide:atom`                          |
+| Figma·database(Supabase) 등 명확한 주제         | 주제에 맞는 아이콘 (`figma`, `database` …)    |
 | 나머지                                          | `lucide:code-xml`                             |
 
 ---
@@ -95,5 +96,5 @@ title: "..."
 | ---------------------------- | ------------- |
 | `type: quote`                | 인용 카드     |
 | `image` 있음                 | 이미지 카드   |
-| 18:00(KST) 이후 작성         | 다크 카드     |
+| 18:00~06:00(KST) 사이 작성   | 다크 카드     |
 | 그 외                        | 기본 흰 카드  |
