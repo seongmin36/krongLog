@@ -3,6 +3,7 @@ import ArchiveCard from "@/components/archive/ArchiveCard.astro";
 import { archiveChunkPath } from "@/lib/blog-url";
 import type { ArchiveEntry, ArchiveFilter } from "@/lib/archive";
 import "@/styles/chip.css";
+import "@/styles/reveal.css";
 
 interface Props {
   /** 전체 필터의 첫 묶음 (나머지는 스크롤 시 HTML 조각으로 불러옴) */
@@ -31,9 +32,10 @@ const moreButtonClass =
       <>
         <!-- 태그 필터 칩 -->
         <div
-          class="flex flex-wrap gap-2"
+          class="reveal flex flex-wrap gap-2"
           role="group"
           aria-label="태그 필터"
+          style="--reveal-delay: 280ms"
           hidden={filters.length <= 1}
         >
           {filters.map((filter, index) => (
@@ -131,6 +133,37 @@ const moreButtonClass =
     let failed = false;
     // 필터가 바뀌면 이전 요청의 결과를 버리기 위한 값
     let feedVersion = 0;
+    // 뒤로가기 복원 때는 이미 본 카드이므로 애니메이션을 건너뛴다
+    let animate = true;
+
+    // 화면에 들어올 때 아래에서 위로 떠오르게: 같이 보이는 카드는 위쪽부터 시차를 둔다
+    const revealObserver = new IntersectionObserver(
+      (entries) => {
+        entries
+          .filter((entry) => entry.isIntersecting)
+          .sort(
+            (a, b) =>
+              a.boundingClientRect.top - b.boundingClientRect.top ||
+              a.boundingClientRect.left - b.boundingClientRect.left,
+          )
+          .forEach((entry, rank) => {
+            const card = entry.target as HTMLElement;
+            card.style.setProperty(
+              "--reveal-delay",
+              `${Math.min(rank, 5) * 90}ms`,
+            );
+            card.classList.replace("reveal-pending", "reveal");
+            revealObserver.unobserve(card);
+          });
+      },
+      { rootMargin: "0px 0px -8% 0px" },
+    );
+
+    function track(card: HTMLElement) {
+      if (!animate) return;
+      card.classList.add("reveal-pending");
+      revealObserver.observe(card);
+    }
 
     htmlCache.set("all/1", cards.map((card) => card.outerHTML).join(""));
 
@@ -204,7 +237,10 @@ const moreButtonClass =
         loadedPages += 1;
         const next = parseCards(html);
         cards.push(...next);
-        next.forEach(placeCard);
+        next.forEach((card) => {
+          placeCard(card);
+          track(card);
+        });
       } catch {
         if (version === feedVersion) failed = true;
       } finally {
@@ -222,6 +258,7 @@ const moreButtonClass =
         item.setAttribute("aria-pressed", String(on));
       });
       activeChip = chip;
+      revealObserver.disconnect();
       feedVersion += 1;
       loading = false;
       failed = false;
@@ -269,6 +306,7 @@ const moreButtonClass =
         : undefined;
       if (!saved || !chip) return;
 
+      animate = false;
       history.scrollRestoration = "manual";
       if (chip !== activeChip) activate(chip);
       while (loadedPages < Math.min(saved.pages, totalPages) && !failed) {
@@ -302,6 +340,7 @@ const moreButtonClass =
     restoreState()
       .catch(() => undefined)
       .finally(() => {
+        cards.forEach(track);
         grid.dataset.ready = "";
         observer.observe(moreButton);
       });
