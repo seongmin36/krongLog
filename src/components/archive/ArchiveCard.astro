@@ -46,14 +46,14 @@ const titleClass = isHeadline
   <a
     href={archivePostPath(entry.id)}
     class:list={[
-      "group block rotate-(--tilt) rounded-2xl border transition-[rotate,translate] duration-300 hover:-translate-y-1 hover:rotate-0 motion-reduce:transition-none",
+      "group hover:border-primary hover:shadow-primary/40 dark:hover:border-dark-text dark:hover:shadow-dark-text/30 block rotate-(--tilt) rounded-2xl border transition-[rotate,translate,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:rotate-0 hover:shadow-[0_6px_28px_-2px] motion-reduce:transition-none",
       shellClass,
     ]}
     data-astro-prefetch
   >
     <!-- 아이콘 · 날짜 -->
     <div class:list={["flex items-center gap-2 text-xs", metaClass]}>
-      <Icon name={icon} class="size-[15px] shrink-0" aria-hidden="true" />
+      <Icon name={icon} class="size-3.75 shrink-0" aria-hidden="true" />
       <time datetime={date.toISOString()}>
         {formatKstMonthDay(date)} · {formatKstTime(date)}
       </time>
