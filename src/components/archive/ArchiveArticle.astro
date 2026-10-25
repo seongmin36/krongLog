@@ -71,17 +71,17 @@ const neighborTitleClass =
 
     {
       isQuote && (
-        <figure class="border-primary/20 bg-primary/5 dark:border-dark-text/25 dark:bg-primary-surface-dark mt-8 rounded-2xl border px-8 py-9">
+        <figure class="border-primary dark:border-dark-text mt-10 border-l-2 pl-8">
           <Icon
             name="lucide:quote"
-            class="text-primary dark:text-dark-text size-7"
+            class="text-primary dark:text-dark-text size-8"
             aria-hidden="true"
           />
-          <blockquote class="text-dark mt-4 font-serif text-2xl leading-normal tracking-[-0.01em] italic dark:text-gray-50">
+          <blockquote class="text-dark font-quote mt-4 text-[34px] leading-[1.4] tracking-[-0.02em] italic dark:text-gray-50">
             {quote}
           </blockquote>
           {author && (
-            <figcaption class="text-primary dark:text-dark-text mt-4 text-sm font-bold">
+            <figcaption class="text-primary dark:text-dark-text mt-6 text-[15px] font-semibold">
               — {author}
             </figcaption>
           )}

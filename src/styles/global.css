@@ -16,6 +16,8 @@ html {
 
 @theme {
   --font-sans: "KaKao Big", "KaKao Small", sans-serif;
+  /* 인용문: 시스템 Georgia (한글은 본문 폰트로 대체) */
+  --font-quote: Georgia, "KaKao Big", serif;
 
   --color-primary: #3b7a57;
   --color-description: #4b5563;
