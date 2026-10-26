@@ -9,7 +9,7 @@ tags: ["TIL", "TypeScript"]
 
 - TypeScript의 assertion signature는 ‘이 함수가 에러없이 끝나면, 타입스크립트가 특정 조건이 참이라고 믿어도 된다’는 뜻이다.
 
-<!-- 이미지 -->
+![](../../../assets/archive/assertion-signature/1.png)
 
 - 사용 방법은 props에 asserts를 붙여, asserts condition으로 반환 타입을 정의하면, invariant(condition)을 실행했을 때 실패하지 않고 반환되면, ‘condition은 참(True)’이라고 타입스크립트에게 알려주는 형태다.
   그래서 이 함수를 호출한 뒤에는 타입스크립트가 위 조건을 바탕으로 타입을 더 좁혀준다.
