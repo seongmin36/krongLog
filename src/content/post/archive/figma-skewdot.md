@@ -2,7 +2,7 @@
 title: "피그마에서 눕는 글씨체를 위한 플러그인"
 date: 2026-02-24T15:39:31+09:00
 icon: "lucide:figma"
-tags: ["사용후기","Figma"]
+tags: ["사용후기", "Figma"]
 ---
 
 ---
