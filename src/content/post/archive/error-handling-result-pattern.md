@@ -1,0 +1,52 @@
+---
+title: "예상 가능한 에러와 예상 불가능한 에러 처리"
+date: 2026-02-26T11:09:19+09:00
+icon: "lucide:code-xml"
+tags: ["TIL", "TypeScript"]
+---
+
+에러 처리에 대해서 try catch를 사용해도 되지만, throw Error(‘에러’)로 보내는 경우는 별로 좋지 않다.
+<br>
+백엔드에서 도메인 별로 에러 처리를 하면 코드만 봐도 어떤 영역의 에러인지 한 눈에 볼 수 있다. ex. TODO_0101, AUTH_0101, …
+
+그래서 이러한 방식의 대안으로 throw대신 ‘반환값’으로 표현하는 방식이 대안이 된다. Result 타입에 ok, err 상태를 두고, ok가 아닌 경우에 에러 정보를 반환한다.
+<br>
+이렇게 하면 try catch없이 if-switch로 에러 코드에 따라 처리가 되고, 어떤 에러인지도 한 눈에 들어온다.
+그리고 여기서 중요한 default 케이스는 백엔드 서버에서 에러 코드를 추가했는데, 현재 AIparse 함수에서 넣지 않았다면, never 타입이 ‘never타입에는 할당이 되지 않습니다.’와 같은 타입 에러를 내기 때문에 에러 케이스를 생략하는 문제를 타입에러로 방지가 가능하다.
+
+![](../../../assets/archive/error-handling-result-pattern/1.png)
+
+![](../../../assets/archive/error-handling-result-pattern/2.png)
+
+여기까지는 예상 가능한 에러에 대한 처리라면, 서버에서 따로 설정하지 않은 예상 외의 에러가 있다. 이 부분은 throw로 처리한다.
+예상 불가능한 에러는 Result로 처리해서는 안되는 이유가 있는데,
+
+1. 타입 오염 : 모든 API 함수의 반환 타입에 NetworkError | ServerError가 달라붙는다.
+2. 무의미한 반복 : 모든 api 호출 지점에 매번 복잡한 if 체크를 해야한다면 귀찮아진다.
+3. 중앙 처리가 자연스럽다 : 예상 불가능한 에러에 throw로 던져서 상위 경계가 한 번에 처리하도록 한다.
+
+- axios와 fetch
+  - axios는 AxiosError로 4xx, 5xx든 응답 상태가 에러이면 모두 throw 한다.
+  - 반면 fetch는 직접 제어할 수 있기 때문에 오히려 유리하다.
+- 특정 공격자가 ‘계정 열거 공격’을 하게 되는 경우를 방지하기 위해 친절한 메시지를 바꾼다.
+  => ‘존재하지 않는 이메일입니다.’ -> ‘입력 정보를 확인해주세요’
+- ‘Effect’라이브러리 : 위 과정에서 Result 패턴에서 직접 타입을 정의하고, 에러를 수동으로 합쳐야 했던 문제를 구현한 것이 ‘Effect’라이브러리다.
+  성공 타입, 에러 타입, 의존성을 모두 타입 레벨에서 추적한다.
+
+![](../../../assets/archive/error-handling-result-pattern/3.png)
+
+- 여기서 든 생각은 ‘그렇다면 백엔드에서 에러 코드를 주는대로 throw로 반환하는 http 클라이언트 레이어에서 AxiosError로 잡는 거랑 비슷하지 않나?’
+  반은 틀렸고 반은 맞았다.
+- 글에서 말하는 핵심은 서버에서(백엔드에서) 주는 에러 메시지가 구체적으로 주는데, 하나의 Error로 재가공해버리면, 어떤 비즈니스 에러가 나는지 안 드러난다.
+  즉, 서버 메시지를 사용자에게 전달하는냐 보다 예상 가능한 에러를 값(타입)으로 노출하느냐, 예외로 섞어 버리느냐가 핵심이다.
+- AxiosError를 쓰면 되지 않냐? -> 맞다. 하지만 그 에러를 사용하는 철학이 서버에서 내려주는 모든 에러를 하나의 throw로 묶는 것이 아니라 두 가지 레이어로 나누는 것이 중요하다.
+
+1. HTTP 클라이언트 레벨에서 예상 가능한 4xx 에러는 Result로 반환하고, 예상 불가한 5xx/네트워크 에러는 throw로 한 번만 정의한다.(이게 AxiosError 사용 방법)
+2. UI/도메인 레벨에서는 Result로만 비즈니스 에러를 보고, 진짜 예외는 ErrorBoundary에 맡긴다.
+   결과적으로 1, 2번이 비슷한 소리다.
+
+- 정리하면
+  - HTTP 레이어: `Result<T, ApiError>`(예상 가능한 4xx) / NetworkError, ServerError는 throw
+  - 도메인 레이어: ApiError -> DomainError로 매핑해서 `Result<T, DomainError>`만 노출
+  - UI 레이어: Result만 분기 처리
+  - 전역(ErrorBoundary): NetworkError, ServerError만 처리

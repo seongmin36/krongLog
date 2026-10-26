@@ -27,6 +27,7 @@ const plainTone = {
   shell: "border-border bg-white p-6 dark:border-border-dark dark:bg-white/4",
   meta: "text-muted-alpha dark:text-muted-dark",
   tag: "text-description/70 dark:text-muted",
+  excerpt: "text-description dark:text-dark-description",
   title:
     "text-dark group-hover:text-primary dark:group-hover:text-dark-text mt-4 text-[18px] leading-[1.45] tracking-[-0.015em] dark:text-gray-50",
 };
@@ -35,11 +36,13 @@ const plainTone = {
 const tones: Record<ArchiveVariant, typeof plainTone> = {
   note: plainTone,
   image: plainTone,
-  headline: {
+  // 저녁 이후에 쓴 글
+  night: {
     shell:
       "border-transparent bg-dark px-7 py-8 dark:border-border-dark dark:bg-black/40",
     meta: "text-white/50",
     tag: "text-white/60",
+    excerpt: "text-white/70",
     title: "mt-5 text-2xl leading-[1.45] tracking-[-0.02em] text-white",
   },
   // 제목은 sr-only라 title 톤은 쓰지 않음
@@ -119,7 +122,8 @@ const tone = tones[variant];
           {excerpt && (
             <p
               class:list={[
-                "text-description dark:text-dark-description mt-2 text-[14.5px] leading-[1.75]",
+                "mt-2 text-[14.5px] leading-[1.75]",
+                tone.excerpt,
                 variant === "image" ? "line-clamp-2" : "line-clamp-4",
               ]}
             >

@@ -155,8 +155,8 @@ deploy 잡이 <Tooltip note="GitHub이 제공하는 ARM64(aarch64) 아키텍처 
 
 CPU 아키텍처에는 두 가지 주요 계열이 있습니다.
 
-- **amd64(x86_64)**: Intel, AMD CPU를 쓰는 일반 PC와 서버에서 사용합니다. GitHub Actions의 기본 runner `ubuntu-latest`가 이 아키텍처입니다.
-- **ARM64(aarch64)**: AWS Graviton, Apple M1/M2, 스마트폰 대부분이 이 계열입니다. 동일한 성능 대비 전력 효율이 높아 클라우드 서버에서 점유율이 높아지고 있습니다.
+- <strong>amd64(x86_64)</strong>: Intel, AMD CPU를 쓰는 일반 PC와 서버에서 사용합니다. GitHub Actions의 기본 runner `ubuntu-latest`가 이 아키텍처입니다.
+- <strong>ARM64(aarch64)</strong>: AWS Graviton, Apple M1/M2, 스마트폰 대부분이 이 계열입니다. 동일한 성능 대비 전력 효율이 높아 클라우드 서버에서 점유율이 높아지고 있습니다.
 
 두 아키텍처는 CPU 명령어 집합이 달라서, 한쪽에서 컴파일한 바이너리는 다른 쪽에서 실행할 수 없습니다.<br />
 EC2 t4g 인스턴스(AWS Graviton)는 ARM64이므로, Docker 이미지도 ARM64용으로 빌드해야 합니다.

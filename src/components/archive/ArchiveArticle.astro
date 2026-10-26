@@ -20,9 +20,10 @@ interface Props {
 const { entry, older, newer } = Astro.props;
 const { title, date, icon, tags, image, quote, author } = entry.data;
 
-const variant = archiveVariant(entry);
-const isHeadline = variant === "headline";
-const isQuote = variant === "quote";
+const hasBody = archiveHasBody(entry);
+const isQuote = archiveVariant(entry) === "quote";
+// 본문 없이 제목만 있는 글은 제목을 크게
+const isTitleOnly = !hasBody && !isQuote && !image;
 
 const neighborClass =
   "hover:bg-hover-overlay-light dark:hover:bg-hover-overlay-dark flex min-w-0 flex-col rounded-[14px] p-4 transition-colors duration-150";
@@ -42,7 +43,8 @@ const neighborTitleClass =
     아카이브 목록
   </a>
 
-  <article class="mx-auto mt-14 max-w-160 sm:mt-20">
+  <!-- 본문 폭은 블로그 글(720px)과 동일 -->
+  <article class="mx-auto mt-14 max-w-[720px] sm:mt-20">
     <header>
       <!-- 아이콘 · 날짜 · 시간 -->
       <div
@@ -60,7 +62,7 @@ const neighborTitleClass =
       <h1
         class:list={[
           "text-dark mt-6 font-bold break-keep dark:text-gray-50",
-          isHeadline
+          isTitleOnly
             ? "text-[44px] leading-[1.3] tracking-[-0.035em]"
             : "text-[34px] leading-[1.35] tracking-[-0.03em]",
         ]}
@@ -97,8 +99,8 @@ const neighborTitleClass =
             alt={title}
             format="webp"
             quality={85}
-            widths={[640, 960, 1280]}
-            sizes="(max-width: 703px) 100vw, 640px"
+            widths={[720, 1080, 1440]}
+            sizes="(max-width: 767px) 100vw, 720px"
             class="aspect-4/3 h-auto w-full object-cover"
             priority
           />
@@ -107,7 +109,7 @@ const neighborTitleClass =
     }
 
     {
-      archiveHasBody(entry) && (
+      hasBody && (
         <div class="prose prose-blog mt-8 text-[17px]">
           <slot />
         </div>

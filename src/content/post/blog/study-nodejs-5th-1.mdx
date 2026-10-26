@@ -46,7 +46,7 @@ export class Board {
 }
 ```
 
-**외래 키(FK)는 `@ManyToOne` 쪽 테이블에만 실제로 생성됩니다.** Board 테이블에 `userId` 컬럼이 만들어지고, User 테이블에는 아무 컬럼도 추가되지 않습니다. Board 테이블 스키마의 외래 키 `userId`로 인해 '이 board가 누구 것인지'를 표현합니다.
+<strong>외래 키(FK)는 `@ManyToOne` 쪽 테이블에만 실제로 생성됩니다.</strong> Board 테이블에 `userId` 컬럼이 만들어지고, User 테이블에는 아무 컬럼도 추가되지 않습니다. Board 테이블 스키마의 외래 키 `userId`로 인해 '이 board가 누구 것인지'를 표현합니다.
 
 User의 boards 필드는 DB 컬럼이 아니라 TypeORM이 조회 시점에 채워주는 가상의 필드입니다. 양쪽 엔티티에 필드를 선언하는 이유는 <strong>양방향 탐색(`user.boards`, `board.user` 둘 다 가능)</strong>을 위해서입니다. 단방향만 필요하면 한쪽만 선언해도 됩니다.
 
