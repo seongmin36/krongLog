@@ -1,6 +1,7 @@
-overrides:
-  vite: "^8"
-
 allowBuilds:
   esbuild: true
+  lefthook: false
   sharp: true
+
+overrides:
+  vite: ^8
