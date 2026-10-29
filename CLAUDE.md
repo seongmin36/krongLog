@@ -26,6 +26,8 @@ pnpm typecheck    # astro check (Astro + TypeScript 진단)
 
 **태그 (`tags`):** 포스트당 **2~3개**, **큰 규모 → 구체적 주제** 순. 일반 글 예: `["Backend", "Nest.js", "TypeORM"]`. leetcode 주간 회고는 첫 태그 `알고리즘` 고정 후 핵심 개념 (`["알고리즘", "Hash", "DP"]` 등). 상세 규칙은 `src/content/post/blog-template.md`, `src/content/post/algorithm-post-template.md` 참고.
 
+**디렉터리 구조 (`src/`):** `pages/`(라우트, 데이터 조합만) · `layouts/`(`BaseLayout`, `partials/`에 Header·NavLink) · `components/{home,blog,archive}/`(화면별 UI) · `components/mdx/`(MDX 본문에서 import하는 CodeBlock·LinkCard·GithubCard·Video) · `components/ui/`(범용 부품) · `lib/`(순수 함수) · `styles/`. 새 파일 위치와 역할 분리 기준은 `docs/conventions/file-structure.md`를 따릅니다.
+
 **라우팅:**
 - `/` → 홈 (최근 포스트)
 - `/blogs` → 전체 포스트 목록
@@ -50,4 +52,4 @@ pnpm typecheck    # astro check (Astro + TypeScript 진단)
 
 **블로그 본문 작성·리라이트 시 에이전트 지시문(복사용):** `MDX 본문에서 긴 연속 서술은 한 단락으로 붙이지 말 것. 논리 덩어리마다 빈 줄로 구간을 나누고, 같은 덩어리 안에서는 문장마다 끝에 <br />로 줄만 바꿀 것(큰 단락 여백 없이 읽기 호흡).`
 
-**동영상 파이프라인:** 원본 `.mov` 파일은 `raw-videos/` 폴더에 저장하며(git-ignored), `pnpm video:build` 또는 `pnpm build` 시 `scripts/process-videos.mjs`가 ffmpeg로 `public/videos/`에 `.mp4`로 자동 변환합니다. 이미 변환된 파일은 스킵됩니다. MDX에서는 `<Video src="/videos/폴더명/파일.mp4" />` 컴포넌트(`src/components/ui/Video.astro`)로 사용하며, 런타임 JS 없이 `<video>` 태그만 렌더링됩니다.
+**동영상 파이프라인:** 원본 `.mov` 파일은 `raw-videos/` 폴더에 저장하며(git-ignored), `pnpm video:build` 또는 `pnpm build` 시 `scripts/process-videos.mjs`가 ffmpeg로 `public/videos/`에 `.mp4`로 자동 변환합니다. 이미 변환된 파일은 스킵됩니다. MDX에서는 `<Video src="/videos/폴더명/파일.mp4" />` 컴포넌트(`src/components/mdx/Video.astro`)로 사용하며, 런타임 JS 없이 `<video>` 태그만 렌더링됩니다.

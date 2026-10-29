@@ -43,8 +43,13 @@ const posts = await getCollection("post");
 | 역할 | 위치 |
 |------|------|
 | 라우트 (데이터 레이어) | `src/pages/` |
-| 페이지 단위 UI 컴포넌트 | `src/components/blog/` 또는 `src/components/ui/` |
-| 재사용 UI 컴포넌트 | `src/components/ui/` |
+| 레이아웃·헤더 등 공통 틀 | `src/layouts/`, `src/layouts/partials/` (Header, NavLink) |
+| 홈 화면 조각 | `src/components/home/` |
+| 블로그 페이지 UI | `src/components/blog/` |
+| 아카이브 페이지 UI | `src/components/archive/` |
+| MDX 본문에서 import하는 컴포넌트 | `src/components/mdx/` (CodeBlock, LinkCard, GithubCard, Video, `github/`) |
+| 여러 곳에서 쓰는 범용 UI 부품 | `src/components/ui/` (Tag, Tooltip, Pagination, ThemeToggle, AppIcons) |
+| 순수 함수·상수·경로 | `src/lib/` |
 | 전역 스타일·토큰 | `src/styles/global.css` |
 | MDX·prose 스타일 | `src/styles/mdx.css` |
 
