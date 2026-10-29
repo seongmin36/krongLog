@@ -45,6 +45,6 @@ closes #
 - [ ] 글의 제목, 슬러그, 날짜 메타데이터가 올바르게 작성되었습니다.
 
 ### 코드 변경
-- [ ] `pnpm typecheck` 통과를 확인했습니다.
+- [ ] `pnpm check` (lint · format:check · typecheck) 통과를 확인했습니다.
 - [ ] `pnpm build` 로컬 빌드 성공을 확인했습니다.
 - [ ] 기존 페이지 렌더링에 영향이 없음을 확인했습니다.

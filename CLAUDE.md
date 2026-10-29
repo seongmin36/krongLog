@@ -10,9 +10,14 @@ pnpm build        # 동영상 변환 + ./dist/ 로 빌드 (Vercel 정적 출력)
 pnpm preview      # 프로덕션 빌드 로컬 미리보기
 pnpm video:build  # raw-videos/*.mov → public/videos/*.mp4 변환만 실행
 pnpm typecheck    # astro check (Astro + TypeScript 진단)
+pnpm lint         # ESLint (.ts·.tsx·.astro·.js)
+pnpm format       # Prettier 일괄 적용
+pnpm format:check # Prettier 검사만
+pnpm check        # lint + format:check + typecheck
+pnpm verify:build # 빌드 결과물(dist) 검증. pnpm build 이후 실행
 ```
 
-`package.json`의 `engines.node`는 `>=22.0.0`입니다. 린트 스크립트는 별도로 없습니다.
+`package.json`의 `engines.node`는 `>=22.0.0`입니다. 커밋 전 훅(lefthook)과 CI 검사 흐름은 `docs/conventions/quality-checks.md`를 참고합니다.
 
 ## 아키텍처
 
