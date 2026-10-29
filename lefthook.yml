@@ -2,11 +2,11 @@ pre-commit:
   piped: true
   jobs:
     - name: eslint
-      glob: "*.{js, mjs, ts, tsx, astro}"
+      glob: "*.{js,mjs,ts,tsx,astro}"
       run: pnpm exec eslint --fix {staged_files}
       stage_fixed: true
 
     - name: prettier
-      glob: "*.{js, mjs, ts, tsx, astro, css, json}"
+      glob: "*.{js,mjs,ts,tsx,astro,css,json}"
       run: pnpm exec prettier --write {staged_files}
       stage_fixed: true
