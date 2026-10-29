@@ -14,7 +14,8 @@
     "typecheck": "astro check",
     "font:subset": "node scripts/font-subset.mjs",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
