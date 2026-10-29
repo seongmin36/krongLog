@@ -105,7 +105,10 @@ function extractFavicon(html: string, pageUrl: string): string {
   return `${origin}/favicon.ico`;
 }
 
-function resolveAbsoluteUrl(value: string | null, baseUrl: string): string | null {
+function resolveAbsoluteUrl(
+  value: string | null,
+  baseUrl: string,
+): string | null {
   if (!value) return null;
 
   try {

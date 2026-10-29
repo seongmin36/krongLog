@@ -1,13 +1,17 @@
 {
   "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "node_modules/vite-plugin-svgr/client.d.ts", "**/*"],
+  "include": [
+    ".astro/types.d.ts",
+    "node_modules/vite-plugin-svgr/client.d.ts",
+    "**/*"
+  ],
   "exclude": ["dist"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./src/*"]
     },
-    "verbatimModuleSyntax": true,
-  },
+    "verbatimModuleSyntax": true
+  }
 }

@@ -14,7 +14,10 @@ const sizeClasses = {
 
 <span
   data-tag={name}
-  class:list={["inline-block rounded-md font-medium leading-relaxed", sizeClasses[size]]}
+  class:list={[
+    "inline-block rounded-md leading-relaxed font-medium",
+    sizeClasses[size],
+  ]}
 >
   {name}
 </span>

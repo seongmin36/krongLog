@@ -12,7 +12,13 @@
     "preview": "astro preview",
     "astro": "astro",
     "typecheck": "astro check",
-    "font:subset": "node scripts/font-subset.mjs"
+    "font:subset": "node scripts/font-subset.mjs",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "prepare": "node -e  \"if (!process.env.CI) { require('child_process').execSync('lefthook install', { stdio: 'inherit' }); }\"",
+    "verify:build": "node scripts/verify-build.mjs",
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck"
   },
   "dependencies": {
     "@astrojs/markdown-remark": "^7.3.2",
@@ -40,12 +46,19 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@eslint/js": "^10.0.1",
     "@shikijs/transformers": "^4.5.0",
     "@types/three": "^0.183.1",
+    "eslint": "^10.13.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-astro": "^3.2.1",
+    "globals": "^17.13.0",
+    "lefthook": "^2.2.2",
     "prettier": "3.8.1",
     "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "typescript": "^6.0.2",
+    "typescript-eslint": "^8.72.1",
     "unist-util-visit": "^5.1.0",
     "vite-plugin-svgr": "^5.2.0"
   }

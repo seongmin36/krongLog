@@ -1,2 +1,11 @@
-# 특정 글만 수동 포맷(MDX 줄바꿈·블록 레이아웃 유지)
-src/content/post/blog/*.mdx
+# 빌드 산출물, 생성물
+dist
+.vercel
+.astro
+pnpm-lock.yaml
+public
+
+# 손으로 포맷하는 콘텐츠, 문서
+src/content
+*.md
+docs

@@ -24,6 +24,14 @@ const moreButtonClass =
   data-archive-root
   data-chunk-url={archiveChunkPath("{key}", "{page}")}
 >
+  <noscript>
+    <style is:inline>
+      [data-archive-grid] {
+        visibility: visible !important;
+      }
+    </style>
+  </noscript>
+
   {
     entries.length === 0 ? (
       <p class="text-muted-alpha dark:text-muted-dark py-20 text-center text-sm">
@@ -31,7 +39,7 @@ const moreButtonClass =
       </p>
     ) : (
       <>
-        <!-- 태그 필터 칩 -->
+        {/* 태그 필터 칩 */}
         <div
           class="flex flex-wrap gap-2"
           role="group"
@@ -51,7 +59,7 @@ const moreButtonClass =
           ))}
         </div>
 
-        <!-- 카드: JS가 화면 너비에 맞춰 열(masonry)로 나눠 담음. JS 없이는 격자 -->
+        {/* 카드: JS가 화면 너비에 맞춰 열(masonry)로 나눠 담음. JS 없이는 격자 */}
         <div class="mt-10">
           <div
             class="grid grid-cols-1 items-start gap-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -62,13 +70,6 @@ const moreButtonClass =
             ))}
           </div>
         </div>
-        <noscript>
-          <style>
-            [data-archive-grid] {
-              visibility: visible !important;
-            }
-          </style>
-        </noscript>
 
         <div class="mt-12 flex justify-center">
           <button
@@ -80,7 +81,7 @@ const moreButtonClass =
             더 보기
           </button>
         </div>
-        <p class="sr-only" aria-live="polite" data-archive-status></p>
+        <p class="sr-only" aria-live="polite" data-archive-status />
       </>
     )
   }

@@ -31,7 +31,7 @@ const tagsJson = (post: CollectionEntry<"post">) =>
 >
   <!-- 태그 필터 칩 -->
   <div
-    class="-mx-4 overflow-x-auto px-4 pt-4 pb-8 [scrollbar-width:none] sm:-mx-6 sm:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pt-0 lg:pb-10 [&::-webkit-scrollbar]:hidden"
+    class="-mx-4 [scrollbar-width:none] overflow-x-auto px-4 pt-4 pb-8 sm:-mx-6 sm:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pt-0 lg:pb-10 [&::-webkit-scrollbar]:hidden"
   >
     <div
       class="flex w-max gap-2 lg:w-auto lg:flex-wrap"
@@ -54,7 +54,8 @@ const tagsJson = (post: CollectionEntry<"post">) =>
             data-home-chip={tag}
             aria-pressed="false"
           >
-            {tag}<span class="chip-count font-mono">{count}</span>
+            {tag}
+            <span class="chip-count font-mono">{count}</span>
           </button>
         ))
       }

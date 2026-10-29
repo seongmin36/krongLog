@@ -42,41 +42,36 @@ const arrowButtonClass =
 </div>
 
 <script>
-  document
-    .querySelectorAll<HTMLElement>(".posts-pagination")
-    .forEach((nav) => {
-      const prevBtn = nav.querySelector<HTMLButtonElement>(
-        '[data-page="prev"]',
-      )!;
-      const nextBtn = nav.querySelector<HTMLButtonElement>(
-        '[data-page="next"]',
-      )!;
-      const currentEl = nav.querySelector("[data-current]")!;
-      const totalEl = nav.querySelector("[data-total]")!;
+  document.querySelectorAll<HTMLElement>(".posts-pagination").forEach((nav) => {
+    const prevBtn = nav.querySelector<HTMLButtonElement>('[data-page="prev"]')!;
+    const nextBtn = nav.querySelector<HTMLButtonElement>('[data-page="next"]')!;
+    const currentEl = nav.querySelector("[data-current]")!;
+    const totalEl = nav.querySelector("[data-total]")!;
 
-      function update(current: number, total: number) {
-        currentEl.textContent = String(current);
-        totalEl.textContent = String(total);
-        prevBtn.disabled = current <= 1;
-        nextBtn.disabled = current >= total;
-      }
-      update(1, 1);
+    function update(current: number, total: number) {
+      currentEl.textContent = String(current);
+      totalEl.textContent = String(total);
+      prevBtn.disabled = current <= 1;
+      nextBtn.disabled = current >= total;
+    }
+    update(1, 1);
 
-      (nav as HTMLElement & { updatePagination: typeof update }).updatePagination =
-        update;
+    (
+      nav as HTMLElement & { updatePagination: typeof update }
+    ).updatePagination = update;
 
-      nav.addEventListener("click", (e) => {
-        const button = (e.target as HTMLElement).closest<HTMLButtonElement>(
-          "[data-page]",
-        );
-        if (!button || button.disabled) return;
+    nav.addEventListener("click", (e) => {
+      const button = (e.target as HTMLElement).closest<HTMLButtonElement>(
+        "[data-page]",
+      );
+      if (!button || button.disabled) return;
 
-        nav.dispatchEvent(
-          new CustomEvent("paginate", {
-            detail: { direction: button.dataset.page },
-            bubbles: true,
-          }),
-        );
-      });
+      nav.dispatchEvent(
+        new CustomEvent("paginate", {
+          detail: { direction: button.dataset.page },
+          bubbles: true,
+        }),
+      );
     });
+  });
 </script>
