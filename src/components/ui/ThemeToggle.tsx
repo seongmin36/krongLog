@@ -17,11 +17,11 @@ export function ThemeToggle() {
     >
       <AppIcon
         name="sun"
-        className="size-4 sm:size-4.5 shrink-0 hidden dark:block"
+        className="hidden size-4 shrink-0 sm:size-4.5 dark:block"
       />
       <AppIcon
         name="moon"
-        className="size-4 sm:size-4.5 shrink-0 block dark:hidden"
+        className="block size-4 shrink-0 sm:size-4.5 dark:hidden"
       />
     </button>
   );

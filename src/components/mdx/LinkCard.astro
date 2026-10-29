@@ -53,9 +53,7 @@ const hostname = og ? new URL(url).hostname : "";
       class="not-prose border-border dark:border-border-dark dark:bg-dark hover:bg-primary-surface dark:hover:bg-primary-surface-dark hover:border-primary/30 dark:hover:border-dark-text/30 my-5 flex items-stretch justify-between gap-4 overflow-hidden rounded-lg border bg-white no-underline transition-colors duration-200"
     >
       <div class="flex min-w-0 flex-1 flex-col gap-1.5 px-4 py-3.5">
-        <span class="card-preview-title block line-clamp-1">
-          {og.title}
-        </span>
+        <span class="card-preview-title line-clamp-1 block">{og.title}</span>
 
         {og.description && (
           <p class="text-description dark:text-dark-description m-0 line-clamp-2 text-[13px] leading-relaxed">

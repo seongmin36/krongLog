@@ -16,7 +16,6 @@ interface Props {
 }
 
 const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
-
 ---
 
 <div class="posts-page">
@@ -29,7 +28,12 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
   <!-- 검색 + 필터 칩 -->
   <div class="posts-toolbar">
     <label class="posts-search">
-      <Icon name="lucide:search" width={16} height={16} class="posts-search-icon" />
+      <Icon
+        name="lucide:search"
+        width={16}
+        height={16}
+        class="posts-search-icon"
+      />
       <input
         id="post-search"
         type="text"
@@ -210,9 +214,7 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     const { direction } = (e as CustomEvent<{ direction: "prev" | "next" }>)
       .detail;
     currentPage =
-      direction === "prev"
-        ? Math.max(1, currentPage - 1)
-        : currentPage + 1;
+      direction === "prev" ? Math.max(1, currentPage - 1) : currentPage + 1;
     filter();
   });
 
