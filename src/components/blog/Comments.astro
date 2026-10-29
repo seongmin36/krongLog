@@ -68,7 +68,7 @@ const initialTheme = theme ?? "light";
    * 무해하다.
    */
   function watchGiscusFrame() {
-    function syncAfterLoad(iframe) {
+    function syncAfterLoad() {
       [0, 300, 800, 1500].forEach((delay) => {
         setTimeout(updateGiscusTheme, delay);
       });
@@ -76,18 +76,14 @@ const initialTheme = theme ?? "light";
 
     const existing = document.querySelector("iframe.giscus-frame");
     if (existing) {
-      existing.addEventListener("load", () => syncAfterLoad(existing), {
-        once: true,
-      });
+      existing.addEventListener("load", () => syncAfterLoad, { once: true });
       return;
     }
 
     const frameObserver = new MutationObserver((_, obs) => {
       const iframe = document.querySelector("iframe.giscus-frame");
       if (!iframe) return;
-      iframe.addEventListener("load", () => syncAfterLoad(iframe), {
-        once: true,
-      });
+      iframe.addEventListener("load", () => syncAfterLoad, { once: true });
       obs.disconnect();
     });
 
