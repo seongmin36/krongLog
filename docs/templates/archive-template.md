@@ -122,7 +122,7 @@ title: "..."
 - "자세한 내용은 …" 처럼 참고 자료로 거는 링크와 **글 최하단 링크**는 링크 블록(`LinkCard`)을 씁니다. (`.mdx` 필요)
 
   ```mdx
-  import LinkCard from "@/components/ui/LinkCard.astro";
+  import LinkCard from "@/components/mdx/LinkCard.astro";
 
   **\*태스크 큐**에 대한 자세한 내용은 MDN: 태스크 큐
 

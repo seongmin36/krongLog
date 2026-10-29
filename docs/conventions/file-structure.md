@@ -43,8 +43,13 @@ const posts = await getCollection("post");
 | 역할 | 위치 |
 |------|------|
 | 라우트 (데이터 레이어) | `src/pages/` |
-| 페이지 단위 UI 컴포넌트 | `src/components/blog/` 또는 `src/components/ui/` |
-| 재사용 UI 컴포넌트 | `src/components/ui/` |
+| 레이아웃·헤더 등 공통 틀 | `src/layouts/`, `src/layouts/partials/` (Header, NavLink) |
+| 홈 화면 조각 | `src/components/home/` |
+| 블로그 페이지 UI | `src/components/blog/` |
+| 아카이브 페이지 UI | `src/components/archive/` |
+| MDX 본문에서 import하는 컴포넌트 | `src/components/mdx/` (CodeBlock, LinkCard, GithubCard, Video, `github/`) |
+| 여러 곳에서 쓰는 범용 UI 부품 | `src/components/ui/` (Tag, Tooltip, Pagination, ThemeToggle, AppIcons) |
+| 순수 함수·상수·경로 | `src/lib/` |
 | 전역 스타일·토큰 | `src/styles/global.css` |
 | MDX·prose 스타일 | `src/styles/mdx.css` |
 
@@ -55,6 +60,7 @@ const posts = await getCollection("post");
 | 재사용 UI 컴포넌트(`components/ui/`) | Tailwind 유틸리티 클래스. 색상은 `@theme` 토큰이 생성하는 유틸리티(`text-description`, `bg-hover-overlay-light` 등)를 사용 |
 | 상태·변형이 많아 유틸리티로 쓰면 장황해지는 컴포넌트 | 해당 `.astro` 파일의 `<style>` 블록 |
 | 여러 컴포넌트가 공유하는 스타일 | `src/styles/mdx.css` 또는 새 CSS 파일 |
+| 스크립트가 만드는 요소나 자식 컴포넌트에 적용되는 스타일 (스코프 `<style>`이 닿지 않음) | `src/styles/`의 CSS 파일 (한 곳에서만 써도 허용, 예: `posts-page.css`, `reveal.css`) |
 | 색상·테마 토큰 | `src/styles/global.css`의 `@theme` 블록 |
 
 같은 클래스 문자열이 여러 엘리먼트에 반복되면 frontmatter 상수로 뽑아 `class={value}`로 재사용합니다(`Pagination.astro`의 `arrowButtonClass` 참고).
