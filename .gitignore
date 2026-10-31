@@ -51,3 +51,6 @@ coverage/
 .claude/
 
 .cache/
+
+# 개인용 mise 설정
+mise.local.toml
