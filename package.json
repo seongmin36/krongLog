@@ -2,7 +2,7 @@
   "name": "temp-astro",
   "type": "module",
   "version": "0.0.1",
-  "packageMagager": "pnpm@10.28.0",
+  "packageManager": "pnpm@10.28.0",
   "engines": {
     "node": ">=22.0.0"
   },
