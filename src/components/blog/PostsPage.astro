@@ -3,7 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
 import { blogPostPath } from "@/lib/blog-url";
 import { formatDotDate } from "@/lib/format-date";
-import { PAGE_SIZE } from "@/lib/posts-page-pagination";
+import { PAGE_SIZE } from "@/lib/blog.ts";
 import Pagination from "@/components/ui/Pagination.astro";
 import "@/styles/chip.css";
 import "@/styles/posts-page.css";
@@ -19,6 +19,15 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
 ---
 
 <div class="posts-page">
+  <script is:inline>
+    // 쿼리로 진입하면 필터 적용 전까지 목록 영역을 숨겨 '전체' 상태가 잠깐 보이지 않게 함.
+    if (location.search) {
+      document.currentScript?.parentElement?.setAttribute(
+        "data-url-pending",
+        "",
+      );
+    }
+  </script>
   <!-- 헤딩 -->
   <div>
     <h1 class="posts-title">전체 글</h1>
@@ -181,42 +190,58 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
   let searchQuery = "";
   let currentPage = 1;
 
-  function filter() {
-    const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
-    const matched: HTMLAnchorElement[] = [];
+  // URL ↔ 상태
+  function readUrl() {
+    const params = new URLSearchParams(location.search);
 
-    rows.forEach((row) => {
-      const title = row.dataset.postTitle ?? "";
-      const tags: string[] = JSON.parse(row.dataset.postTags ?? "[]");
-      const matchLabel = activeLabel === "" || tags.includes(activeLabel);
-      const matchSubTag = activeSubTag === "" || tags.includes(activeSubTag);
-      const matchSearch =
-        searchQuery === "" || title.includes(searchQuery.toLowerCase());
+    const tag = params.get("tag") ?? "";
+    activeLabel = topTags.some(([t]) => t === tag) ? tag : "";
 
-      if (matchLabel && matchSubTag && matchSearch) matched.push(row);
-    });
+    const sub = params.get("sub") ?? "";
+    const subEntries = activeLabel
+      ? (subTagsByLabel[activeLabel] ?? [])
+      : topTags;
+    activeSubTag = subEntries.some(([t]) => t === sub) ? sub : "";
 
-    const totalPages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
-    currentPage = Math.min(currentPage, totalPages);
-
-    const start = (currentPage - 1) * PAGE_SIZE;
-    const visiblePage = new Set(matched.slice(start, start + PAGE_SIZE));
-
-    rows.forEach((row) => {
-      row.hidden = !visiblePage.has(row);
-    });
-
-    emptyMsg.hidden = matched.length > 0;
-    paginationEl?.updatePagination?.(currentPage, totalPages);
+    searchQuery = params.get("q") ?? "";
+    currentPage = Math.max(1, Number(params.get("page")) || 1);
   }
 
-  paginationEl?.addEventListener("paginate", (e) => {
-    const { direction } = (e as CustomEvent<{ direction: "prev" | "next" }>)
-      .detail;
-    currentPage =
-      direction === "prev" ? Math.max(1, currentPage - 1) : currentPage + 1;
-    filter();
-  });
+  // 현재 필터 상태를 URL에 기록. 기본값은 쿼리에서 생략
+  function writeUrl(mode: "push" | "replace") {
+    const params = new URLSearchParams();
+    if (activeLabel) params.set("tag", activeLabel);
+    if (activeSubTag) params.set("sub", activeSubTag);
+    if (searchQuery) params.set("q", searchQuery);
+    if (currentPage > 1) params.set("page", String(currentPage));
+
+    const query = params.toString();
+    const next = query ? `${location.pathname}?${query}` : location.pathname;
+    // 같은 칩을 다시 누르는 등 상태가 그대로면 히스토리를 쌓지 않음
+    if (next === location.pathname + location.search) return;
+
+    if (mode === "push") history.pushState(null, "", next);
+    else history.replaceState(null, "", next);
+  }
+
+  // 렌더 (상태 → DOM)
+  function syncChips() {
+    chips.forEach((chip) => {
+      const on = chip.dataset.chip === activeLabel;
+      chip.classList.toggle("chip-active", on);
+      chip.setAttribute("aria-pressed", String(on));
+    });
+  }
+
+  function syncSidebar() {
+    categoryList
+      .querySelectorAll<HTMLButtonElement>("[data-sidebar]")
+      .forEach((item) => {
+        const on = item.dataset.sidebar === activeSubTag;
+        item.classList.toggle("sidebar-item-active", on);
+        item.setAttribute("aria-pressed", String(on));
+      });
+  }
 
   function labelPostCount(label: string): number {
     if (label === "") return totalPostCount;
@@ -227,19 +252,6 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
       if (tags.includes(label)) count++;
     });
     return count;
-  }
-
-  function setSubTag(tag: string) {
-    activeSubTag = tag;
-    currentPage = 1;
-    categoryList
-      .querySelectorAll<HTMLButtonElement>("[data-sidebar]")
-      .forEach((item) => {
-        const on = item.dataset.sidebar === tag;
-        item.classList.toggle("sidebar-item-active", on);
-        item.setAttribute("aria-pressed", String(on));
-      });
-    filter();
   }
 
   function renderCategoryList(label: string) {
@@ -272,19 +284,61 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     });
   }
 
+  function filter() {
+    const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
+    const matched: HTMLAnchorElement[] = [];
+
+    rows.forEach((row) => {
+      const title = row.dataset.postTitle ?? "";
+      const tags: string[] = JSON.parse(row.dataset.postTags ?? "[]");
+      const matchLabel = activeLabel === "" || tags.includes(activeLabel);
+      const matchSubTag = activeSubTag === "" || tags.includes(activeSubTag);
+      const matchSearch =
+        searchQuery === "" || title.includes(searchQuery.toLowerCase());
+
+      if (matchLabel && matchSubTag && matchSearch) matched.push(row);
+    });
+
+    const totalPages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
+    currentPage = Math.min(currentPage, totalPages);
+
+    const start = (currentPage - 1) * PAGE_SIZE;
+    const visiblePage = new Set(matched.slice(start, start + PAGE_SIZE));
+
+    rows.forEach((row) => {
+      row.hidden = !visiblePage.has(row);
+    });
+
+    emptyMsg.hidden = matched.length > 0;
+    paginationEl?.updatePagination?.(currentPage, totalPages);
+  }
+
+  function applyState() {
+    syncChips();
+    renderCategoryList(activeLabel);
+    syncSidebar();
+    searchInput.value = searchQuery;
+    filter();
+  }
+
+  // 액션 (상태 변경 → 렌더 → URL 기록)
   function setLabel(label: string) {
     activeLabel = label;
     activeSubTag = "";
     currentPage = 1;
-    chips.forEach((chip) => {
-      const on = chip.dataset.chip === label;
-      chip.classList.toggle("chip-active", on);
-      chip.setAttribute("aria-pressed", String(on));
-    });
-    renderCategoryList(label);
-    filter();
+    applyState();
+    writeUrl("push");
   }
 
+  function setSubTag(tag: string) {
+    activeSubTag = tag;
+    currentPage = 1;
+    syncSidebar();
+    filter();
+    writeUrl("push");
+  }
+
+  // 이벤트 연결
   chips.forEach((chip) =>
     chip.addEventListener("click", () => setLabel(chip.dataset.chip ?? "")),
   );
@@ -292,6 +346,16 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     searchQuery = searchInput.value;
     currentPage = 1;
     filter();
+    writeUrl("replace");
+  });
+
+  paginationEl?.addEventListener("paginate", (e) => {
+    const { direction } = (e as CustomEvent<{ direction: "prev" | "next" }>)
+      .detail;
+    currentPage =
+      direction === "prev" ? Math.max(1, currentPage - 1) : currentPage + 1;
+    filter();
+    writeUrl("push");
   });
 
   document.addEventListener("keydown", (e) => {
@@ -301,6 +365,20 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     }
   });
 
-  renderCategoryList("");
-  filter();
+  window.addEventListener("popstate", () => {
+    readUrl();
+    applyState();
+  });
+
+  // 초기 실행
+  readUrl();
+  applyState();
+  writeUrl("replace");
+
+  // 트랜지션이 꺼지고 나서야 숨김 해제
+  const postsPage = document.querySelector<HTMLElement>(".posts-page");
+  if (postsPage) {
+    void postsPage.offsetHeight;
+    postsPage.removeAttribute("data-url-pending");
+  }
 </script>

@@ -48,16 +48,6 @@ const initialTheme = theme ?? "light";
     sendMessage({ setConfig: { theme: getGiscusTheme() } });
   }
 
-  // <html> class(다크모드 토글)가 바뀔 때마다 동기화
-  const observer = new MutationObserver(() => {
-    updateGiscusTheme();
-  });
-
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class"],
-  });
-
   /**
    * data-theme은 서버 렌더 시점 값이라 실제 저장된 테마와 다를 수 있다.
    * giscus는 범용 "준비 완료" 이벤트를 제공하지 않는다 — discussion 메타데이터
@@ -89,6 +79,16 @@ const initialTheme = theme ?? "light";
 
     frameObserver.observe(document.body, { childList: true, subtree: true });
   }
+
+  // <html> class(다크모드 토글)가 바뀔 때마다 동기화
+  const observer = new MutationObserver(() => {
+    updateGiscusTheme();
+  });
+
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ["class"],
+  });
 
   watchGiscusFrame();
 </script>

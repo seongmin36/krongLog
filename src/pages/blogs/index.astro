@@ -1,14 +1,9 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import PostsPage from "@/components/blog/PostsPage.astro";
-import { getCollection } from "astro:content";
-import { countTopTags } from "@/lib/post-tags";
+import { countTopTags, getSortedPosts } from "@/lib/blog";
 
-const allPosts = await getCollection("post");
-const sortedPosts = allPosts.sort(
-  (a, b) => b.data.date.getTime() - a.data.date.getTime(),
-);
-
+const sortedPosts = await getSortedPosts();
 const topTags = countTopTags(sortedPosts);
 
 const subTagsByLabel: Record<string, [string, number][]> = {};

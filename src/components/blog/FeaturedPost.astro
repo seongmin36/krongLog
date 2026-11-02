@@ -6,6 +6,7 @@ import Tag from "@/components/ui/Tag.astro";
 import { blogPostPath } from "@/lib/blog-url";
 import { formatDotDate } from "@/lib/format-date";
 import placeholderImage from "@/assets/img-default.png";
+import { FEATURED_IMAGE } from "@/lib/blog";
 
 interface Props {
   post: CollectionEntry<"post">;
@@ -30,8 +31,8 @@ const { title, description, date, tags, image } = post.data;
       alt={image ? title : "placeholder"}
       format="webp"
       quality={75}
-      widths={[400, 640, 800, 960, 1280]}
-      sizes="(max-width: 1023px) 100vw, 680px"
+      widths={FEATURED_IMAGE.widths}
+      sizes={FEATURED_IMAGE.sizes}
       class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
       priority={priorityLcp}
     />
@@ -59,30 +60,30 @@ const { title, description, date, tags, image } = post.data;
     </div>
 
     <h2
+      data-field="title"
       class="text-dark group-hover:text-primary dark:group-hover:text-dark-text mt-3 text-2xl leading-[1.4] font-bold tracking-[-0.03em] transition-colors duration-200 lg:mt-5 lg:text-[34px] lg:leading-[1.35] dark:text-gray-50"
     >
       {title}
     </h2>
 
-    {
-      description && (
-        <p class="text-description dark:text-dark-description mt-3 line-clamp-2 text-[14.5px] leading-[1.75] lg:mt-4 lg:line-clamp-3 lg:text-[15.5px] lg:leading-[1.8]">
-          {description}
-        </p>
-      )
-    }
+    <p
+      data-field="description"
+      hidden={!description}
+      class="text-description dark:text-dark-description mt-3 line-clamp-2 text-[14.5px] leading-[1.75] lg:mt-4 lg:line-clamp-3 lg:text-[15.5px] lg:leading-[1.8]"
+    >
+      {description}
+    </p>
 
     <!-- 태그 · 화살표 -->
     <div class="mt-5 flex items-center justify-between gap-4 lg:mt-7">
-      {
-        tags && tags.length > 0 && (
-          <div class="flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
-              <Tag name={tag} />
-            ))}
-          </div>
-        )
-      }
+      <div
+        data-field="tags"
+        class="flex flex-wrap gap-1.5"
+        hidden={!tags?.length}
+      >
+        {tags?.map((tag) => <Tag name={tag} />)}
+      </div>
+
       <span
         class="border-border text-dark group-hover:border-primary group-hover:text-primary dark:border-border-dark dark:group-hover:border-dark-text dark:group-hover:text-dark-text ml-auto inline-flex size-11 shrink-0 items-center justify-center rounded-full border transition-colors duration-200 dark:text-gray-50"
         aria-hidden="true"

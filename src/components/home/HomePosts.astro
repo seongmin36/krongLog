@@ -5,30 +5,25 @@ import FeaturedPost from "@/components/blog/FeaturedPost.astro";
 import PostCard from "@/components/blog/PostCard.astro";
 import { blogsIndexPath } from "@/lib/blog-url";
 import "@/styles/chip.css";
+import Tag from "@/components/ui/Tag.astro";
+import type { HomePostData } from "@/lib/blog";
 
 interface Props {
   posts: CollectionEntry<"post">[];
   topTags: [string, number][];
+  data: HomePostData[];
 }
 
-/** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 (모바일은 MOBILE_GRID_SIZE) */
+/** 대표글 1개 다음으로 카드 그리드에 보여줄 개수 (모바일은 4개, CSS로 제한) */
 const GRID_SIZE = 6;
-const MOBILE_GRID_SIZE = 4;
 
-const { posts, topTags } = Astro.props;
-
-// JS 실행 전 기본 배치(데스크톱 기준): 0 → 대표글, 1~GRID_SIZE → 카드
-const slotOf = (i: number) =>
-  i === 0 ? "featured" : i <= GRID_SIZE ? "card" : "none";
-const tagsJson = (post: CollectionEntry<"post">) =>
-  JSON.stringify(post.data.tags ?? []);
+const { posts, topTags, data } = Astro.props;
+const [first, ...rest] = posts;
+// </script> 같은 문자열이 인라인 JSON을 끊지 않도록 < 이스케이프
+const dataJson = JSON.stringify(data).replace(/</g, "\\u003c");
 ---
 
-<div
-  id="home-posts"
-  data-grid-size={GRID_SIZE}
-  data-mobile-grid-size={MOBILE_GRID_SIZE}
->
+<div id="home-posts" data-grid-size={GRID_SIZE}>
   <!-- 태그 필터 칩 -->
   <div
     class="-mx-4 [scrollbar-width:none] overflow-x-auto px-4 pt-4 pb-8 sm:-mx-6 sm:px-6 lg:mx-0 lg:overflow-visible lg:px-0 lg:pt-0 lg:pb-10 [&::-webkit-scrollbar]:hidden"
@@ -67,43 +62,44 @@ const tagsJson = (post: CollectionEntry<"post">) =>
     aria-label="최근 글"
     class="border-border dark:border-border-dark border-b pb-10 lg:pb-16"
     data-home-section="featured"
+    hidden={!first}
   >
-    {
-      posts.map((post, i) => (
-        <div
-          data-home-slot="featured"
-          data-post-tags={tagsJson(post)}
-          hidden={slotOf(i) !== "featured"}
-        >
-          <FeaturedPost post={post} rank={1} priorityLcp={i === 0} />
-        </div>
-      ))
-    }
+    {first && <FeaturedPost post={first} rank={1} priorityLcp />}
   </section>
 
   <!-- 카드 그리드 -->
   <section
     aria-label="최근 글 목록"
-    class="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:pt-16"
+    class="grid grid-cols-1 gap-5 pt-10 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:pt-16 max-sm:[&>*:nth-child(n+5)]:hidden"
     data-home-section="card"
-    hidden={posts.length <= 1}
+    hidden={rest.length === 0}
   >
     {
-      posts.map((post, i) => (
-        <div
-          class:list={[
-            "flex flex-col",
-            // JS 실행 전 모바일에서 MOBILE_GRID_SIZE 초과 카드 숨김 (초기화 시 제거)
-            i > MOBILE_GRID_SIZE && "max-sm:hidden",
-          ]}
-          data-home-slot="card"
-          hidden={slotOf(i) !== "card"}
-        >
+      rest.slice(0, GRID_SIZE).map((post) => (
+        <div class="flex flex-col">
           <PostCard post={post} />
         </div>
       ))
     }
   </section>
+
+  {
+    first && (
+      <>
+        <template id="home-featured-tpl">
+          <FeaturedPost post={first} rank={1} />
+        </template>
+        <template id="home-card-tpl">
+          <div class="flex flex-col">
+            <PostCard post={first} />
+          </div>
+        </template>
+      </>
+    )
+  }
+
+  <template id="home-tag-tpl"><Tag name="" /></template>
+  <script type="application/json" id="home-posts-data" set:html={dataJson} />
 
   <!-- 전체 글 보기 -->
   <div class="mt-12 flex justify-center lg:mt-16">
@@ -179,42 +175,85 @@ const tagsJson = (post: CollectionEntry<"post">) =>
 </style>
 
 <script>
+  import type { HomePostData, HomePostImage } from "@/lib/blog";
+
   const root = document.getElementById("home-posts")!;
   const gridSize = Number(root.dataset.gridSize) || 6;
-  const mobileGridSize = Number(root.dataset.mobileGridSize) || 4;
-  const mobileQuery = window.matchMedia("(max-width: 639.98px)");
   const chips = root.querySelectorAll<HTMLButtonElement>("[data-home-chip]");
-
-  const slots = (name: string) => [
-    ...root.querySelectorAll<HTMLElement>(`[data-home-slot="${name}"]`),
-  ];
-  const section = (name: string) =>
-    root.querySelector<HTMLElement>(`[data-home-section="${name}"]`)!;
-
-  const featured = slots("featured");
-  const cards = slots("card");
-  const postTags: string[][] = featured.map((item) =>
-    JSON.parse(item.dataset.postTags ?? "[]"),
-  );
+  const featuredSection = root.querySelector<HTMLElement>(
+    '[data-home-section="featured"]',
+  )!;
+  const cardSection = root.querySelector<HTMLElement>(
+    '[data-home-section="card"]',
+  )!;
+  const template = (id: string) =>
+    document.getElementById(id) as HTMLTemplateElement | null;
+  const featuredTpl = template("home-featured-tpl");
+  const cardTpl = template("home-card-tpl");
+  const tagTpl = template("home-tag-tpl")!;
+  const data = JSON.parse(
+    document.getElementById("home-posts-data")?.textContent ?? "[]",
+  ) as HomePostData[];
 
   let activeTag = "";
 
+  function createTag(name: string) {
+    const el = tagTpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    el.dataset.tag = name;
+    el.textContent = name;
+
+    return el;
+  }
+
+  // 템플릿을 복제해 data-field 자리에 글 데이터를 채움
+  function fill(
+    tpl: HTMLTemplateElement,
+    post: HomePostData,
+    image: HomePostImage,
+  ) {
+    const node = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+    const field = (name: string) =>
+      node.querySelector<HTMLElement>(`[data-field="${name}"]`)!;
+
+    const link =
+      node instanceof HTMLAnchorElement ? node : node.querySelector("a")!;
+    link.href = post.href;
+
+    const img = node.querySelector("img")!;
+    img.src = image.src;
+    img.srcset = image.srcset;
+    img.alt = post.alt;
+    img.loading = "lazy";
+    img.removeAttribute("fetchpriority");
+
+    field("title").textContent = post.title;
+    field("description").textContent = post.description;
+    field("description").hidden = !post.description;
+
+    const time = node.querySelector("time")!;
+    time.dateTime = post.datetime;
+    time.textContent = post.date;
+
+    field("tags").replaceChildren(...post.tags.map(createTag));
+    field("tags").hidden = post.tags.length === 0;
+    return node;
+  }
+
   function render() {
-    // 배치는 JS가 담당하므로 초기 렌더용 모바일 숨김 클래스 제거
-    cards.forEach((card) => card.classList.remove("max-sm:hidden"));
-    const cardCount = mobileQuery.matches ? mobileGridSize : gridSize;
-    const matched = featured
-      .map((_, i) => i)
-      .filter((i) => activeTag === "" || postTags[i].includes(activeTag));
+    if (!featuredTpl || !cardTpl) return;
+    const matched = activeTag
+      ? data.filter((post) => post.tags.includes(activeTag))
+      : data;
+    const [first, ...rest] = matched;
 
-    featured.forEach((item, i) => {
-      const rank = matched.indexOf(i);
-      item.hidden = rank !== 0;
-      cards[i].hidden = !(rank >= 1 && rank <= cardCount);
-    });
-
-    section("featured").hidden = matched.length < 1;
-    section("card").hidden = matched.length < 2;
+    featuredSection.replaceChildren(
+      ...(first ? [fill(featuredTpl, first, first.featured)] : []),
+    );
+    cardSection.replaceChildren(
+      ...rest.slice(0, gridSize).map((post) => fill(cardTpl, post, post.card)),
+    );
+    featuredSection.hidden = !first;
+    cardSection.hidden = rest.length === 0;
   }
 
   chips.forEach((chip) =>
@@ -228,7 +267,4 @@ const tagsJson = (post: CollectionEntry<"post">) =>
       render();
     }),
   );
-
-  mobileQuery.addEventListener("change", render);
-  render();
 </script>

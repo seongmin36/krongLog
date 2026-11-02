@@ -4,6 +4,16 @@
   padding: 4rem 0;
 }
 
+.posts-page[data-url-pending]
+  :is(.posts-toolbar, .posts-content, #posts-pagination) {
+  visibility: hidden;
+}
+
+/* 숨김 해제 시 칩, 사이드바 색 전환 애니메이션이 보이지 않도록 트랜지션 비활성화 */
+.posts-page[data-url-pending] * {
+  transition: none !important;
+}
+
 /* 헤딩 */
 .posts-title {
   font-size: 1.875rem;
