@@ -19,6 +19,15 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
 ---
 
 <div class="posts-page">
+  <script is:inline>
+    // 쿼리로 진입하면 필터 적용 전까지 목록 영역을 숨겨 '전체' 상태가 잠깐 보이지 않게 함.
+    if (location.search) {
+      document.currentScript?.parentElement?.setAttribute(
+        "data-url-pending",
+        "",
+      );
+    }
+  </script>
   <!-- 헤딩 -->
   <div>
     <h1 class="posts-title">전체 글</h1>
@@ -360,4 +369,5 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
   readUrl();
   applyState();
   writeUrl("replace");
+  document.querySelector(".posts-page")?.removeAttribute("data-url-pending");
 </script>

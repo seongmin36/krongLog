@@ -4,6 +4,11 @@
   padding: 4rem 0;
 }
 
+.posts-page[data-url-pending]
+  :is(.posts-toolbar, .posts-content, #posts-pagination) {
+  visibility: hidden;
+}
+
 /* 헤딩 */
 .posts-title {
   font-size: 1.875rem;
