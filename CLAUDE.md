@@ -45,6 +45,7 @@ pnpm verify:build # 빌드 결과물(dist) 검증. pnpm build 이후 실행
 - Tailwind v4 설정은 `src/styles/global.css`에 완전히 위치합니다(`tailwind.config.*` 파일 없음). 커스텀 테마 토큰(색상, 폰트)은 `@theme`으로 정의하며, 스타일 토큰 규칙은 `docs/conventions/style-tokens.md`, 파일·역할 분리 규칙은 `docs/conventions/file-structure.md`를 참고합니다.
 - 기술 태그 색상(React, TypeScript, Docker 등)은 `Tag.astro`의 `data-tag` 속성을 통한 CSS로 정의됩니다.
 - 경로 별칭 `@/*`는 `src/*`로 매핑됩니다.
+- 컴포넌트 `<script>`는 상수·타입 → DOM 참조 → 상태 → 함수(헬퍼 → 렌더 → 액션) → 이벤트 연결 → 초기 실행 순서로 작성합니다. 상세 규칙은 `docs/conventions/file-structure.md`의 "스크립트 내부 순서"를 따릅니다.
 - SVG 파일은 SVGR(Vite 플러그인, `astro.config.mjs`)을 통해 React 컴포넌트로 임포트됩니다.
 
 **SEO**는 `src/types/seo.ts`에 타입이 정의된 props를 통해 `BaseLayout.astro`에서 처리됩니다.
