@@ -5,6 +5,7 @@ import { formatDotDate } from "@/lib/format-date";
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
 import placeholderImage from "@/assets/img-default.png";
+import { CARD_IMAGE } from "@/lib/blog";
 
 interface Props {
   priorityLcp?: boolean;
@@ -24,10 +25,6 @@ const { post, priorityLcp = false } = Astro.props;
 const { title, description, date, tags, image } = post.data;
 
 const formattedDate = formatDotDate(date);
-
-const cardImageSizes =
-  "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, min(400px, 33vw)";
-const cardWidths = [400, 560, 720, 840, 960, 1120] as const;
 ---
 
 <a
@@ -45,8 +42,8 @@ const cardWidths = [400, 560, 720, 840, 960, 1120] as const;
           alt={title}
           format="webp"
           quality={75}
-          widths={[...cardWidths]}
-          sizes={cardImageSizes}
+          widths={CARD_IMAGE.widths}
+          sizes={CARD_IMAGE.sizes}
           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           priority={priorityLcp}
         />
@@ -56,8 +53,8 @@ const cardWidths = [400, 560, 720, 840, 960, 1120] as const;
           alt="placeholder"
           format="webp"
           quality={75}
-          widths={[...cardWidths]}
-          sizes={cardImageSizes}
+          widths={CARD_IMAGE.widths}
+          sizes={CARD_IMAGE.sizes}
           class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           priority={priorityLcp}
         />
@@ -68,31 +65,30 @@ const cardWidths = [400, 560, 720, 840, 960, 1120] as const;
   <!-- 카드 본문 -->
   <div class="flex flex-1 flex-col gap-2.5 py-4 sm:py-5">
     <!-- 태그 목록 -->
-    {
-      tags && tags.length > 0 && (
-        <div class="flex flex-wrap gap-1.5">
-          {tags.map((tag) => (
-            <Tag name={tag} />
-          ))}
-        </div>
-      )
-    }
+    <div
+      data-field="tags"
+      hidden={!tags?.length}
+      class="flex flex-wrap gap-1.5"
+    >
+      {tags?.map((tag) => <Tag name={tag} />)}
+    </div>
 
     <!-- 제목 -->
     <h3
+      data-field="title"
       class="group-hover:text-primary line-clamp-2 text-[15px] leading-snug font-bold text-gray-900 transition-colors duration-200 sm:text-base dark:text-gray-50"
     >
       {title}
     </h3>
 
     <!-- 설명 -->
-    {
-      description && (
-        <p class="text-description dark:text-dark-description line-clamp-2 text-[13px] leading-relaxed">
-          {description}
-        </p>
-      )
-    }
+    <p
+      data-field="description"
+      hidden={!description}
+      class="text-description dark:text-dark-description line-clamp-2 text-[13px] leading-relaxed"
+    >
+      {description}
+    </p>
 
     <!-- 날짜 -->
     <time
