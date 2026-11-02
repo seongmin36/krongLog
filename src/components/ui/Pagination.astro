@@ -54,7 +54,6 @@ const arrowButtonClass =
       prevBtn.disabled = current <= 1;
       nextBtn.disabled = current >= total;
     }
-    update(1, 1);
 
     (
       nav as HTMLElement & { updatePagination: typeof update }
@@ -73,5 +72,7 @@ const arrowButtonClass =
         }),
       );
     });
+
+    update(1, 1);
   });
 </script>

@@ -166,8 +166,6 @@ const moreButtonClass =
       revealObserver.observe(card);
     }
 
-    htmlCache.set("all/1", cards.map((card) => card.outerHTML).join(""));
-
     /** 카드를 가장 낮은 열에 쌓는다 (추가돼도 기존 카드는 움직이지 않음) */
     function placeCard(card: HTMLElement) {
       const shortest = columns.reduce((a, b) =>
@@ -349,6 +347,7 @@ const moreButtonClass =
     );
     window.addEventListener("pagehide", saveState);
 
+    htmlCache.set("all/1", cards.map((card) => card.outerHTML).join(""));
     layoutColumns();
     syncMore();
 
