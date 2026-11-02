@@ -181,6 +181,65 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
   let searchQuery = "";
   let currentPage = 1;
 
+  function readUrl() {
+    const params = new URLSearchParams(location.search);
+
+    const tag = params.get("tag") ?? "";
+    activeLabel = topTags.some(([t]) => t === tag) ? tag : "";
+
+    const sub = params.get("sub") ?? "";
+    const subEntries = activeLabel
+      ? (subTagsByLabel[activeLabel] ?? [])
+      : topTags;
+    activeSubTag = subEntries.some(([t]) => t === sub) ? sub : "";
+
+    searchQuery = params.get("q") ?? "";
+    currentPage = Math.max(1, Number(params.get("page")) || 1);
+  }
+
+  // 현재 필터 상태를 URL에 기록. 기본값은 쿼리에서 생략
+  function writeUrl(mode: "push" | "replace") {
+    const params = new URLSearchParams();
+    if (activeLabel) params.set("tag", activeLabel);
+    if (activeSubTag) params.set("sub", activeSubTag);
+    if (searchQuery) params.set("q", searchQuery);
+    if (currentPage > 1) params.set("page", String(currentPage));
+
+    const query = params.toString();
+    const next = query ? `${location.pathname}?${query}` : location.pathname;
+    // 같은 칩을 다시 누르는 등 상태가 그대로면 히스토리를 쌓지 않음
+    if (next === location.pathname + location.search) return;
+
+    if (mode === "push") history.pushState(null, "", next);
+    else history.replaceState(null, "", next);
+  }
+
+  function syncChips() {
+    chips.forEach((chip) => {
+      const on = chip.dataset.chip === activeLabel;
+      chip.classList.toggle("chip-active", on);
+      chip.setAttribute("aria-pressed", String(on));
+    });
+  }
+
+  function syncSidebar() {
+    categoryList
+      .querySelectorAll<HTMLButtonElement>("[data-sidebar]")
+      .forEach((item) => {
+        const on = item.dataset.sidebar === activeSubTag;
+        item.classList.toggle("sidebar-item-active", on);
+        item.setAttribute("aria-pressed", String(on));
+      });
+  }
+
+  function applyState() {
+    syncChips();
+    renderCategoryList(activeLabel);
+    syncSidebar();
+    searchInput.value = searchQuery;
+    filter();
+  }
+
   function filter() {
     const rows = postList.querySelectorAll<HTMLAnchorElement>(".post-row");
     const matched: HTMLAnchorElement[] = [];
@@ -216,6 +275,7 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     currentPage =
       direction === "prev" ? Math.max(1, currentPage - 1) : currentPage + 1;
     filter();
+    writeUrl("push");
   });
 
   function labelPostCount(label: string): number {
@@ -232,14 +292,9 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
   function setSubTag(tag: string) {
     activeSubTag = tag;
     currentPage = 1;
-    categoryList
-      .querySelectorAll<HTMLButtonElement>("[data-sidebar]")
-      .forEach((item) => {
-        const on = item.dataset.sidebar === tag;
-        item.classList.toggle("sidebar-item-active", on);
-        item.setAttribute("aria-pressed", String(on));
-      });
+    syncSidebar();
     filter();
+    writeUrl("push");
   }
 
   function renderCategoryList(label: string) {
@@ -276,13 +331,8 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     activeLabel = label;
     activeSubTag = "";
     currentPage = 1;
-    chips.forEach((chip) => {
-      const on = chip.dataset.chip === label;
-      chip.classList.toggle("chip-active", on);
-      chip.setAttribute("aria-pressed", String(on));
-    });
-    renderCategoryList(label);
-    filter();
+    applyState();
+    writeUrl("push");
   }
 
   chips.forEach((chip) =>
@@ -292,6 +342,7 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     searchQuery = searchInput.value;
     currentPage = 1;
     filter();
+    writeUrl("replace");
   });
 
   document.addEventListener("keydown", (e) => {
@@ -301,6 +352,12 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
     }
   });
 
-  renderCategoryList("");
-  filter();
+  window.addEventListener("popstate", () => {
+    readUrl();
+    applyState();
+  });
+
+  readUrl();
+  applyState();
+  writeUrl("replace");
 </script>
