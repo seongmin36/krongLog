@@ -369,5 +369,11 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
   readUrl();
   applyState();
   writeUrl("replace");
-  document.querySelector(".posts-page")?.removeAttribute("data-url-pending");
+
+  // 트랜지션이 꺼지고 나서야 숨김 해제
+  const postsPage = document.querySelector<HTMLElement>(".posts-page");
+  if (postsPage) {
+    void postsPage.offsetHeight;
+    postsPage.removeAttribute("data-url-pending");
+  }
 </script>
