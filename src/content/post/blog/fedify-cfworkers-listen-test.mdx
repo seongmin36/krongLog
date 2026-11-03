@@ -14,7 +14,7 @@ import GithubCard from "@/components/mdx/GithubCard.astro";
 
 <GithubCard url="https://github.com/fedify-dev/fedify/issues/881" />
 
-![GitHub 이슈 #881 화면](/images/fedify-cfworkers-listen-test/1.png)
+![GitHub 이슈 #881 화면](../../../assets/blog/fedify-cfworkers-listen-test/1.png)
 
 Fedify에서 가장 처음 맡은 이슈는 #881입니다.
 
@@ -56,7 +56,7 @@ Cloudflare **플랫폼 인프라 자체**가 그 역할을 대신합니다.
 
 Fedify 문서에서도 동일한 내용을 언급하고 있습니다.
 
-![Fedify 공식 문서의 WorkersMessageQueue.listen() 설명](/images/fedify-cfworkers-listen-test/2.png)
+![Fedify 공식 문서의 WorkersMessageQueue.listen() 설명](../../../assets/blog/fedify-cfworkers-listen-test/2.png)
 
 > Cloudflare Queues API는 큐에서 메시지를 폴링하는 방법을 제공하지 않으므로, `WorkersMessageQueue.listen()` 메서드는 호출되면 항상 `TypeError`를 던집니다. 대신 Cloudflare worker에 `queue()` 메서드를 정의해야 하며, 큐에 새 메시지가 있을 때 Cloudflare Queues API가 이를 호출합니다.(번역된 내용)
 
@@ -238,7 +238,7 @@ mise exec -- pnpm exec vitest run src/mod.test.ts -t "listen"
 
 아무것도 구현하지 않은 상태에서 검증해보겠습니다.
 
-![구현 전 vitest 실행 결과 (테스트 0개, 통과)](/images/fedify-cfworkers-listen-test/3.png)
+![구현 전 vitest 실행 결과 (테스트 0개, 통과)](../../../assets/blog/fedify-cfworkers-listen-test/3.png)
 
 **테스트가 하나도 실행되지 않은 채 통과**로 끝납니다. 검증할 대상 자체가 없으니 당연한 결과입니다.
 
@@ -261,7 +261,7 @@ listen(
 
 위 케이스와 마찬가지로 동일하게 **정상적**으로 체크가 완료됩니다.
 
-![TypeError를 Error로 바꿔도 통과하는 mise check-each 결과](/images/fedify-cfworkers-listen-test/4.png)
+![TypeError를 Error로 바꿔도 통과하는 mise check-each 결과](../../../assets/blog/fedify-cfworkers-listen-test/4.png)
 
 여기서 의문점이 들 수 있습니다. '아까 `deno check` 에서 타입이 맞지 않은 경우를 검사한다고 했는데, **TypeError** → **Error**로 변경한 것은 왜 오류로 받아들여지지 않을까요?'
 
@@ -271,7 +271,7 @@ Java에는 `throws IOException` 같은 체크 예외들이 있어서 컴파일�
 
 이어서 vitest도 진행해보았습니다.
 
-![Error로 변경한 상태에서 테스트 코드 작성 전 vitest 실행 결과](/images/fedify-cfworkers-listen-test/5.png)
+![Error로 변경한 상태에서 테스트 코드 작성 전 vitest 실행 결과](../../../assets/blog/fedify-cfworkers-listen-test/5.png)
 
 여기서도 실행된 테스트가 없어서 그냥 통과로 끝납니다. 검증할 코드가 없으니 TypeError든 Error든 결과가 같습니다.<br />
 즉, 이걸 구분해내는 게 이번 **작업의 목표**입니다.
@@ -309,7 +309,7 @@ describe("WorkersMessageQueue", () => {
 
 마찬가지로 TypeError를 Error로 변경하고, vitest로 직접 검증해보았습니다.
 
-![테스트 코드 작성 후 Error로 변경 시 vitest가 실패로 잡아내는 화면](/images/fedify-cfworkers-listen-test/6.png)
+![테스트 코드 작성 후 Error로 변경 시 vitest가 실패로 잡아내는 화면](../../../assets/blog/fedify-cfworkers-listen-test/6.png)
 
 이번에는 테스트가 실패합니다. `toThrow(TypeError)` 단언이 걸리고, vitest가 실제로 던져진 건 Error라고 알려줍니다. 테스트 코드가 없을 때는 아무 일도 없었지만, 이제는 구현이 계약을 어기는 순간 바로 잡아내게 됩니다.
 
@@ -323,7 +323,7 @@ describe("WorkersMessageQueue", () => {
 
 가장 첫 번째 리뷰는 이재열 멘토님의 리뷰였습니다.
 
-![Matrix에서 받은 멘토 리뷰 스크린샷](/images/fedify-cfworkers-listen-test/7.png)
+![Matrix에서 받은 멘토 리뷰 스크린샷](../../../assets/blog/fedify-cfworkers-listen-test/7.png)
 
 리뷰를 받고, 출처 명시를 위해 cloudflare 공식 문서를 활용하여 해당 자료를 조사하였습니다.
 

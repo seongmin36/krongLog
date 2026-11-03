@@ -6,6 +6,7 @@ import Tag from "@/components/ui/Tag.astro";
 import { formatDotDate } from "@/lib/format-date";
 import Comments from "@/components/blog/Comments.astro";
 import TableOfContents from "@/components/blog/TableOfContents.astro";
+import { getOgImageUrl } from "@/lib/og-image";
 
 export async function getStaticPaths() {
   const allPosts = await getCollection("post");
@@ -21,7 +22,7 @@ const { Content, headings } = await render(post);
 const { title, description, date, tags, image, updatedDate } = post.data;
 
 const formattedDate = formatDotDate(date);
-const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
+const ogImage = await getOgImageUrl(image, Astro.site);
 ---
 
 <BaseLayout

@@ -222,7 +222,7 @@ export const errorMiddleware = (
 
 **결과** : [결과 서술. 수치나 관찰 내용 포함]
 
-![실험 결과](/images/폴더명/번호.png)
+![실험 결과](../../../assets/blog/폴더명/번호.png)
 
 [결과 해석 또는 원인 분석]
 
@@ -232,7 +232,7 @@ export const errorMiddleware = (
 - 실험 제목은 `### 실험 :` 으로 시작
 - 코드 → 결과 선언 → 이미지 → 해석 순서 고정
 - `**결과** :` 볼드 처리 후 바로 서술
-- 이미지 경로: `/images/폴더명/번호.png` (번호는 순서대로)
+- 이미지 경로: `../../../assets/blog/폴더명/번호.png` (번호는 순서대로)
 - 실험 간 구분은 `<br />` 1개
 
 ---
@@ -240,13 +240,15 @@ export const errorMiddleware = (
 ### 이미지
 
 ```mdx
-![실행 결과](/images/study-nodejs-1st/1.png)
+![실행 결과](../../../assets/blog/study-nodejs-1st/1.png)
 ````
 
 **규칙**
 
 - alt text는 `실행 결과` 또는 `실험 결과 확인하기` 통일
-- 경로: `/images/게시글식별자/번호.png`
+- 경로: `../../../assets/blog/게시글식별자/번호.png` (파일은 `src/assets/blog/게시글식별자/`에 둠)
+- `public/`에 두거나 `/images/...` 절대경로로 쓰지 않음. Astro 최적화(webp 변환, width/height)가 적용되지 않고 원본이 그대로 배포됨
+- `<figure>` 안에서도 `<img>` 태그 대신 Markdown 문법(`![alt](경로)`)을 사용
 - 캡션 별도 추가 없음 (앞뒤 텍스트로 설명)
 
 ### 이미지 주석 처리
@@ -256,15 +258,15 @@ export const errorMiddleware = (
 `.mdx` 파일은 `<!-- -->` HTML 주석을 지원하지 않습니다 (MDX 컴파일 에러). `{/* */}` JSX 주석을 사용합니다. `.md` 파일에서만 `<!-- -->`가 동작합니다.
 
 ```mdx
-{/* ![실행 결과](/images/게시글식별자/번호.png) */}
+{/* ![실행 결과](../../../assets/blog/게시글식별자/번호.png) */}
 ```
 
 **규칙**
 
-- `.mdx` 파일: 이미지 파일이 `public/images/` 에 없는 경우 `{/* */}` JSX 주석으로 감싸서 주석 처리 (`<!-- -->`는 빌드 에러 발생)
+- `.mdx` 파일: 이미지 파일이 `src/assets/blog/` 에 없는 경우(경로의 파일이 없으면 빌드 에러) `{/* */}` JSX 주석으로 감싸서 주석 처리 (`<!-- -->`는 빌드 에러 발생)
 - `.md` 파일: `<!-- -->` HTML 주석 사용
 - 주석 처리된 이미지는 실제 파일이 추가된 후 주석을 해제
-- 주석 처리된 이미지도 경로 규칙(`/images/게시글식별자/번호.png`)과 alt text 규칙은 동일하게 적용
+- 주석 처리된 이미지도 경로 규칙(`../../../assets/blog/게시글식별자/번호.png`)과 alt text 규칙은 동일하게 적용
 
 ---
 
@@ -442,7 +444,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 **결과** : [서술]
 
-![실험 결과](/images/식별자/1.png)
+![실험 결과](../../../assets/blog/식별자/1.png)
 
 [해석]
 

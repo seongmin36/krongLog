@@ -12,12 +12,12 @@ import Tooltip from "@/components/ui/Tooltip.astro";
  
 처음 로그인 API를 만들고 비밀번호를 틀린 요청을 보냈을 때, 서버가 돌려준 메시지는 다음과 같았습니다.
  
-![실행 결과](/images/study-nodejs-8th/1.png)
+![실행 결과](../../../assets/blog/study-nodejs-8th/1.png)
  
 "**유효하지 않은 자격 증명입니다.**" 문법적으로는 맞는 메시지지만, 프론트엔드 입장에서는 비밀번호가 틀렸는지, 이메일이 없는지, 토큰이 만료됐는지 전혀 알 수 없습니다. 사용자에게는 더더욱 의미가 없는 문구입니다.
 
 <figure>
-  <img src="/images/study-nodejs-8th/2.png" alt="실행 결과" />
+  ![실행 결과](../../../assets/blog/study-nodejs-8th/2.png)
   <figcaption>에러 처리를 하지 않는 것은 위 사진에서의 상황과 유사하다고 볼 수 있다.</figcaption>
 </figure>
 
@@ -64,7 +64,7 @@ if (!isValid) {
  
 `bcrypt.compare`로 평문 비밀번호와 저장된 해시를 비교하고, 일치하지 않으면 `UnauthorizedException`을 던집니다. 이 예외는 NestJS의 기본 예외 필터가 자동으로 잡아서 HTTP 401 응답으로 변환합니다.
  
-![실행 결과](/images/study-nodejs-8th/3.png)
+![실행 결과](../../../assets/blog/study-nodejs-8th/3.png)
  
 ```json
 {
@@ -269,7 +269,7 @@ AllExceptionsFilter      →  그 외 모든 예외 catch
  
 이렇게 등록하면 모든 에러 응답이 동일한 4개 필드 shape로 통일됩니다.
  
-![실행 결과](/images/study-nodejs-8th/4.png)
+![실행 결과](../../../assets/blog/study-nodejs-8th/4.png)
  
 ---
  
@@ -420,7 +420,7 @@ async getTodos(@GetUser() user: User) {
 
 회원가입처럼 사용자에게 직접 보여줄 메시지는 데코레이터로 선언하고, 단순 조회처럼 일반적인 응답은 자동 생성에 맡깁니다. **응답 shape는 전역적으로 일관되게 유지하면서, 메시지는 엔드포인트별로 세밀하게 표현**할 수 있는 구조가 됐습니다.
 
-![실행 결과](/images/study-nodejs-8th/6.png)
+![실행 결과](../../../assets/blog/study-nodejs-8th/6.png)
 
 ```json
 {

@@ -197,11 +197,11 @@ async createBoard(
 
 **Unauthorized 상태에서 게시물 생성**
 
-![실행 결과](/images/study-nodejs-5th/1.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/1.png)
 
 **Authorized 상태에서 게시물 생성**
 
-![실행 결과](/images/study-nodejs-5th/2.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/2.png)
 
 게시물을 성공적으로 생성하게 되면, `createBoard(boardDto, user)` 메서드로 인해서 user 객체까지 들어가는 것을 확인할 수 있습니다.
 
@@ -274,7 +274,7 @@ const board = this.boardRepository.create({
 });
 ```
 
-![실행 결과](/images/study-nodejs-5th/3.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/3.png)
 
 하지만, user 객체 전체를 넘기는 것이 가독성도 좋고, 타입 안정성도 가져갑니다. `as User`로 강제 타입 캐스팅할 필요도 없기 때문에 기존 user 객체를 전부 넘겨주는 방식을 유지하는 것이 좋습니다.
 
@@ -322,7 +322,7 @@ getAllBoards(@GetUser() user: User): Promise<Board[]> {
 }
 ```
 
-![실행 결과](/images/study-nodejs-5th/4.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/4.png)
 
 ---
 

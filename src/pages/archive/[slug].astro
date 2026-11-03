@@ -3,6 +3,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import ArchiveArticle from "@/components/archive/ArchiveArticle.astro";
 import { archiveSummary, getSortedArchive } from "@/lib/archive";
 import { render } from "astro:content";
+import { getOgImageUrl } from "@/lib/og-image";
 
 export async function getStaticPaths() {
   const entries = await getSortedArchive();
@@ -23,7 +24,7 @@ const { Content } = await render(entry);
 const { title, date, image } = entry.data;
 
 const description = archiveSummary(entry) || title;
-const ogImage = image ? new URL(image.src, Astro.site).href : undefined;
+const ogImage = await getOgImageUrl(image, Astro.site);
 ---
 
 <BaseLayout
