@@ -157,7 +157,7 @@ export class AppModule {}
 설정 없이 두면 헤더, 파라미터, 소켓 정보까지 전부 포함된 긴 JSON이 됩니다.
 
 <figure>
-  <img src="/images/study-nodejs-9th-1/1.png" alt="실행 결과" />
+  ![실행 결과](../../../assets/blog/study-nodejs-9th-1/1.png)
   <figcaption>무차별 JSON 직렬화 공격</figcaption>
 </figure>
 
@@ -198,7 +198,7 @@ async function bootstrap() {
 NestJS 부팅 초반에 발생하는 로그(모듈 초기화 등)가 Pino가 준비되기 전에 출력되면 포맷이 섞입니다.<br />
 이 옵션을 켜두면 그 로그들을 버퍼에 모아뒀다가 Pino가 준비된 시점에 한꺼번에 출력합니다.
 
-![실행 결과](/images/study-nodejs-9th-1/2.png)
+![실행 결과](../../../assets/blog/study-nodejs-9th-1/2.png)
 
 ## Service와 Controller에서 Logger 쓰기
 
@@ -361,7 +361,7 @@ NestJS가 직접 인스턴스를 만들고, 생성자에 필요한 `PinoLogger`�
 개발 환경에서는 `pino-pretty`가 JSON을 사람이 읽기 좋은 형태로 변환합니다.<br />
 레벨별 색상, 타임스탬프, `context` 이름이 한눈에 들어옵니다.
 
-![실행 결과](/images/study-nodejs-9th-1/3.png)
+![실행 결과](../../../assets/blog/study-nodejs-9th-1/3.png)
 
 운영 환경에서는 `transport`를 `undefined`로 두면 Pino의 기본 JSON 출력이 그대로 나옵니다.<br />
 이 형태가 Datadog, CloudWatch, ELK Stack 같은 로그 수집 시스템에서 바로 파싱 가능합니다.
@@ -380,7 +380,7 @@ NestJS가 직접 인스턴스를 만들고, 생성자에 필요한 `PinoLogger`�
 }
 ```
 
-![실행 결과](/images/study-nodejs-9th-1/4.png)
+![실행 결과](../../../assets/blog/study-nodejs-9th-1/4.png)
 
 Built-in Logger의 문자열 출력은 이 수준의 파싱이 불가능합니다.<br />
 **Pino로 전환**하면 추가 설정 없이 이 포맷으로 찍힙니다.

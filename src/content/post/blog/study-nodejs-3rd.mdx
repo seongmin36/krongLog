@@ -143,7 +143,7 @@ PostgreSQL에서 데이터베이스를 생성할 때, libc와 ICU 설정으로 �
 - <strong>ICU(International Components for Unicode)</strong> — 전 세계의 모든 언어와 유니코드를 완벽하게 지원하기 위해 만들어진 글로벌 표준 라이브러리입니다. OS와 상관없이 항상 동일한 결과를 보장하며,
   이모지, 고어, 복잡한 다국어 등의 정렬에 강력합니다. 데이터의 일관성이 매우 높습니다
 
-![실행 결과](/images/study-nodejs-3rd/2.png)
+![실행 결과](../../../assets/blog/study-nodejs-3rd/2.png)
 
 위 사진은 ICU와 libc가 충돌되어 생긴 문제입니다.
 
@@ -320,7 +320,7 @@ const board = await this.boardRepository.findOneBy({ id: id });
 export class BoardRepository extends Repository<Board> {}
 ```
 
-![실행 결과](/images/study-nodejs-3rd/4.png)
+![실행 결과](../../../assets/blog/study-nodejs-3rd/4.png)
 
 `EntityRepository is deprecated. (ts 6387)`이라는 오류 메시지가 생성되었습니다. TypeORM 버전이 올라감에 따라 `@EntityRepository`처럼 커스텀 레포지토리를 생성하는 방식이 삭제되었기 때문에, TypeORM 0.3.x 버전에서는 사용하지 말라는 경고 메시지가 출력된 것입니다.
 
@@ -344,11 +344,11 @@ export class BoardsService {
 
 Service에서 직접 주입 후 리팩토링한 결과, 정상적으로 게시글 업로드 요청이 되었습니다.
 
-![실행 결과](/images/study-nodejs-3rd/5.png)
+![실행 결과](../../../assets/blog/study-nodejs-3rd/5.png)
 
 데이터베이스에도 정상적으로 들어간 것을 확인할 수 있습니다.
 
-![실행 결과](/images/study-nodejs-3rd/6.png)
+![실행 결과](../../../assets/blog/study-nodejs-3rd/6.png)
 
 ---
 

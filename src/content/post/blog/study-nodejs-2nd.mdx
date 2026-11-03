@@ -243,11 +243,11 @@ export class BoardsService {
 
 POST로 게시물을 생성하고 GET으로 확인한 결과입니다.
 
-![실행 결과](/images/study-nodejs-2nd/1.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/1.png)
 
-![실행 결과](/images/study-nodejs-2nd/2.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/2.png)
 
-![실행 결과](/images/study-nodejs-2nd/3.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/3.png)
 
 <br />
 
@@ -419,7 +419,7 @@ createBoard(@Body() createBoard: CreateBoardDto): Board {
 
 `title`이나 `description`이 빈 문자열로 들어오면 `ValidationPipe`이 자동으로 `400 Bad Request`와 에러 메시지를 반환합니다.
 
-![실행 결과](/images/study-nodejs-2nd/4.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/4.png)
 
 <br />
 
@@ -447,11 +447,11 @@ deleteBoard(id: string): void {
 
 `NotFoundException`에 메시지를 전달하기 전에는 기본 "Not Found"만 반환됩니다.
 
-![실행 결과](/images/study-nodejs-2nd/5.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/5.png)
 
 커스텀 메시지를 전달하면 어떤 리소스가 없는지 구체적으로 알 수 있습니다.
 
-![실행 결과](/images/study-nodejs-2nd/6.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/6.png)
 
 <br />
 
@@ -462,9 +462,9 @@ NestJS의 Built-in Pipe만으로 부족할 때, `PipeTransform` 인터페이스�
 예를 들어, 게시물의 `status`는 `PUBLIC` 또는 `PRIVATE`만 허용해야 합니다.
 커스텀 파이프가 없으면 `status`에 아무 문자열이나 들어가도 그대로 저장됩니다.
 
-![실행 결과](/images/study-nodejs-2nd/7.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/7.png)
 
-![실행 결과](/images/study-nodejs-2nd/8.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/8.png)
 
 이 검증을 커스텀 파이프로 구현합니다.
 
@@ -513,15 +513,15 @@ updateBoardStatus(
 
 커스텀 파이프를 적용한 뒤 동일하게 테스트합니다.
 
-![실행 결과](/images/study-nodejs-2nd/9.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/9.png)
 
 잘못된 값을 보내면 파이프가 요청을 거부합니다.
 
-![실행 결과](/images/study-nodejs-2nd/10.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/10.png)
 
 유효한 값은 정상적으로 통과됩니다.
 
-![실행 결과](/images/study-nodejs-2nd/11.png)
+![실행 결과](../../../assets/blog/study-nodejs-2nd/11.png)
 
 ---
 

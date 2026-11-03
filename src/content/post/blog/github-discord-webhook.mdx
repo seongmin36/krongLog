@@ -111,7 +111,7 @@ https://discord.com/api/webhooks/{WEBHOOK_ID}/{WEBHOOK_TOKEN}/github
 GitHub는 GitHub 이벤트 JSON을 그대로 보내는데, Discord의 일반 Incoming Webhook은 Discord 메시지로 JSON으로 받기를 원합니다.
 
 <figure>
-  <img src="/images/github-discord-webhook/1.png" alt="Discord Webhook Resource Document" />
+  ![Discord Webhook Resource Document](../../../assets/blog/github-discord-webhook/1.png)
   <figcaption>출처: Discord Webhook Resource Document</figcaption>
 </figure>
 
@@ -132,7 +132,7 @@ Completed in: 0.08 seconds
 
 HTTP 204는 요청이 정상 처리됐지만 별도 응답 본문은 없다는 뜻이라, 이 시점에는 연결 자체만 확인된 상태입니다.
 
-![GitHub Webhook ping 테스트 Recent deliveries](/images/github-discord-webhook/2.png)
+![GitHub Webhook ping 테스트 Recent deliveries](../../../assets/blog/github-discord-webhook/2.png)
 
 GitHub 저장소의 Settings → Webhooks → 해당 Webhook → Recent deliveries에서 전송 기록을 볼 수 있고, 원하면 Redeliver로 다시 보낼 수도 있습니다.
 
@@ -149,7 +149,7 @@ git push -u origin chore/test-github-events
 이 브랜치로 `develop`을 대상으로 PR을 생성하면 **`Pull requests → opened`** 이벤트가 발생하고, **`#프론트-github-events`** 로 메시지가 도착합니다.
 
 <figure>
-  <img src="/images/github-discord-webhook/3.png" alt="테스트 PR 생성 후 `#프론트-github-events`에 도착한 PR opened 알림" />
+  ![테스트 PR 생성 후 `#프론트-github-events`에 도착한 PR opened 알림](../../../assets/blog/github-discord-webhook/3.png)
   <figcaption>
     테스트 PR 생성 후 <code>#프론트-github-events</code>에 도착한 PR opened 알림
   </figcaption>
@@ -470,7 +470,7 @@ Draft PR은 아직 리뷰 요청 전의 작업 중 상태입니다.<br />
 **✅ CI 통과 — 리뷰 부탁드립니다**
 
 <figure>
-  <img src="/images/github-discord-webhook/4.png" alt="Actions 탭에서 `CI` 실행이 끝난 직후 `PR Discord Notification`이 이어서 실행되는 모습" />
+  ![Actions 탭에서 `CI` 실행이 끝난 직후 `PR Discord Notification`이 이어서 실행되는 모습](../../../assets/blog/github-discord-webhook/4.png)
   <figcaption>
     Actions 탭에서 <code>CI</code> 실행이 끝난 직후 <code>PR Discord Notification</code>이 이어서 실행되는 모습
   </figcaption>
@@ -533,11 +533,11 @@ const content = ok
 
 CI 성공 시 Discord 메시지 예시는 다음과 같습니다.
 
-{/* ![CI 성공 Discord 메시지](/images/github-discord-webhook/5.png) */}
+{/* ![CI 성공 Discord 메시지](../../../assets/blog/github-discord-webhook/5.png) */}
 
 CI 실패 시에는 로그 링크를 함께 전송합니다.
 
-{/* ![CI 실패 Discord 메시지](/images/github-discord-webhook/6.png) */}
+{/* ![CI 실패 Discord 메시지](../../../assets/blog/github-discord-webhook/6.png) */}
 
 실패 메시지에 사용하는 `run.html_url`은 해당 GitHub Actions 실행 페이지입니다.<br />
 Discord에서 링크를 클릭하면 실패한 CI 로그로 바로 이동할 수 있습니다.
@@ -590,7 +590,7 @@ Discord에서 링크를 클릭하면 실패한 CI 로그로 바로 이동할 수
 - `workflows: ['CI']`의 이름이 실제 CI workflow의 `name: CI`와 정확히 일치하는가
 - `discord-pr-notification.yml`이 기본 브랜치에 병합된 뒤 생성한 새 PR에서 후속 workflow가 실행되는가
 
-{/* ![workflow_run 검증 Actions 탭](/images/github-discord-webhook/7.png) */}
+{/* ![workflow_run 검증 Actions 탭](../../../assets/blog/github-discord-webhook/7.png) */}
 
 #### 성공과 실패를 모두 검증한다
 

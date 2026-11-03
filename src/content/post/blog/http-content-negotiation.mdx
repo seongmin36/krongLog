@@ -28,7 +28,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 `HTTP`에서 **콘텐츠 협상**이란 동일한 URI에서 리소스의 서로 다른 버전을 제공하기 위해 사용하는 메커니즘입니다. 사용자 에이전트가 문서의 언어, 이미지 포맷, 컨텐츠 인코딩 중 어떤 것이 적절한지 명시할 수 있습니다. — [MDN : 콘텐츠 협상](https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Content_negotiation)
 
 <figure>
-  <img src="/images/http-content-negotiation/1.png" alt="MDN 콘텐츠 협상 다이어그램" />
+  ![MDN 콘텐츠 협상 다이어그램](../../../assets/blog/http-content-negotiation/1.png)
   <figcaption>출처: MDN 콘텐츠 협상</figcaption>
 </figure>
 
@@ -224,7 +224,7 @@ UA-CH 방식     :  브라우저가 처음부터  →  ?1 / ?0 만 전송
 > 서버 주도 협상은 몇 가지 **결점**을 가지고 있습니다. 그것은 확장하기에 불리합니다. **협상 내에서 사용하는 기능당 한 가지 헤더가 존재**해야 합니다. 만약 스크린 크기, 해상도 혹은 또 다른 치수를 사용하고자 한다면, 새로운 HTTP 헤더가 반드시 만들어져야 합니다. 헤더의 전송은 반드시 **모든 요청 상에서 이루어져야 합니다.** 그런 헤더들이 결국 증가하여, **메시지 사이즈가 성능에 악영향이 끼치는 상황**이 올 수도 있습니다. 전송하는 헤더가 정확하면 정확할수록, 그만큼의 불확실성이 더 전송되고, 더 많은 HTTP 흔적을 남기며 관련된 개인정보 문제들을 불러옵니다. — [MDN : 에이전트 주도 협상](https://developer.mozilla.org/ko/docs/Web/HTTP/Guides/Content_negotiation#%EC%97%90%EC%9D%B4%EC%A0%84%ED%8A%B8_%EC%A3%BC%EB%8F%84_%ED%98%91%EC%83%81)
 
 <figure>
-  <img src="/images/http-content-negotiation/2.png" alt="MDN 콘텐츠 협상 다이어그램" />
+  ![MDN 콘텐츠 협상 다이어그램](../../../assets/blog/http-content-negotiation/2.png)
   <figcaption>출처: MDN 에이전트 주도 협상</figcaption>
 </figure>
 

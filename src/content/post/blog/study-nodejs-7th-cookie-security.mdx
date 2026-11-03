@@ -19,7 +19,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 가장 처음 맞닥뜨렸을 때, 문제의 원인은 단순해 보였습니다. 쿠키를 요청에 포함하는 옵션이 빠져있었습니다.
 
-![실행 결과](/images/study-nodejs-7th/1.png)
+![실행 결과](../../../assets/blog/study-nodejs-7th/1.png)
 
 수정 전 코드입니다. 토큰 값이 localStorage에 그대로 저장되고, 요청 인터셉터에서 Authorization 헤더로 직접 붙여 보내는 구조입니다.
 
@@ -179,7 +179,7 @@ HttpOnly 쿠키로 XSS 공격의 토큰 탈취는 막았습니다.
 secure: process.env.NODE_ENV === 'production',
 ```
 
-![실행 결과](/images/study-nodejs-7th/2.png)
+![실행 결과](../../../assets/blog/study-nodejs-7th/2.png)
 
 브라우저 DevTools Application 탭에서 `access_token` 쿠키에 HttpOnly(Ht...) 체크와 SameSite: Lax 설정이 찍힌 것을 직접 확인할 수 있습니다.
 

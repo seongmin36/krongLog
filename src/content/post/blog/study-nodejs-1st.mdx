@@ -121,7 +121,7 @@ export const errorMiddleware = (
 
 실험용 라우터에서 `next(new Error("강제 에러 발생"))`을 호출해 에러를 발생시킵니다.
 
-![실험 결과 확인하기](/images/study-nodejs-1st/8.png)
+![실험 결과 확인하기](../../../assets/blog/study-nodejs-1st/8.png)
 
 **결과** : 이건 정상 동작합니다. `(err, req, res, next)` 4개의 인자를 받고 있기 때문입니다.
 `/error-test` 엔드포인트에 `GET` 요청을 보내면 `{ ok: false, message: "강제 에러 발생" }` 형태의 JSON 응답이 정상적으로 반환됩니다.
@@ -143,7 +143,7 @@ export const errorMiddleware = (
 
 Express는 함수의 <Tooltip note="Java 같은 정적 언어는 @ExceptionHandler 어노테이션으로 에러 처리기임을 명시하지만, JavaScript(Express)는 함수의 인자 개수(Function.length)로 판단합니다. 일반 미들웨어는 인자가 2~3개, 에러 핸들러는 반드시 4개여야 합니다.">`.length` 프로퍼티(인자 개수)</Tooltip>로 일반 미들웨어와 에러 미들웨어를 구분합니다. 인자가 3개면 일반 미들웨어로 취급해서, `next(err)` 호출 시 이 함수를 **건너뜁니다**.
 
-![실험 결과 확인하기](/images/study-nodejs-1st/9.png)
+![실험 결과 확인하기](../../../assets/blog/study-nodejs-1st/9.png)
 
 **결과** : 인자 하나(`next`)를 주석 처리한 뒤 동일하게 `/error-test`에 `GET` 요청을 보냈을 때, 이전에는 JSON 형태로 응답이 왔지만 이번에는 **HTML 형식의 에러 페이지**가 반환됐습니다. 
 
@@ -164,7 +164,7 @@ router.get("/hang-test", (_req, _res, _next) => {
 
 이 경우 클라이언트는 약 30초 후 타임아웃이 걸려 **무한 로딩** 상태가 됩니다. `next()`나 `res.*()` 중 하나는 반드시 호출해야 요청-응답 사이클이 완결됩니다. [Talend API Tester](https://chromewebstore.google.com/detail/talend-api-tester-free-ed/aejoelaoggembcahagimdiliamlcdmfm?hl=ko&pli=1)로 `/hang-test` 엔드포인트에 요청을 보내 확인했습니다.
 
-![실험 결과 확인하기](/images/study-nodejs-1st/7.png)
+![실험 결과 확인하기](../../../assets/blog/study-nodejs-1st/7.png)
 
 **결과** : 대략 30초 정도 기다렸는데 무한 로딩이 걸렸습니다. 이후 `Abort` 버튼으로 강제 종료했고, `Request Aborted`라는 응답이 반환됐습니다.
 
@@ -224,7 +224,7 @@ console.log("4. end");
 
 **결과** : `1. start` → `4. end` → `3. promise then` → `2. setTimeout`
 
-![실행 결과](/images/study-nodejs-1st/1.png)
+![실행 결과](../../../assets/blog/study-nodejs-1st/1.png)
 
 동기 코드가 먼저, <Tooltip note={`마이크로태스크 큐는 이벤트 루프에서 매크로태스크보다 높은 우선순위로 실행되는 짧은 작업 단위입니다. Promise의 then()/catch()/finally(), async/await, MutationObserver, queueMicrotask()가 여기에 해당합니다.\n실행 순서: 콜 스택 → 마이크로태스크 큐 → 매크로태스크 → 렌더링`}>**마이크로태스크**</Tooltip>(Promise)가 그다음, 매크로태스크(setTimeout)가 마지막입니다. `setTimeout(0)`이라고 "즉시" 실행되는 게 아닙니다. 현재 실행 중인 코드가 끝나면 마이크로태스크 큐가 먼저 비워지고, 그다음 타이머 큐가 처리됩니다.
 <br />
@@ -248,7 +248,7 @@ console.log('end');
 
 **결과** : 메인 컨텍스트에서 실행하면 두 함수의 순서가 **비결정적**입니다. 실행할 때마다 바뀔 수 있습니다. `setTimeout(0)`이 '즉시' 실행되지는 않습니다.
 
-![실행 결과](/images/study-nodejs-1st/2.png)
+![실행 결과](../../../assets/blog/study-nodejs-1st/2.png)
 
 하지만 **I/O 콜백 내부**에서는 이야기가 다릅니다.
 
@@ -263,7 +263,7 @@ fs.readFile(import.meta.url, () => {
 
 **결과** : I/O 콜백 이후에는 check phase의 `setImmediate`가 timer보다 먼저 실행됩니다. poll phase 직후가 check phase이기 때문입니다.
 
-![실행 결과](/images/study-nodejs-1st/3.png)
+![실행 결과](../../../assets/blog/study-nodejs-1st/3.png)
 
 <br />
 
@@ -283,7 +283,7 @@ console.log("end");
 
 **결과** : `start` → `end` → `nextTick` → `promise then` → `setTimeout` / `setImmediate` (순수 `node` 환경 기준)
 
-![실행 결과](/images/study-nodejs-1st/5.png)
+![실행 결과](../../../assets/blog/study-nodejs-1st/5.png)
 
 `process.nextTick()`은 현재 호출 스택이 완료된 직후, 이벤트 루프의 다음 phase로 넘어가기 전에 실행됩니다. [Node.js 공식 문서](https://nodejs.org/ko/learn/asynchronous-work/understanding-processnexttick)에 따르면 "대기 중인 다른 작업이나 단계가 처리되기 전에 해당 함수가 실행되도록 예약"됩니다.
 
@@ -291,7 +291,7 @@ console.log("end");
 
 같은 코드를 `tsx`로 실행하면 `promise then`이 `nextTick`보다 **먼저** 출력되는 현상이 발생했습니다. 원인을 추적해보니 두 가지였습니다.
 
-![실행 결과](/images/study-nodejs-1st/4.png)
+![실행 결과](../../../assets/blog/study-nodejs-1st/4.png)
 
 - **ESM 모듈 시스템**은 코드 실행 전부터 Promise 환경(마이크로태스크 큐) 안에서 동작합니다
 - **tsx**는 코드 변환 시 비동기 래퍼로 감싸 실행하므로, `Promise.then`의 우선순위가 달라질 수 있습니다
@@ -306,7 +306,7 @@ pnpm tsx src/playground/event-loop.cjs
 node src/playground/event-loop.cjs
 ```
 
-![실행 결과](/images/study-nodejs-1st/6.png)
+![실행 결과](../../../assets/blog/study-nodejs-1st/6.png)
 
 **교훈** : 이벤트 루프의 실행 순서를 검증할 때는 반드시 **순수 Node.js 환경**(CJS + node 명령어)에서 돌려야 합니다. 실행 도구, 모듈 시스템, Node.js 버전에 따라 미묘하게 순서가 바뀔 수 있기 때문입니다.
 

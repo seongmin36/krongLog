@@ -92,6 +92,12 @@
   @apply my-6;
 }
 
+/* figure 안 Markdown 이미지는 <p>로 감싸지므로 단락·이미지 여백 제거 */
+.prose figure > p,
+.prose figure > p > img {
+  @apply m-0;
+}
+
 .prose figcaption {
   @apply mt-2 text-right text-xs text-gray-500 dark:text-gray-400;
 }

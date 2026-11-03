@@ -114,7 +114,7 @@ const app = await NestFactory.create(AppModule, {
 
 NestJS가 기본으로 제공하는 Logger 클래스입니다.
 
-![실행 결과](/images/study-nodejs-5th/5.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/5.png)
 
 서버 부팅하면 나오는 형식과 동일합니다. NestJS 내부도 이 Logger를 사용하고, 같은 형식으로 로그를 남길 수 있습니다.
 
@@ -179,7 +179,7 @@ async function bootstrap() {
 
 **결과**
 
-![실행 결과](/images/study-nodejs-5th/6.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/6.png)
 
 <br />
 
@@ -206,7 +206,7 @@ export class BoardsController {
 
 **결과**
 
-![실행 결과](/images/study-nodejs-5th/7.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/7.png)
 
 `[BoardsController]`라고 출력된 이유는 `new Logger('BoardsController')`로 Logger의 생성자가 첫 번째 인자로 받는 문자열을 ‘컨텍스트(context)’로 저장해 두기 때문입니다. 즉, 어느 클래스/모듈에서 발생한 로그인지 식별할 수 있게 해 주는 역할입니다.
 
@@ -239,11 +239,11 @@ export class BoardsController {
 
 **보드 생성**
 
-![실행 결과](/images/study-nodejs-5th/8.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/8.png)
 
 **결과**
 
-![실행 결과](/images/study-nodejs-5th/9.png)
+![실행 결과](../../../assets/blog/study-nodejs-5th/9.png)
 
 ---
 

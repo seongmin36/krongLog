@@ -100,11 +100,11 @@ CSS의 `@font-face` 설정에 다음을 추가하면 브라우저에 FOUT 방식
 
 **Before**
 
-![Preload 적용 전 폰트 로드 타이밍](/images/blog-font-optimization/2.png)
+![Preload 적용 전 폰트 로드 타이밍](../../../assets/blog/blog-font-optimization/2.png)
 
 **After**
 
-![Preload 적용 후 폰트 로드 타이밍](/images/blog-font-optimization/3.png)
+![Preload 적용 후 폰트 로드 타이밍](../../../assets/blog/blog-font-optimization/3.png)
 
 폰트가 다른 리소스보다 먼저 요청되어 도착 시점이 앞당겨졌습니다. 차이가 극적이지는 않지만, 첫 화면 렌더링에서 폰트 교체가 일어나는 시점이 분명히 빨라졌습니다.
 
@@ -175,7 +175,7 @@ const r = spawnSync("pyftsubset", [inputAbs, `--text-file=${textFile}`, "--flavo
 
 ### 빌드 후 폰트 크기
 
-![서브셋 적용 후 폰트 파일 크기](/images/blog-font-optimization/4.png)
+![서브셋 적용 후 폰트 파일 크기](../../../assets/blog/blog-font-optimization/4.png)
 
 원본 폰트 대비 용량이 `317kb -> 48kb`로 크게 줄었습니다. 한글 11,172자에서 실제 블로그에 등장하는 글자 수백 자로 압축했기 때문입니다.
 

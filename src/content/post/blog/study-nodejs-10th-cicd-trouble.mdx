@@ -28,7 +28,7 @@ Cannot find module '@repo/schemas'
 Object is possibly 'undefined'   ← DTO 프로퍼티 32건
 ```
 
-![symlink 파괴 에러](/images/study-nodejs-10th-cicd/1.png)
+![symlink 파괴 에러](../../../assets/blog/study-nodejs-10th-cicd/1.png)
 
 **원인**
 
@@ -150,7 +150,7 @@ Cannot find module '@/common/decorators/response-message.decorator'
 Cannot find module '@repo/schemas'
 ```
 
-![Jest 모듈 해석 실패](/images/study-nodejs-10th-cicd/2.png)
+![Jest 모듈 해석 실패](../../../assets/blog/study-nodejs-10th-cicd/2.png)
 
 **원인**
 
@@ -229,7 +229,7 @@ bash: line 2: docker: command not found
 exit status 127
 ```
 
-![Docker 미설치 에러](/images/study-nodejs-10th-cicd/4.png)
+![Docker 미설치 에러](../../../assets/blog/study-nodejs-10th-cicd/4.png)
 
 **원인 추적 과정**
 
@@ -291,7 +291,7 @@ qemu: uncaught target signal 4 (Illegal instruction) - core dumped
 
 빌드가 15분 넘게 진행이 없다가 크래시가 납니다.
 
-![QEMU 크래시 로그](/images/study-nodejs-10th-cicd/6.png)
+![QEMU 크래시 로그](../../../assets/blog/study-nodejs-10th-cicd/6.png)
 
 **원인**
 
@@ -308,7 +308,7 @@ deploy:
   runs-on: ubuntu-24.04-arm # ARM 네이티브 runner — QEMU 불필요
 ```
 
-![ARM runner 빌드 성공](/images/study-nodejs-10th-cicd/7.png)
+![ARM runner 빌드 성공](../../../assets/blog/study-nodejs-10th-cicd/7.png)
 
 GitHub Actions는 `ubuntu-24.04-arm` runner를 지원합니다.<br />
 EC2 Graviton과 동일한 aarch64 아키텍처이므로 QEMU 없이 네이티브 빌드가 가능합니다.<br />
@@ -366,7 +366,7 @@ Error: unable to determine transport target for "pino-pretty"
 
 arm64 이미지로 컨테이너가 뜨는 것 같았는데, `docker logs`를 보니 2~3초마다 재시작되고 있었습니다.
 
-![pino-pretty 크래시 로그](/images/study-nodejs-10th-cicd/9.png)
+![pino-pretty 크래시 로그](../../../assets/blog/study-nodejs-10th-cicd/9.png)
 
 **원인**
 
@@ -405,7 +405,7 @@ Error: getaddrinfo ENOTFOUND postgresql
 
 Nest 서버가 기동됐지만 DB 연결에서 반복 실패합니다.
 
-![ENOTFOUND 에러와 해결 후 정상 기동 로그](/images/study-nodejs-10th-cicd/10.png)
+![ENOTFOUND 에러와 해결 후 정상 기동 로그](../../../assets/blog/study-nodejs-10th-cicd/10.png)
 
 **원인**
 
