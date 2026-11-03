@@ -130,7 +130,7 @@ N주차에는 아래 [개수]문제를 PR로 제출하고 리뷰를 받았습니
 
 [리뷰 내용 요약. 원래 코드가 어땠고 리뷰어가 무엇을 지적했는지 → 어떻게 고쳤는지]
 
-![리뷰어 [리뷰어명] 피드백 스크린샷](/images/게시글식별자/번호.png)
+![리뷰어 [리뷰어명] 피드백 스크린샷](../../../assets/blog/게시글식별자/번호.png)
 
 [리뷰를 통해 얻은 인사이트 1문장]
 ```
@@ -246,7 +246,7 @@ src/content/post/blog/
   images/
     leetcode-study-thumbnail.png   ← 모든 주차가 공유하는 썸네일 (frontmatter image)
 
-public/images/
+src/assets/blog/
   study-leetcode-weekNN/
     1.png                          ← 리뷰 스크린샷, 순서대로 번호
     2.png
