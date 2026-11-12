@@ -338,9 +338,7 @@
     gap: 1.5rem;
   }
   .posts-sidebar {
-    width: 100%;
-    flex-direction: row;
-    gap: 2rem;
+    display: none;
   }
   .posts-search {
     width: 100%;
