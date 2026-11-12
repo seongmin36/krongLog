@@ -36,6 +36,11 @@ export const CARD_IMAGE = {
   sizes: "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, min(400px, 33vw)",
 };
 
+export const ROW_THUMB_IMAGE = {
+  widths: [96, 192, 288],
+  sizes: "96px",
+};
+
 export interface HomePostImage {
   src: string;
   srcset: string;
