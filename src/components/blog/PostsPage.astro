@@ -14,10 +14,9 @@ interface Props {
   posts: CollectionEntry<"post">[];
   topTags: [string, number][];
   subTagsByLabel: Record<string, [string, number][]>;
-  sortedYears: [number, number][];
 }
 
-const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
+const { posts, topTags, subTagsByLabel } = Astro.props;
 ---
 
 <div class="posts-page">
@@ -101,22 +100,6 @@ const { posts, topTags, subTagsByLabel, sortedYears } = Astro.props;
                   <span>{tag}</span>
                   <span class="sidebar-count">{count}</span>
                 </button>
-              </li>
-            ))
-          }
-        </ul>
-      </div>
-
-      <div class="sidebar-section">
-        <p class="sidebar-label">연도</p>
-        <ul class="sidebar-list">
-          {
-            sortedYears.map(([year, count]) => (
-              <li>
-                <div class="sidebar-item sidebar-item-static">
-                  <span>{year}</span>
-                  <span class="sidebar-count">{count}</span>
-                </div>
               </li>
             ))
           }
