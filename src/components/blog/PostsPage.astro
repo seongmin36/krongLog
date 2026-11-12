@@ -119,6 +119,9 @@ const { posts, topTags, subTagsByLabel } = Astro.props;
               data-post-title={post.data.title.toLowerCase()}
               data-post-tags={JSON.stringify(post.data.tags ?? [])}
             >
+              <span class="post-date">{formatDotDate(post.data.date)}</span>
+              <span class="post-tag">{firstTag}</span>
+              <span class="post-title-text">{post.data.title}</span>
               <span class="post-thumb">
                 <Image
                   src={post.data.image ?? placeholderImage}
@@ -134,9 +137,6 @@ const { posts, topTags, subTagsByLabel } = Astro.props;
                   class="post-thumb-img"
                 />
               </span>
-              <span class="post-date">{formatDotDate(post.data.date)}</span>
-              <span class="post-tag">{firstTag}</span>
-              <span class="post-title-text">{post.data.title}</span>
             </a>
           );
         })

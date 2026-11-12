@@ -242,7 +242,7 @@
 .post-row {
   text-decoration: none;
   display: grid;
-  grid-template-columns: 96px 112px 140px 1fr;
+  grid-template-columns: 112px 140px 1fr 96px;
   column-gap: 1rem;
   align-items: center;
   padding: 1.125rem 0.75rem;
