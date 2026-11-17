@@ -437,11 +437,13 @@
 }
 
 /* Redis 브랜드 */
-[data-tag="Redis"] {
+[data-tag="Redis"],
+[data-tag="critical-script"] {
   background-color: var(--color-tag-redis-bg);
   color: var(--color-tag-redis-text);
 }
-.dark [data-tag="Redis"] {
+.dark [data-tag="Redis"],
+.dark [data-tag="critical-script"] {
   background-color: var(--color-tag-redis-bg-dark);
   color: var(--color-tag-redis-text-dark);
 }
@@ -513,11 +515,13 @@
 }
 /* 팔레트: teal */
 [data-tag="블로그"],
-[data-tag="CI/CD"] {
+[data-tag="CI/CD"],
+[data-tag="2026 우아콘"] {
   @apply bg-teal-100 text-teal-700;
 }
 .dark [data-tag="블로그"],
-.dark [data-tag="CI/CD"] {
+.dark [data-tag="CI/CD"],
+.dark [data-tag="2026 우아콘"] {
   @apply bg-teal-900/40 text-teal-300;
 }
 /* 팔레트: orange */
