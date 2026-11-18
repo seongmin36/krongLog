@@ -3,13 +3,11 @@ title: "'Seamless City' 우아콘 2026에 다녀왔습니다"
 description: "우아콘 2026에 참석해 둘러본 부스와 인상 깊었던 두 세션을 듣고 느낀 점을 정리합니다."
 date: "2026-11-18"
 tags: ["회고", "2026 우아콘", "critical-script"]
+image: "./images/img-woowacon-2026.png"
 ---
 
 import LinkCard from "@/components/mdx/LinkCard.astro";
 import Tooltip from "@/components/ui/Tooltip.astro";
-
-{/* 원본: 우아콘 메인 이미지 (출처 : https://woowacon.com/) */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/1.png) */}
 
 <LinkCard url="https://woowacon.com/" />
 
@@ -17,8 +15,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 2025년 12월 즈음 유튜브 알고리즘에서 'UX 엔지니어 허준'님의 **'배민 모션시스템 二.O: ≪春의 호흡≫ 제 1형 Spring 주무르기'** 라는 제목이 저의 이목을 끌었고, 이때 우아콘을 처음 알게 되었습니다.
 
-{/* TODO: 유튜브 영상 링크 — 배민 모션시스템 二.O: ≪春의 호흡≫ 제 1형 Spring 주무르기 #우아콘2025 #우아한형제들 */}
-{/* <LinkCard url="https://www.youtube.com/watch?v=..." /> */}
+<LinkCard url="https://www.youtube.com/watch?v=DX3GBKycgJM&pp=ygUc7Jqw7JWE7L2YIDIwMjUgc3ByaW5nIOuqqOyFmA%3D%3D" />
 
 > 도대체 저 애니메이션 기술명으로 한(?) 제목으로 무슨 이야기를 할까?
 
@@ -35,13 +32,11 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 이 중 2천여 명이 추첨을 통해 참석하게 되는데요, 운이 좋게도 참여 기회를 얻게 되어 많은 이야기를 들을 수 있었습니다.
 
-{/* 원본: IMG_4375.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/2.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/1.png)
 
 올해 우아콘의 공식 주제는 **'Seamless City : 멈추지 않는 도시를 만드는 기술'** 이었고, AI, ML, 백/프론트엔드, 데이터, 로봇 등 각 분야 현직자분들께서 발표하는 40개의 세션으로 구성되었습니다.
 
-{/* 원본: 스크린샷 2026-11-17 오전 12.00.30.png */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/3.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/2.png)
 
 ---
 
@@ -56,11 +51,11 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 지나다니면서 하나하나 관심 있게 봤지만, 가장 푹 빠져 있던 부스는 단연코 **'프롬프트 스피드런'** 이었습니다.
 
-{/* 원본: IMG_4376.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/4.png) */}
+<figure class="grid grid-cols-2 gap-3 [&_img]:w-full">
+  ![실행 결과](../../../assets/blog/2026-woowacon/3.png)
 
-{/* 원본: IMG_4378.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/5.png) */}
+  ![실행 결과](../../../assets/blog/2026-woowacon/4.png)
+</figure>
 
 참여 방법은 간단합니다.<br />
 임의의 주제를 90초 안에 **프롬프트만** 입력해서, 정해진 요구사항을 가장 잘 만족한 사람에게 상품을 주는 규칙입니다.
@@ -72,8 +67,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 ## 우아콘에서 느꼈던 것들
 
-{/* 원본: IMG_4374.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/6.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/5.png)
 
 오전 10시 오프닝 키노트부터 시작해서 오후 5시 30분까지 참여하셨던 분들은 대부분 6개의 세션을 듣게 됩니다.
 
@@ -89,8 +83,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 ### <mark>다국어를 LLM으로 고치는 방법?</mark>
 
-{/* 원본: IMG_4390.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/7.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/6.png)
 
 세션을 듣기 전에는 **"LLM은 번역 전문이니까 금방 해결할 수 있지 않을까?"** 라는 안일한 생각을 가졌지만, 듣고 난 후에는 그 생각이 완전히 바뀌었습니다.
 
@@ -98,8 +91,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 #### 고민 1. 어떤 언어로 설계해야 할까?
 
-{/* 원본: IMG_4391.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/8.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/7.png)
 
 우아한형제들의 개발팀은 이미 LLM에 접근해 활용할 수 있는 기본 준비를 마친 상태였습니다.
 
@@ -108,15 +100,13 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 **Step 2. 관점의 전환 :** 자바의 강점인 **SSE 스트리밍, 동시 요청 처리, 자원 제어, 데이터 정합성, 장애 격리** 등은 이미 자바 생태계에서 익숙하고 강력한 영역입니다.<br />
 그래서 이 위에 LLM 모델 자체의 <strong>무상태(stateless) 추론</strong>을 조립하는 것이 유리하다고 판단했습니다.
 
-{/* TODO: Spring AI 2.0.0 GA Available Now 링크 */}
-{/* <LinkCard url="https://spring.io/blog/..." /> */}
+<LinkCard url="https://spring.io/blog/2026/06/12/spring-ai-2-0-0-GA-available-now" />
 
-게다가 6월에 'Spring AI 2.0 GA'가 정식 출시되면서, 과거 'Spring AI 1.x'의 한계였던 <strong>에이전트 흐름 제어(<Tooltip note="ToolCallingAdvisor를 통해 도구 호출이 어드바이저 체인(AI 모델의 요청-응답 과정에 개입해 여러 차례 재진입하며 왕복하는 구조) 안으로 들어오면서, 에이전트 흐름을 일관되게 제어할 수 있게 되었습니다.">ToolCallingAdvisor</Tooltip>)</strong>, <strong>표준 프로토콜(MCP) 통합</strong>, **고성능 비동기 처리** 등이 프레임워크 차원에서 지원되기 시작했습니다.
+게다가 6월에 'Spring AI 2.0 GA'가 정식 출시되면서, 과거 'Spring AI 1.x'의 한계였던 <strong>에이전트 흐름 제어(<Tooltip note={"ToolCallingAdvisor : ToolCallingAdvisor를 통해 어드바이저 체인 안으로 들어오면서 에이전트 흐름을 일관되게 제어할 수 있게 되었습니다.\n\n어드바이저 체인 : 인공지능 프레임워크에서 AI 모델의 요청-응답 과정에 개입하여 여러 차례 재진입(re-entry)하고 왕복하며 동작하는 구조"}>ToolCallingAdvisor</Tooltip>)</strong>, <strong>표준 프로토콜(MCP) 통합</strong>, **고성능 비동기 처리** 등이 프레임워크 차원에서 지원되기 시작했습니다.
 
 따라서 개발팀은 **자바**를 선택해 LLM 서비스를 구축하고, 안정적인 고성능 서버 아키텍처를 핵심으로 삼았습니다.
 
-{/* 원본: 아키텍처 이미지 (아키텍처가 궁금하신 분들을 위해) */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/9.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/8.png)
 
 아키텍처가 궁금하신 분들을 위해 첨부합니다.
 
@@ -134,8 +124,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 결국 이 문제들은 반드시 해결해야만 하는 숙제가 되었습니다.
 
-{/* 원본: IMG_4394.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/10.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/9.png)
 
 개발팀은 이를 위 이미지와 같은 방식으로 해결했습니다.
 
@@ -151,8 +140,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 - **실시간 번역 파이프라인 및 캐싱 구축**
 
-  {/* 원본: IMG_4396.HEIC */}
-  {/* ![실행 결과](../../../assets/blog/woowacon-2026/11.png) */}
+  ![실행 결과](../../../assets/blog/2026-woowacon/10.png)
 
   메뉴판이 바뀔 때마다 가게 전체를 다시 번역하면 비용과 시간이 감당할 수 없게 커집니다.<br />
   이에 개발팀은 두 가지 장치를 더했습니다.
@@ -163,8 +151,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 
 - <strong>번역 품질 향상을 위한 LLM 고도화(Claude Haiku)</strong>
 
-  {/* 원본: IMG_4399.HEIC */}
-  {/* ![실행 결과](../../../assets/blog/woowacon-2026/12.png) */}
+  ![실행 결과](../../../assets/blog/2026-woowacon/11.png)
 
   마지막 숙제는 '공기밥 → air rice' 같은 **직역 문제를 해결하는 것**이었습니다.<br />
   특히 'B마트', '한집배달', '알뜰배달'과 같은 **배민만의 서비스 용어는 LLM이 알 수 없습니다.**
@@ -180,10 +167,9 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 세션을 다 듣고 나서 '번역은 LLM이 잘하는 영역'이라는 일차원적 LLM 호출 프로세스는 빙산의 일각이라는 것을 느꼈습니다.<br />
 회고를 기록하는 지금도 '5년의 숙제'라는 타이틀을 붙인 무게가 다시금 느껴지는 것 같습니다.
 
-### <mark>⭐️ 배달의민족 웹뷰 로딩 성능을 30% 개선한 최적화 전략</mark>
+### ⭐️ 배달의민족 웹뷰 로딩 성능을 30% 개선한 최적화 전략
 
-{/* 원본: IMG_4410.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/13.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/12.png)
 
 저는 이번 우아콘에 가장 오고 싶었던 이유가 이 세션 때문이었다고 단언컨대 얘기할 수 있을 것 같아 별표를 달아보았습니다.
 
@@ -192,8 +178,7 @@ import Tooltip from "@/components/ui/Tooltip.astro";
 배민은 '하이브리드 앱'으로 구현된 서비스입니다.<br />
 즉, 기본 뼈대는 '네이티브 앱'으로 만들고, 'B마트'나 이벤트 페이지 같은 특정 메뉴는 '웹뷰'로 구현되었죠.
 
-{/* 원본: IMG_4411.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/14.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/13.png)
 
 B마트가 웹뷰로 구현된 **대표적인 이유**가 무엇일까요?
 
@@ -204,14 +189,12 @@ B마트 같은 커머스 서비스는 수시로 상품 데이터가 바뀌기 �
 
 #### 그러나 불편함이 존재했다
 
-{/* 원본: IMG_4413.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/15.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/14.png)
 
 하지만 **웹뷰는 네이티브보다 로딩이 느리다**는 치명적인 단점이 있었습니다.<br />
 무려 LCP가 1.34초를 기록했죠.
 
-{/* 원본: IMG_4414.HEIC */}
-{/* ![실행 결과](../../../assets/blog/woowacon-2026/16.png) */}
+![실행 결과](../../../assets/blog/2026-woowacon/15.png)
 
 위 사진의 표에서도 볼 수 있듯이, 웹 성능을 최적화하기 위해서는 일반적으로 아래와 같은 작업을 합니다.
 
