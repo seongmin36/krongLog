@@ -201,6 +201,19 @@ export function parseGitHubUrl(
   return { owner: match[1], repo: match[2], number: Number(match[3]) };
 }
 
+function githubHeaders(): Record<string, string> {
+  const headers: Record<string, string> = {
+    Accept: "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+  };
+
+  // 토큰이 있으면 시간당 5000회, 없으면 60회로 제한
+  const token = import.meta.env.GITHUB_TOKEN;
+  if (token) headers.Authorization = `Bearer ${token}`;
+
+  return headers;
+}
+
 export async function fetchGitHubIssue(
   url: string,
 ): Promise<GithubIssueData | null> {
@@ -213,18 +226,9 @@ export async function fetchGitHubIssue(
   if (cached) return cached;
 
   try {
-    const headers: Record<string, string> = {
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-    };
-
-    // 토큰이 있으면 시간당 5000회, 없으면 60회로 제한
-    const token = import.meta.env.GITHUB_TOKEN;
-    if (token) headers.Authorization = `Bearer ${token}`;
-
     const res = await fetch(
       `https://api.github.com/repos/${owner}/${repo}/issues/${number}`,
-      { headers, signal: AbortSignal.timeout(8000) },
+      { headers: githubHeaders(), signal: AbortSignal.timeout(8000) },
     );
 
     if (!res.ok) return null;
@@ -250,6 +254,72 @@ export async function fetchGitHubIssue(
       authorAvatar: issue.user.avatar_url,
       isPullRequest: Boolean(issue.pull_request),
       updatedAt: issue.closed_at ?? issue.updated_at,
+    };
+
+    await writeCache(key, data);
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Github - 레포                                                       */
+/* ------------------------------------------------------------------ */
+
+export interface GithubRepoData {
+  url: string;
+  owner: string;
+  repo: string;
+  description: string | null;
+  ownerAvatar: string;
+  stars: number;
+  language: string | null;
+  updatedAt: string;
+}
+
+// 레포 루트 주소만 받는다 (/tree, /blob, /issues 등 하위 경로는 제외)
+export function parseGitHubRepoUrl(
+  url: string,
+): { owner: string; repo: string } | null {
+  const match = url.match(
+    /^https?:\/\/(?:www\.)?github\.com\/([\w.-]+)\/([\w.-]+?)(?:\.git)?\/?(?:[?#].*)?$/,
+  );
+  if (!match) return null;
+
+  return { owner: match[1], repo: match[2] };
+}
+
+export async function fetchGitHubRepo(
+  url: string,
+): Promise<GithubRepoData | null> {
+  const parts = parseGitHubRepoUrl(url);
+  if (!parts) return null;
+
+  const { owner, repo } = parts;
+  const key = `gh_repo_${owner}_${repo}`;
+  const cached = await readCache<GithubRepoData>(key);
+  if (cached) return cached;
+
+  try {
+    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+      headers: githubHeaders(),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!res.ok) return null;
+
+    const repository = await res.json();
+
+    const data: GithubRepoData = {
+      url,
+      owner: repository.owner.login,
+      repo: repository.name,
+      description: repository.description,
+      ownerAvatar: repository.owner.avatar_url,
+      stars: repository.stargazers_count,
+      language: repository.language,
+      updatedAt: repository.pushed_at ?? repository.updated_at,
     };
 
     await writeCache(key, data);
