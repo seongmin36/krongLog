@@ -14,7 +14,9 @@ async function readCache<T>(key: string): Promise<T | null> {
     const raw = await fs.readFile(path.join(CACHE_DIR, `${key}.json`), "utf-8");
     const { timestamp, data } = JSON.parse(raw);
 
-    if (Date.now() - timestamp > TTL) return null;
+    // timestamp가 없으면 NaN 비교로 영원히 만료되지 않으므로 만료로 처리한다
+    if (typeof timestamp !== "number" || Date.now() - timestamp > TTL)
+      return null;
 
     memoryCache.set(key, data);
     return data as T;
@@ -30,7 +32,7 @@ async function writeCache(key: string, data: unknown): Promise<void> {
     await fs.mkdir(CACHE_DIR, { recursive: true });
     await fs.writeFile(
       path.join(CACHE_DIR, `${key}.json`),
-      JSON.stringify({ timeStamp: Date.now(), data }),
+      JSON.stringify({ timestamp: Date.now(), data }),
     );
   } catch {
     // 캐시 쓰기 실패는 빌드를 막지 않는다
@@ -212,8 +214,8 @@ export async function fetchGitHubIssue(
 
   try {
     const headers: Record<string, string> = {
-      Accept: "applicataion/vnd.github+json",
-      "X-GitHub_Api_Version": "2022-11-28",
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
     };
 
     // 토큰이 있으면 시간당 5000회, 없으면 60회로 제한
