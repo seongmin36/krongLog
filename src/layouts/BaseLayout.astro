@@ -4,6 +4,8 @@ import CodeBlock from "@/components/mdx/CodeBlock.astro";
 import fontsCss from "@/styles/fonts.css?raw";
 import "@/styles/global.css";
 import { buildBlogPostingJsonLd, buildWebsiteJsonLd } from "@/lib/json-ld";
+import { getOgImageUrl } from "@/lib/og-image";
+import defaultOgImage from "@/assets/og-default.png";
 
 interface Props {
   title?: string;
@@ -25,8 +27,9 @@ const {
 
 const siteUrl = Astro.site!.href;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+// 기본 이미지도 1200px JPEG로 변환한다 (원본 PNG는 용량이 커서 카카오톡 미리보기에서 빠짐)
 const resolvedOgImage =
-  ogImage ?? new URL("/images/og-default.png", Astro.site).href;
+  ogImage ?? (await getOgImageUrl(defaultOgImage, Astro.site))!;
 
 const jsonLdGraph = [
   buildWebsiteJsonLd(siteUrl),
