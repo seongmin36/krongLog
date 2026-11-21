@@ -1,4 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" rx="6" fill="#3B7A57"/>
-  <text x="16" y="22" font-family="system-ui, -apple-system, sans-serif" font-size="18" font-weight="bold" fill="white" text-anchor="middle">K</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">KrongLog favicon</title>
+  <desc id="desc">A dark green terminal prompt layered over two green rounded layers.</desc>
+  <!-- Lower knowledge layers -->
+  <path d="M112 292 315 330c20 4 39-5 49-23l40-72c5-9 17-12 26-7 9 5 12 17 7 26l-49 87c-16 28-46 42-77 36l-205-39c-13-2-21-15-18-28 3-12 15-20 27-18Z" fill="#3C985B"/>
+  <path d="M112 340 315 378c20 4 39-5 49-23l40-72c5-9 17-12 26-7 9 5 12 17 7 26l-49 87c-16 28-46 42-77 36l-205-39c-13-2-21-15-18-28 3-12 15-20 27-18Z" fill="#79C27D"/>
+  <!-- Terminal tile -->
+  <path d="M139 111c7-16 24-25 41-22l218 35c21 3 33 26 24 45l-56 120c-8 16-25 25-42 22l-218-35c-21-3-33-26-24-45l57-120Z" fill="#064B35"/>
+  <!-- Prompt chevron -->
+  <path d="m196 157 43 40-48 29" fill="none" stroke="#DDF8D9" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Cursor -->
+  <rect x="263" y="222" width="53" height="24" rx="7" fill="#DDF8D9"/>
 </svg>
