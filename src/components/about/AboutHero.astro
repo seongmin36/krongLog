@@ -1,84 +1,175 @@
 ---
 import { Icon } from "astro-icon/components";
 import PillButton from "@/components/about/PillButton.astro";
+import { ABOUT_PORTFOLIO_HREF, ABOUT_RESUME_HREF } from "@/lib/about";
+
+// 순환 문구 (순서대로 반복). 첫 문구는 서버에서 active로 렌더한다
+const rotatingPhrases = ["경험을 나누는 걸", "이야기하는 걸", "함께 배우는 걸"];
 ---
 
 <section class="pt-12 pb-16 lg:py-25">
-  <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
-    <div class="lg:col-span-7">
-      <!-- 터미널 프롬프트 -->
-      <p class="font-mono text-[13px] tracking-[0.04em]">
-        <span class="text-primary dark:text-dark-text">~/about</span>{" "}
-        <span class="text-muted-alpha dark:text-muted-dark">$ whoami</span>
-      </p>
+  <!-- 터미널 프롬프트 -->
+  <p class="font-mono text-[13px] tracking-[0.04em]">
+    <span class="text-primary dark:text-dark-text">~/about</span>{" "}
+    <span class="text-muted-alpha dark:text-muted-dark">$ whoami</span>
+  </p>
 
-      <h1
-        class="text-dark mt-5 text-[40px] leading-[1.2] font-bold tracking-[-0.02em] sm:text-[56px] dark:text-gray-50"
+  <h1
+    class="text-dark mt-5 text-[40px] leading-[1.2] font-bold tracking-[-0.02em] break-keep sm:text-[clamp(40px,6.4vw,56px)] dark:text-gray-50"
+  >
+    <span class="sr-only"
+      >사람들과 경험을 나누는 걸 좋아하는 개발자, 조성민입니다.</span
+    >
+    <span class="block" aria-hidden="true">
+      <span class="block">사람들과</span>
+      <!-- 세 문구를 한 칸에 겹쳐 두고, 상태에 따라 위아래로 움직인다 -->
+      <span
+        class="text-primary dark:text-dark-text grid h-[1.2em] overflow-hidden"
+        data-rotator
       >
-        <span class="block">사람들과</span>
-        <span class="text-primary dark:text-dark-text block">이야기하는 걸</span
+        {
+          rotatingPhrases.map((phrase, index) => (
+            <span
+              class="rotator-item col-start-1 row-start-1"
+              data-rotator-item
+              data-state={index === 0 ? "active" : "idle"}
+            >
+              {phrase}
+            </span>
+          ))
+        }
+      </span>
+      <span class="block sm:whitespace-nowrap">
+        좋아하는 개발자, 조성민<span class="text-muted dark:text-muted-dark"
+          >입니다.</span
         >
-        <span class="block">좋아하는 개발자,</span>
-        <span class="block"
-          >조성민<span class="text-muted dark:text-muted-dark">입니다.</span
-          ></span
-        >
-      </h1>
+      </span>
+    </span>
+  </h1>
 
-      <p
-        class="text-dark mt-6 flex items-center gap-2.5 text-[17px] font-bold tracking-[-0.015em] sm:text-[20px] dark:text-gray-50"
-      >
-        <span
-          class="bg-primary dark:bg-dark-text size-2 shrink-0 rounded-full"
-          aria-hidden="true"></span>
-        Next.js와 React로 사용자 경험을 만드는 프론트엔드 개발자
-      </p>
+  <p
+    class="text-dark mt-6 flex items-center gap-2.5 text-[17px] font-bold tracking-[-0.015em] sm:text-[20px] dark:text-gray-50"
+  >
+    <span
+      class="bg-primary dark:bg-dark-text size-2 shrink-0 rounded-full"
+      aria-hidden="true"></span>
+    Next.js와 React로 사용자 경험을 만드는 프론트엔드 개발자
+  </p>
 
-      <div
-        class="text-description dark:text-muted mt-5 flex flex-col gap-1 text-[16px] leading-[1.75] break-keep sm:text-[17px]"
-      >
-        <p>코드를 작성하는 시간만큼 대화하는 시간을 중요하게 생각합니다.</p>
-        <p>
-          배운 것을 발표하고, 기록하고, 나누면서 함께 성장하는 방법을 찾고
-          있어요.
-        </p>
-      </div>
+  <div
+    class="text-description dark:text-muted mt-5 flex flex-col gap-1 text-[16px] leading-[1.75] break-keep sm:text-[17px]"
+  >
+    <p>코드를 작성하는 시간만큼 대화하는 시간을 중요하게 생각합니다.</p>
+    <p>
+      배운 것을 발표하고, 기록하고, 나누면서 함께 성장하는 방법을 찾고 있어요.
+    </p>
+  </div>
 
-      <div class="mt-9 flex flex-wrap gap-3">
-        <PillButton variant="primary">
-          <Icon
-            name="lucide:file-text"
-            class="size-[18px]"
-            aria-hidden="true"
-          />
-          이력서 보기
-          <Icon
-            name="lucide:arrow-up-right"
-            class="size-4"
-            aria-hidden="true"
-          />
-        </PillButton>
-        <PillButton variant="outline">
-          포트폴리오
-          <Icon
-            name="lucide:arrow-up-right"
-            class="text-muted-alpha dark:text-muted-dark size-4"
-            aria-hidden="true"
-          />
-        </PillButton>
-      </div>
-    </div>
-
-    <div class="flex lg:col-span-5 lg:justify-end lg:pt-2">
-      <div
-        class="border-primary/20 bg-primary-surface dark:border-dark-text/25 dark:bg-primary-surface-dark flex aspect-square w-full max-w-[440px] items-center justify-center rounded-[32px] border border-dashed"
-      >
-        <span
-          class="text-muted-alpha dark:text-muted-dark font-mono text-[13px]"
-        >
-          three.js · coming soon
-        </span>
-      </div>
-    </div>
+  <div class="mt-9 flex flex-wrap gap-3">
+    <PillButton
+      variant="primary"
+      href={ABOUT_RESUME_HREF}
+      trailing="arrow-up-right"
+    >
+      <Icon name="lucide:file-text" class="size-[18px]" aria-hidden="true" />
+      이력서 보기
+    </PillButton>
+    <PillButton
+      variant="outline"
+      href={ABOUT_PORTFOLIO_HREF}
+      trailing="arrow-up-right"
+    >
+      포트폴리오
+    </PillButton>
   </div>
 </section>
+
+<style>
+  .rotator-item {
+    transform: translateY(105%);
+    opacity: 0;
+    transition:
+      transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .rotator-item[data-state="active"] {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  .rotator-item[data-state="leaving"] {
+    transform: translateY(-105%);
+    opacity: 0;
+  }
+  .rotator-item[data-state="idle"] {
+    transform: translateY(105%);
+    opacity: 0;
+    transition: none;
+  }
+</style>
+
+<script>
+  // 상수
+  const INTERVAL_MS = 3500;
+
+  // DOM 참조
+  const items = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-rotator-item]"),
+  );
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  // 상태
+  let current = 0;
+  let timerId: number | undefined;
+
+  // 헬퍼
+  function stopTimer() {
+    window.clearInterval(timerId);
+    timerId = undefined;
+  }
+
+  function startTimer() {
+    stopTimer();
+    timerId = window.setInterval(tick, INTERVAL_MS);
+  }
+
+  // 액션
+  // 나가는 문구는 leaving, 들어오는 문구는 active로 바꾼다.
+  // 지난 틱에 나간 문구는 이번 틱 시작에 idle로 되돌린다 (트랜지션 없음, 이미 틱 간격보다 짧게 끝남)
+  function tick() {
+    if (document.hidden) return;
+
+    items.forEach((item) => {
+      if (item.dataset.state === "leaving") item.dataset.state = "idle";
+    });
+    items[current].dataset.state = "leaving";
+    current = (current + 1) % items.length;
+    items[current].dataset.state = "active";
+  }
+
+  // 첫 문구로 바로 돌아간다. 움직임 없이 바꾼다.
+  function resetToFirst() {
+    stopTimer();
+    current = 0;
+    items.forEach((item, index) => {
+      item.style.transition = "none";
+      item.dataset.state = index === 0 ? "active" : "idle";
+    });
+    // 스타일을 확정한 뒤 인라인 transition을 풀어 이후 틱은 정상 트랜지션을 쓴다
+    void items[0].offsetHeight;
+    items.forEach((item) => {
+      item.style.transition = "";
+    });
+  }
+
+  // 이벤트 연결
+  reduceMotion.addEventListener("change", () => {
+    if (reduceMotion.matches) {
+      resetToFirst();
+    } else {
+      startTimer();
+    }
+  });
+
+  // 초기 실행
+  if (!reduceMotion.matches) startTimer();
+</script>
