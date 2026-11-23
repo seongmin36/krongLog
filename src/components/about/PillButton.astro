@@ -1,0 +1,59 @@
+---
+interface Props {
+  variant: "primary" | "outline";
+  href?: string;
+  type?: "button" | "submit" | "reset";
+  /** 좌우 padding 클래스 (기본 px-6) */
+  padding?: string;
+  class?: string;
+}
+
+const { variant, href, type, padding = "px-6", class: className } = Astro.props;
+
+const baseClass =
+  "inline-flex h-[52px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border text-[16px] font-bold no-underline transition-colors duration-200";
+
+const variantClass =
+  variant === "primary"
+    ? "border-primary bg-primary text-white dark:border-dark-text dark:bg-dark-text dark:text-dark"
+    : "border-border bg-white text-dark dark:border-border-dark dark:bg-dark dark:text-gray-50";
+
+// outline 버튼만 hover를 준다 (href 없는 자리표시 링크는 제외)
+const interactiveClass =
+  variant === "outline" && (href || type)
+    ? "hover:bg-hover-overlay-light dark:hover:bg-hover-overlay-dark"
+    : "";
+
+const cursorClass = type ? "cursor-pointer" : "";
+
+const isExternal = href?.startsWith("http") ?? false;
+const classes = [
+  baseClass,
+  padding,
+  variantClass,
+  interactiveClass,
+  cursorClass,
+  className,
+];
+---
+
+{
+  type ? (
+    <button type={type} class:list={classes}>
+      <slot />
+    </button>
+  ) : href ? (
+    <a
+      href={href}
+      class:list={classes}
+      target={isExternal ? "_blank" : undefined}
+      rel={isExternal ? "noopener noreferrer" : undefined}
+    >
+      <slot />
+    </a>
+  ) : (
+    <a role="link" aria-disabled="true" class:list={classes}>
+      <slot />
+    </a>
+  )
+}
