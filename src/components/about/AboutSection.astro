@@ -26,6 +26,10 @@ const gridClass = isSplit
   ? "lg:grid lg:grid-cols-[340px_1fr] lg:items-start lg:gap-12"
   : "";
 const bodyClass = isSplit ? "mt-10 min-w-0 lg:mt-0" : "mt-12 min-w-0";
+// split에서만 제목을 스크롤 중 고정한다 (grid 직접 자식)
+const headerClass = isSplit
+  ? "flex items-end justify-between gap-4 lg:sticky lg:top-36"
+  : "flex items-end justify-between gap-4";
 const hasActions = Astro.slots.has("actions");
 ---
 
@@ -33,7 +37,7 @@ const hasActions = Astro.slots.has("actions");
 
 <section aria-labelledby={id} class={sectionClass}>
   <div class={gridClass}>
-    <div class="flex items-end justify-between gap-4">
+    <div class={headerClass}>
       <div>
         <p
           class="text-primary dark:text-dark-text font-mono text-sm leading-none"
