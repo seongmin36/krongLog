@@ -1,0 +1,172 @@
+---
+import { Icon } from "astro-icon/components";
+import AboutDivider from "@/components/about/AboutDivider.astro";
+import PillButton from "@/components/about/PillButton.astro";
+import { AppIcon } from "@/components/ui/AppIcons";
+import { ABOUT_GITHUB_URL, ABOUT_LINKEDIN_URL } from "@/lib/about";
+
+// 장식 이력서 미리보기의 막대 묶음 (묶음마다 첫 막대는 굵은 제목 막대)
+const barGroups = [
+  ["w-[42%]", "w-[92%]", "w-[78%]", "w-[85%]"],
+  ["w-[36%]", "w-[88%]", "w-[70%]"],
+  ["w-[46%]", "w-[94%]", "w-[80%]", "w-[62%]"],
+];
+
+const socialButtonClass =
+  "border-border text-description hover:bg-hover-overlay-light hover:text-dark dark:border-border-dark dark:text-muted dark:hover:bg-hover-overlay-dark dark:hover:text-gray-50 inline-flex size-10 items-center justify-center rounded-full border transition-colors duration-200";
+---
+
+<AboutDivider />
+
+<section aria-labelledby="about-resume-title" class="pt-16 lg:pt-30">
+  <div
+    class="border-border dark:border-border-dark dark:bg-dark rounded-[32px] border bg-white p-6 sm:p-10 lg:p-14"
+  >
+    <div class="lg:grid lg:grid-cols-[1fr_300px] lg:items-center lg:gap-14">
+      <div class="min-w-0">
+        <p
+          class="text-primary dark:text-dark-text font-mono text-[13px] tracking-[0.08em]"
+        >
+          RESUME
+        </p>
+        <h2
+          id="about-resume-title"
+          class="text-dark mt-3 text-[26px] leading-[1.28] font-bold tracking-[-0.02em] sm:text-[32px] dark:text-gray-50"
+        >
+          <span class="block">코드 밖의 이야기까지,</span>
+          <span class="text-muted dark:text-muted-dark block"
+            >한 장에 담았어요.</span
+          >
+        </h2>
+        <p
+          class="text-description dark:text-muted mt-4 text-[17px] leading-[1.75] break-keep"
+        >
+          가장 최근에 업데이트한 이력서예요. 웹에서 바로 보거나 PDF로
+          받아가세요.
+        </p>
+
+        <div class="mt-7 flex flex-wrap gap-3">
+          <PillButton variant="primary">
+            <Icon
+              name="lucide:download"
+              class="size-[18px]"
+              aria-hidden="true"
+            />
+            이력서 다운로드
+          </PillButton>
+          <PillButton variant="outline">
+            웹에서 보기
+            <Icon name="lucide:arrow-right" class="size-4" aria-hidden="true" />
+          </PillButton>
+        </div>
+
+        <p
+          class="text-muted-alpha dark:text-muted-dark mt-5 font-mono text-[13px]"
+        >
+          PDF · 175KB · 2026.11.21 업데이트
+        </p>
+
+        <div
+          class="border-border dark:border-border-dark mt-7 flex flex-wrap items-center gap-3.5 border-t pt-7"
+        >
+          <p class="text-description dark:text-muted text-[15px] font-bold">
+            연락하기
+          </p>
+          <div class="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              aria-label="이메일 주소 복사"
+              class="border-border text-dark hover:bg-hover-overlay-light dark:border-border-dark dark:hover:bg-hover-overlay-dark inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border px-4 font-mono text-[13px] transition-colors duration-200 dark:text-gray-50"
+            >
+              [email@domain]
+              <Icon
+                name="lucide:copy"
+                class="text-muted-alpha dark:text-muted-dark size-4"
+                aria-hidden="true"
+              />
+            </button>
+            <a
+              href={ABOUT_GITHUB_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="GitHub"
+              class={socialButtonClass}
+            >
+              <AppIcon name="github" className="size-[18px]" />
+            </a>
+            <a
+              href={ABOUT_LINKEDIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="LinkedIn"
+              class={socialButtonClass}
+            >
+              <AppIcon name="linkedin" className="size-[18px]" />
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- 장식용 이력서 미리보기 -->
+      <div
+        class="relative mx-auto hidden h-[368px] w-[280px] lg:block"
+        aria-hidden="true"
+      >
+        <div
+          class="border-border bg-inline-code-surface dark:border-border-dark dark:bg-inline-code-surface-dark absolute inset-0 -rotate-6 rounded-3xl border"
+        >
+        </div>
+        <div
+          class="border-border dark:border-border-dark bg-highlight-pen dark:bg-primary-surface-dark absolute inset-0 rotate-4 rounded-3xl border"
+        >
+        </div>
+        <div
+          class="border-border dark:border-border-dark dark:bg-dark relative flex h-full flex-col rounded-3xl border bg-white p-7 drop-shadow-[0_16px_18px_var(--color-border)]"
+        >
+          <p
+            class="text-dark text-[22px] leading-[1.5] font-bold tracking-[-0.02em] dark:text-gray-50"
+          >
+            조성민
+          </p>
+          <p
+            class="text-primary dark:text-dark-text mt-1 font-mono text-[12px]"
+          >
+            Frontend Developer
+          </p>
+          <div class="bg-border dark:bg-border-dark mt-5 h-px"></div>
+
+          {
+            barGroups.map((group) => (
+              <div class="mt-5 flex flex-col gap-2">
+                {group.map((width, index) => (
+                  <span
+                    class:list={[
+                      "rounded-full",
+                      width,
+                      index === 0
+                        ? "bg-muted/55 dark:bg-muted-dark h-[7px]"
+                        : "bg-border dark:bg-border-dark h-[5px]",
+                    ]}
+                  />
+                ))}
+              </div>
+            ))
+          }
+
+          <div class="mt-auto flex items-center justify-between pt-5">
+            <span
+              class="bg-primary dark:bg-dark-text dark:text-dark rounded-lg px-2 py-0.5 font-mono text-[11px] leading-4 font-bold text-white"
+            >
+              PDF
+            </span>
+            <Icon
+              name="lucide:arrow-up-right"
+              class="text-muted-alpha dark:text-muted-dark size-4"
+              aria-hidden="true"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
