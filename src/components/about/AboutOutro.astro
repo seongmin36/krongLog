@@ -1,5 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
+import { ABOUT_PORTFOLIO_HREF } from "@/lib/about";
 ---
 
 <section class="py-20 lg:py-30">
@@ -10,9 +11,10 @@ import { Icon } from "astro-icon/components";
       어떤 걸 만들어 왔는지 궁금하다면
     </span>
     <a
-      role="link"
-      aria-disabled="true"
-      class="text-primary dark:text-dark-text inline-flex items-center gap-1.5 font-bold"
+      href={ABOUT_PORTFOLIO_HREF}
+      role={ABOUT_PORTFOLIO_HREF ? undefined : "link"}
+      aria-disabled={ABOUT_PORTFOLIO_HREF ? undefined : "true"}
+      class="text-primary dark:text-dark-text inline-flex items-center gap-1.5 font-bold transition-opacity duration-200 hover:opacity-80"
     >
       포트폴리오 보러 가기
       <Icon name="lucide:arrow-right" class="size-4" aria-hidden="true" />
