@@ -1,0 +1,84 @@
+---
+import { Icon } from "astro-icon/components";
+import PillButton from "@/components/about/PillButton.astro";
+---
+
+<section class="pt-12 pb-16 lg:py-25">
+  <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
+    <div class="lg:col-span-7">
+      <!-- 터미널 프롬프트 -->
+      <p class="font-mono text-[13px] tracking-[0.04em]">
+        <span class="text-primary dark:text-dark-text">~/about</span>{" "}
+        <span class="text-muted-alpha dark:text-muted-dark">$ whoami</span>
+      </p>
+
+      <h1
+        class="text-dark mt-5 text-[40px] leading-[1.2] font-bold tracking-[-0.02em] sm:text-[56px] dark:text-gray-50"
+      >
+        <span class="block">사람들과</span>
+        <span class="text-primary dark:text-dark-text block">이야기하는 걸</span
+        >
+        <span class="block">좋아하는 개발자,</span>
+        <span class="block"
+          >조성민<span class="text-muted dark:text-muted-dark">입니다.</span
+          ></span
+        >
+      </h1>
+
+      <p
+        class="text-dark mt-6 flex items-center gap-2.5 text-[17px] font-bold tracking-[-0.015em] sm:text-[20px] dark:text-gray-50"
+      >
+        <span
+          class="bg-primary dark:bg-dark-text size-2 shrink-0 rounded-full"
+          aria-hidden="true"></span>
+        Next.js와 React로 사용자 경험을 만드는 프론트엔드 개발자
+      </p>
+
+      <div
+        class="text-description dark:text-muted mt-5 flex flex-col gap-1 text-[16px] leading-[1.75] break-keep sm:text-[17px]"
+      >
+        <p>코드를 작성하는 시간만큼 대화하는 시간을 중요하게 생각합니다.</p>
+        <p>
+          배운 것을 발표하고, 기록하고, 나누면서 함께 성장하는 방법을 찾고
+          있어요.
+        </p>
+      </div>
+
+      <div class="mt-9 flex flex-wrap gap-3">
+        <PillButton variant="primary">
+          <Icon
+            name="lucide:file-text"
+            class="size-[18px]"
+            aria-hidden="true"
+          />
+          이력서 보기
+          <Icon
+            name="lucide:arrow-up-right"
+            class="size-4"
+            aria-hidden="true"
+          />
+        </PillButton>
+        <PillButton variant="outline">
+          포트폴리오
+          <Icon
+            name="lucide:arrow-up-right"
+            class="text-muted-alpha dark:text-muted-dark size-4"
+            aria-hidden="true"
+          />
+        </PillButton>
+      </div>
+    </div>
+
+    <div class="flex lg:col-span-5 lg:justify-end lg:pt-2">
+      <div
+        class="border-primary/20 bg-primary-surface dark:border-dark-text/25 dark:bg-primary-surface-dark flex aspect-square w-full max-w-[440px] items-center justify-center rounded-[32px] border border-dashed"
+      >
+        <span
+          class="text-muted-alpha dark:text-muted-dark font-mono text-[13px]"
+        >
+          three.js · coming soon
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
