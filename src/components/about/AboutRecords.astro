@@ -13,7 +13,11 @@ interface Props {
 const { postCount, archiveCount, topTags } = Astro.props;
 
 const recordCardClass =
-  "border-border bg-white hover:bg-primary-surface hover:border-primary/30 dark:border-border-dark dark:bg-dark dark:hover:bg-primary-surface-dark dark:hover:border-dark-text/30 flex flex-col rounded-3xl border p-8 no-underline transition-colors duration-200";
+  "group border-border bg-white hover:border-primary dark:border-border-dark dark:bg-dark dark:hover:border-dark-text flex flex-col rounded-3xl border p-8 no-underline transition-colors duration-200";
+const recordLabelClass =
+  "text-description dark:text-muted mt-5 flex items-center justify-between text-[17px] transition-colors duration-200 group-hover:text-primary dark:group-hover:text-dark-text";
+const recordArrowClass =
+  "size-4 transition-transform duration-200 group-hover:translate-x-1 motion-reduce:transition-none";
 ---
 
 <AboutSection
@@ -31,11 +35,13 @@ const recordCardClass =
         >
           {postCount}
         </span>
-        <span
-          class="text-description dark:text-muted mt-5 flex items-center justify-between text-[17px]"
-        >
+        <span class={recordLabelClass}>
           개의 블로그 글
-          <Icon name="lucide:arrow-right" class="size-4" aria-hidden="true" />
+          <Icon
+            name="lucide:arrow-right"
+            class={recordArrowClass}
+            aria-hidden="true"
+          />
         </span>
       </a>
       <a href={archiveIndexPath()} class={recordCardClass} data-astro-prefetch>
@@ -44,11 +50,13 @@ const recordCardClass =
         >
           {archiveCount}
         </span>
-        <span
-          class="text-description dark:text-muted mt-5 flex items-center justify-between text-[17px]"
-        >
+        <span class={recordLabelClass}>
           개의 끄적임
-          <Icon name="lucide:arrow-right" class="size-4" aria-hidden="true" />
+          <Icon
+            name="lucide:arrow-right"
+            class={recordArrowClass}
+            aria-hidden="true"
+          />
         </span>
       </a>
     </div>
