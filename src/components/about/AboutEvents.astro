@@ -1,0 +1,72 @@
+---
+import { Icon } from "astro-icon/components";
+import AboutSection from "@/components/about/AboutSection.astro";
+import { ABOUT_EVENTS } from "@/lib/about";
+
+const totalLabel = String(ABOUT_EVENTS.length).padStart(2, "0");
+const navButtonClass =
+  "border-border bg-white text-dark dark:border-border-dark dark:bg-dark dark:text-gray-50 inline-flex size-12 cursor-pointer items-center justify-center rounded-full border transition-colors duration-150 enabled:hover:bg-hover-overlay-light disabled:cursor-default disabled:opacity-35 dark:enabled:hover:bg-hover-overlay-dark";
+---
+
+<AboutSection
+  number="04"
+  title="다녀온 행사들"
+  id="about-events"
+  description="직접 발표하고, 참여하고, 사람들을 만났던 순간들"
+>
+  <div slot="actions" class="flex gap-2.5">
+    <button
+      type="button"
+      class={navButtonClass}
+      aria-label="이전 행사"
+      disabled
+    >
+      <Icon name="lucide:chevron-left" class="size-5" aria-hidden="true" />
+    </button>
+    <button type="button" class={navButtonClass} aria-label="다음 행사">
+      <Icon name="lucide:chevron-right" class="size-5" aria-hidden="true" />
+    </button>
+  </div>
+
+  <div
+    role="region"
+    aria-label="다녀온 행사 목록"
+    tabindex="0"
+    class="snap-x overflow-x-auto"
+  >
+    <ul class="flex gap-6">
+      {
+        ABOUT_EVENTS.map((event) => (
+          <li class="w-[85%] shrink-0 snap-start sm:w-[48%] lg:w-[calc((100%-48px)/3)]">
+            <div class="border-border bg-inline-code-surface dark:border-border-dark dark:bg-inline-code-surface-dark flex aspect-[4/3] items-center justify-center rounded-3xl border">
+              <span class="text-muted-alpha dark:text-muted-dark text-sm">
+                실제 행사 사진
+              </span>
+            </div>
+            <h3 class="text-dark mt-4 text-[22px] leading-[1.35] font-bold tracking-[-0.02em] dark:text-gray-50">
+              {event.title}
+            </h3>
+            <p class="text-description dark:text-muted mt-1.5 text-[17px] leading-[1.75] break-keep">
+              {event.description}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="mt-8 flex items-center gap-4">
+    <div
+      class="bg-border dark:bg-border-dark relative h-0.5 flex-1 overflow-hidden rounded-full"
+      aria-hidden="true"
+    >
+      <div
+        class="bg-primary dark:bg-dark-text absolute inset-y-0 left-0 w-1/3 rounded-full"
+      >
+      </div>
+    </div>
+    <span class="text-muted-alpha dark:text-muted-dark font-mono text-[13px]">
+      01 / {totalLabel}
+    </span>
+  </div>
+</AboutSection>
