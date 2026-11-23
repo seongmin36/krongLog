@@ -3,7 +3,12 @@ import { Icon } from "astro-icon/components";
 import AboutDivider from "@/components/about/AboutDivider.astro";
 import PillButton from "@/components/about/PillButton.astro";
 import { AppIcon } from "@/components/ui/AppIcons";
-import { ABOUT_GITHUB_URL, ABOUT_LINKEDIN_URL } from "@/lib/about";
+import {
+  ABOUT_EMAIL,
+  ABOUT_GITHUB_URL,
+  ABOUT_LINKEDIN_URL,
+  ABOUT_RESUME_HREF,
+} from "@/lib/about";
 
 // 장식 이력서 미리보기의 막대 묶음 (묶음마다 첫 막대는 굵은 제목 막대)
 const barGroups = [
@@ -12,8 +17,11 @@ const barGroups = [
   ["w-[46%]", "w-[94%]", "w-[80%]", "w-[62%]"],
 ];
 
+const emailButtonClass =
+  "group border-border text-dark hover:border-primary hover:text-primary dark:border-border-dark dark:text-gray-50 dark:hover:border-dark-text dark:hover:text-dark-text inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border px-4 font-mono text-[13px] transition-colors duration-200";
+
 const socialButtonClass =
-  "border-border text-description hover:bg-hover-overlay-light hover:text-dark dark:border-border-dark dark:text-muted dark:hover:bg-hover-overlay-dark dark:hover:text-gray-50 inline-flex size-10 items-center justify-center rounded-full border transition-colors duration-200";
+  "border-border text-description hover:border-primary hover:text-primary dark:border-border-dark dark:text-muted dark:hover:border-dark-text dark:hover:text-dark-text inline-flex size-10 items-center justify-center rounded-full border transition-colors duration-200";
 ---
 
 <AboutDivider />
@@ -54,9 +62,12 @@ const socialButtonClass =
             />
             이력서 다운로드
           </PillButton>
-          <PillButton variant="outline">
+          <PillButton
+            variant="outline"
+            href={ABOUT_RESUME_HREF}
+            trailing="arrow-right"
+          >
             웹에서 보기
-            <Icon name="lucide:arrow-right" class="size-4" aria-hidden="true" />
           </PillButton>
         </div>
 
@@ -75,13 +86,20 @@ const socialButtonClass =
           <div class="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
-              aria-label="이메일 주소 복사"
-              class="border-border text-dark hover:bg-hover-overlay-light dark:border-border-dark dark:hover:bg-hover-overlay-dark inline-flex h-10 cursor-pointer items-center gap-2 rounded-full border px-4 font-mono text-[13px] transition-colors duration-200 dark:text-gray-50"
+              aria-label={`이메일 주소 ${ABOUT_EMAIL} 복사`}
+              class={emailButtonClass}
+              data-email={ABOUT_EMAIL}
+              data-email-copy
             >
-              [email@domain]
+              {ABOUT_EMAIL}
               <Icon
                 name="lucide:copy"
-                class="text-muted-alpha dark:text-muted-dark size-4"
+                class="text-muted-alpha dark:text-muted-dark size-4 group-data-copied:hidden"
+                aria-hidden="true"
+              />
+              <Icon
+                name="lucide:check"
+                class="text-primary dark:text-dark-text hidden size-4 group-data-copied:block"
                 aria-hidden="true"
               />
             </button>
@@ -107,21 +125,27 @@ const socialButtonClass =
         </div>
       </div>
 
-      <!-- 장식용 이력서 미리보기 -->
-      <div
-        class="relative mx-auto hidden h-[368px] w-[280px] lg:block"
-        aria-hidden="true"
+      <!-- 장식용 이력서 미리보기. 전체가 이력서 링크다 -->
+      <a
+        href={ABOUT_RESUME_HREF}
+        aria-label="이력서 보기"
+        role={ABOUT_RESUME_HREF ? undefined : "link"}
+        aria-disabled={ABOUT_RESUME_HREF ? undefined : "true"}
+        class="group relative mx-auto hidden h-[368px] w-[280px] no-underline lg:block"
       >
         <div
-          class="border-border bg-inline-code-surface dark:border-border-dark dark:bg-inline-code-surface-dark absolute inset-0 -rotate-6 rounded-3xl border"
+          class="border-border bg-inline-code-surface dark:border-border-dark dark:bg-inline-code-surface-dark absolute inset-0 -rotate-6 rounded-3xl border transition-[rotate,translate] duration-500 ease-out group-hover:-translate-x-4 group-hover:-rotate-11 motion-reduce:transition-none"
+          aria-hidden="true"
         >
         </div>
         <div
-          class="border-border dark:border-border-dark bg-highlight-pen dark:bg-primary-surface-dark absolute inset-0 rotate-4 rounded-3xl border"
+          class="border-border dark:border-border-dark bg-highlight-pen dark:bg-primary-surface-dark absolute inset-0 rotate-4 rounded-3xl border transition-[rotate,translate] duration-500 ease-out group-hover:translate-x-4 group-hover:rotate-8 motion-reduce:transition-none"
+          aria-hidden="true"
         >
         </div>
         <div
-          class="border-border dark:border-border-dark dark:bg-dark relative flex h-full flex-col rounded-3xl border bg-white p-7 drop-shadow-[0_16px_18px_var(--color-border)]"
+          class="border-border dark:border-border-dark dark:bg-dark group-hover:border-primary dark:group-hover:border-dark-text relative flex h-full flex-col rounded-3xl border bg-white p-7 shadow-[0_16px_36px_-20px_var(--color-border)] transition-[translate,border-color] duration-500 ease-out group-hover:-translate-y-1.5 motion-reduce:transition-none"
+          aria-hidden="true"
         >
           <p
             class="text-dark text-[22px] leading-[1.5] font-bold tracking-[-0.02em] dark:text-gray-50"
@@ -161,12 +185,51 @@ const socialButtonClass =
             </span>
             <Icon
               name="lucide:arrow-up-right"
-              class="text-muted-alpha dark:text-muted-dark size-4"
+              class="text-muted-alpha dark:text-muted-dark group-hover:text-primary dark:group-hover:text-dark-text size-4 transition-colors duration-500 ease-out motion-reduce:transition-none"
               aria-hidden="true"
             />
           </div>
         </div>
-      </div>
+      </a>
     </div>
   </div>
 </section>
+
+<script>
+  // 상수
+  const COPIED_DURATION_MS = 1800;
+
+  // DOM 참조
+  const copyButton =
+    document.querySelector<HTMLButtonElement>("[data-email-copy]");
+
+  // 상태
+  let resetTimer: ReturnType<typeof setTimeout> | undefined;
+
+  // 렌더 (상태 → DOM)
+  function setCopied(copied: boolean) {
+    if (!copyButton) return;
+    if (copied) {
+      copyButton.dataset.copied = "";
+    } else {
+      delete copyButton.dataset.copied;
+    }
+  }
+
+  // 액션
+  async function copyEmail() {
+    if (!copyButton) return;
+    try {
+      await navigator.clipboard.writeText(copyButton.dataset.email ?? "");
+    } catch {
+      // clipboard 미지원 환경은 무시한다
+      return;
+    }
+    clearTimeout(resetTimer);
+    setCopied(true);
+    resetTimer = setTimeout(() => setCopied(false), COPIED_DURATION_MS);
+  }
+
+  // 이벤트 연결
+  copyButton?.addEventListener("click", copyEmail);
+</script>
