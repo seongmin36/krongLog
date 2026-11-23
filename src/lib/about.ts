@@ -1,5 +1,9 @@
 export const ABOUT_GITHUB_URL = "https://github.com/seongmin36";
 export const ABOUT_LINKEDIN_URL = "https://www.linkedin.com/in/krongsungmin/";
+// 페이지가 생기면 여기에 주소를 넣는다. 없으면 버튼이 비활성 자리표시로 그려진다.
+export const ABOUT_RESUME_HREF: string | undefined = undefined;
+export const ABOUT_PORTFOLIO_HREF: string | undefined = undefined;
+export const ABOUT_EMAIL = "[email@domain]";
 
 export interface AboutValue {
   title: string;
@@ -86,6 +90,38 @@ export const ABOUT_ACTIVITIES: AboutActivity[] = [
     category: "발표",
     title: "교내 Git/GitHub 세션",
     summary: "초보자를 위한 GitHub 가이드 기획부터 자료 제작, 진행까지 담당",
+    period: "[YYYY.MM]",
+    learned: "[배운 점 한 줄]",
+    link: { label: "GitHub" },
+  },
+  {
+    category: "[분류]",
+    title: "[활동 이름]",
+    summary: "[한 줄 설명]",
+    period: "[YYYY.MM]",
+    learned: "[배운 점 한 줄]",
+    link: { label: "GitHub" },
+  },
+  {
+    category: "[분류]",
+    title: "[활동 이름]",
+    summary: "[한 줄 설명]",
+    period: "[YYYY.MM]",
+    learned: "[배운 점 한 줄]",
+    link: { label: "GitHub" },
+  },
+  {
+    category: "[분류]",
+    title: "[활동 이름]",
+    summary: "[한 줄 설명]",
+    period: "[YYYY.MM]",
+    learned: "[배운 점 한 줄]",
+    link: { label: "GitHub" },
+  },
+  {
+    category: "[분류]",
+    title: "[활동 이름]",
+    summary: "[한 줄 설명]",
     period: "[YYYY.MM]",
     learned: "[배운 점 한 줄]",
     link: { label: "GitHub" },
