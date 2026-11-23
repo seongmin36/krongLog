@@ -1,0 +1,59 @@
+---
+import { Icon } from "astro-icon/components";
+import AboutSection from "@/components/about/AboutSection.astro";
+import CategoryPill from "@/components/about/CategoryPill.astro";
+import PillButton from "@/components/about/PillButton.astro";
+import { ABOUT_ACTIVITIES } from "@/lib/about";
+---
+
+<AboutSection number="03" title="활동" id="about-activities">
+  <ul class="border-border dark:border-border-dark border-t">
+    {
+      ABOUT_ACTIVITIES.map((activity) => (
+        <li class="border-border dark:border-border-dark flex flex-col gap-4 border-b py-8 lg:grid lg:grid-cols-[69px_360px_1fr_140px] lg:items-start lg:gap-x-6">
+          <div class="mt-0.5">
+            <CategoryPill label={activity.category} />
+          </div>
+          <h3 class="text-dark text-[20px] leading-[1.4] font-bold tracking-[-0.02em] dark:text-gray-50">
+            {activity.title}
+          </h3>
+          <div class="flex flex-col gap-1.5">
+            <p class="text-description dark:text-muted text-[16px] leading-[1.75] break-keep">
+              {activity.summary}
+            </p>
+            <p class="text-muted-alpha dark:text-muted-dark font-mono text-[13px]">
+              {activity.period}
+            </p>
+            <p class="text-muted-alpha dark:text-muted-dark flex items-start gap-2 text-[15px] leading-[1.65] break-keep">
+              <Icon
+                name="lucide:arrow-right"
+                class="mt-1 size-4 shrink-0"
+                aria-hidden="true"
+              />
+              <span>{activity.learned}</span>
+            </p>
+          </div>
+          <PillButton variant="outline" padding="px-4" class="w-[140px]">
+            {activity.link.label}
+            <Icon
+              name="lucide:arrow-up-right"
+              class="text-muted-alpha dark:text-muted-dark size-4"
+              aria-hidden="true"
+            />
+          </PillButton>
+        </li>
+      ))
+    }
+  </ul>
+
+  <div class="mt-8">
+    <PillButton variant="outline" type="button">
+      전체 활동 더 보기 (+4)
+      <Icon
+        name="lucide:chevron-down"
+        class="text-muted-alpha dark:text-muted-dark size-4"
+        aria-hidden="true"
+      />
+    </PillButton>
+  </div>
+</AboutSection>
