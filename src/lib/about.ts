@@ -149,11 +149,33 @@ export const ABOUT_ACTIVITIES: AboutActivity[] = [
   },
 ];
 
+// 최근 행사부터 적는다.
 export const ABOUT_EVENTS: AboutEvent[] = [
-  { title: "UMCON #2", description: "UMC 연합 행사 발표 세션 참여" },
-  { title: "UMCON #3", description: "UMC 네트워킹 행사 참여" },
   {
     title: "우아콘 2026",
     description: "critical-script 세션 발표자에게 측정 편차 질문",
+  },
+  {
+    title: "PyCon Korea 2026 스프린트",
+    description: "김인제 님의 '누구나 원하는 오픈소스에 기여를!' 스프린트 참여",
+  },
+  {
+    title: "인공지능 페스타(AI FESTA) 2026",
+    description: "행사 참여 및 네트워킹",
+  },
+  { title: "K-DEVCON", description: "컨퍼런스 연사 발표 청취" },
+  { title: "UMC 9기 데모데이", description: "Travlocks 프로젝트 시연 및 설명" },
+  {
+    title: "9기 UMCON",
+    description: "UMC 컨퍼런스 연사 발표 청취 및 네트워킹",
+  },
+  {
+    title: "TEO Conf 2025",
+    description: "컨퍼런스 연사 발표 청취 및 네트워킹",
+  },
+  { title: "UMC 8기 데모데이", description: "CHICCHIC 프로젝트로 참여" },
+  {
+    title: "8기 UMCON",
+    description: "UMC 컨퍼런스 연사 발표 청취 및 네트워킹",
   },
 ];
