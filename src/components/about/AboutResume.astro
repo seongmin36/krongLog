@@ -9,6 +9,7 @@ import {
   ABOUT_LINKEDIN_URL,
   ABOUT_RESUME_HREF,
 } from "@/lib/about";
+import { RESUME_PDF_HREF, RESUME_PDF_NAME } from "@/lib/resume-file";
 
 // 장식 이력서 미리보기의 막대 묶음 (묶음마다 첫 막대는 굵은 제목 막대)
 const barGroups = [
@@ -26,7 +27,7 @@ const socialButtonClass =
 
 <AboutDivider />
 
-<section aria-labelledby="about-resume-title" class="pt-16 lg:pt-30">
+<section aria-labelledby="about-resume-title" class="py-16 lg:py-30">
   <div
     class="border-border dark:border-border-dark dark:bg-dark rounded-[32px] border bg-white p-6 sm:p-10 lg:p-14"
   >
@@ -41,10 +42,7 @@ const socialButtonClass =
           id="about-resume-title"
           class="text-dark mt-3 text-[26px] leading-[1.28] font-bold tracking-[-0.02em] sm:text-[32px] dark:text-gray-50"
         >
-          <span class="block">코드 밖의 이야기까지,</span>
-          <span class="text-muted dark:text-muted-dark block"
-            >한 장에 담았어요.</span
-          >
+          이력서
         </h2>
         <p
           class="text-description dark:text-muted mt-4 text-[17px] leading-[1.75] break-keep"
@@ -54,7 +52,13 @@ const socialButtonClass =
         </p>
 
         <div class="mt-7 flex flex-wrap gap-3">
-          <PillButton variant="primary">
+          <PillButton
+            variant="primary"
+            href={RESUME_PDF_HREF}
+            download={RESUME_PDF_NAME}
+            disabled={!RESUME_PDF_HREF}
+            data-astro-prefetch="false"
+          >
             <Icon
               name="lucide:download"
               class="size-[18px]"
@@ -81,7 +85,7 @@ const socialButtonClass =
           class="border-border dark:border-border-dark mt-7 flex flex-wrap items-center gap-3.5 border-t pt-7"
         >
           <p class="text-description dark:text-muted text-[15px] font-bold">
-            연락하기
+            Contact
           </p>
           <div class="flex flex-wrap items-center gap-2.5">
             <button
@@ -103,24 +107,26 @@ const socialButtonClass =
                 aria-hidden="true"
               />
             </button>
-            <a
-              href={ABOUT_GITHUB_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub"
-              class={socialButtonClass}
-            >
-              <AppIcon name="github" className="size-[18px]" />
-            </a>
-            <a
-              href={ABOUT_LINKEDIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="LinkedIn"
-              class={socialButtonClass}
-            >
-              <AppIcon name="linkedin" className="size-[18px]" />
-            </a>
+            <div class="flex gap-2.5">
+              <a
+                href={ABOUT_GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="GitHub"
+                class={socialButtonClass}
+              >
+                <AppIcon name="github" className="size-[18px]" />
+              </a>
+              <a
+                href={ABOUT_LINKEDIN_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                class={socialButtonClass}
+              >
+                <AppIcon name="linkedin" className="size-[18px]" />
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -129,9 +135,7 @@ const socialButtonClass =
       <a
         href={ABOUT_RESUME_HREF}
         aria-label="이력서 보기"
-        role={ABOUT_RESUME_HREF ? undefined : "link"}
-        aria-disabled={ABOUT_RESUME_HREF ? undefined : "true"}
-        class="group relative mx-auto hidden h-[368px] w-[280px] no-underline lg:block"
+        class="group relative mx-auto hidden h-[368px] w-[280px] cursor-pointer no-underline lg:block"
       >
         <div
           class="border-border bg-inline-code-surface dark:border-border-dark dark:bg-inline-code-surface-dark absolute inset-0 -rotate-6 rounded-3xl border transition-[rotate,translate] duration-500 ease-out group-hover:-translate-x-4 group-hover:-rotate-11 motion-reduce:transition-none"
