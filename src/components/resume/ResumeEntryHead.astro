@@ -1,0 +1,33 @@
+---
+import type { ResumeEntry } from "@/lib/resume";
+
+interface Props {
+  entry: ResumeEntry;
+}
+
+const { entry } = Astro.props;
+---
+
+<div>
+  <div class="flex flex-wrap items-baseline justify-between gap-x-4">
+    <div class="flex flex-wrap items-baseline gap-x-2.5">
+      <h3 class="text-dark text-[15.5px] font-bold">{entry.name}</h3>
+      <p class="text-dark text-[14.5px]">{entry.title}</p>
+    </div>
+    <p class="text-description text-[12.5px] whitespace-nowrap">
+      {entry.period}
+    </p>
+  </div>
+  {
+    entry.meta.map((line, index) => (
+      <p
+        class:list={[
+          "text-description text-[12.5px] leading-[1.5]",
+          index === 0 ? "mt-1" : "mt-0.5",
+        ]}
+      >
+        {line}
+      </p>
+    ))
+  }
+</div>

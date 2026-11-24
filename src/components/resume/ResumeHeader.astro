@@ -1,0 +1,57 @@
+---
+import type { ResumeLink } from "@/lib/resume";
+
+interface Contact extends ResumeLink {
+  term: string;
+}
+
+interface Props {
+  name: string;
+  role: string;
+  contacts: Contact[];
+}
+
+const { name, role, contacts } = Astro.props;
+const linkClass = "text-resume-accent break-all no-underline hover:underline";
+---
+
+<header
+  class="border-border flex flex-col gap-6 border-b pb-6 sm:flex-row sm:items-end sm:justify-between"
+>
+  <div>
+    <h1
+      class="text-dark text-[32px] leading-[1.2] font-bold tracking-[-0.02em]"
+    >
+      {name}
+    </h1>
+    <p class="text-description mt-1.5 text-[15px]">{role}</p>
+  </div>
+
+  <dl
+    class="grid grid-cols-[68px_auto] gap-x-3 gap-y-1 text-[13px] leading-[1.5]"
+  >
+    {
+      contacts.map((contact) => (
+        <>
+          <dt class="text-description">{contact.term}</dt>
+          <dd class="min-w-0">
+            {contact.href.startsWith("mailto:") ? (
+              <a href={contact.href} class={linkClass}>
+                {contact.label}
+              </a>
+            ) : (
+              <a
+                href={contact.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class={linkClass}
+              >
+                {contact.label}
+              </a>
+            )}
+          </dd>
+        </>
+      ))
+    }
+  </dl>
+</header>

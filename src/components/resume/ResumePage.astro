@@ -1,0 +1,84 @@
+---
+import ResumeToolbar from "@/components/resume/ResumeToolbar.astro";
+import ResumeHeader from "@/components/resume/ResumeHeader.astro";
+import ResumeSection from "@/components/resume/ResumeSection.astro";
+import ResumeBullets from "@/components/resume/ResumeBullets.astro";
+import ResumeProject from "@/components/resume/ResumeProject.astro";
+import ResumeOpenSource from "@/components/resume/ResumeOpenSource.astro";
+import ResumeAiProject from "@/components/resume/ResumeAiProject.astro";
+import ResumeActivities from "@/components/resume/ResumeActivities.astro";
+import ResumeSkills from "@/components/resume/ResumeSkills.astro";
+import ResumeEducation from "@/components/resume/ResumeEducation.astro";
+import {
+  RESUME_ACTIVITIES,
+  RESUME_AI_PROJECT,
+  RESUME_AI_PROJECT_DETAILS,
+  RESUME_AI_PROJECT_LINKS,
+  RESUME_BLOG,
+  RESUME_CONTACTS,
+  RESUME_CONTRIBUTIONS,
+  RESUME_EDUCATION,
+  RESUME_INTRO,
+  RESUME_METRICS,
+  RESUME_METRICS_NOTE,
+  RESUME_NAME,
+  RESUME_OPEN_SOURCE,
+  RESUME_PROJECT,
+  RESUME_PROJECT_DETAILS,
+  RESUME_PROJECT_LINKS,
+  RESUME_PROJECT_ROLE,
+  RESUME_ROLE,
+  RESUME_SKILLS,
+} from "@/lib/resume";
+import "@/styles/resume.css";
+---
+
+<div
+  class="about-page mx-auto max-w-[852px] pt-8 pb-24 print:max-w-none print:pt-0 print:pb-0"
+>
+  <ResumeToolbar />
+  <article
+    class="border-border text-dark mt-6 rounded-[14px] border bg-white p-6 shadow-[0_12px_40px_var(--color-border)] sm:p-10 lg:p-14 print:mt-0 print:border-0 print:p-0 print:shadow-none"
+  >
+    <ResumeHeader
+      name={RESUME_NAME}
+      role={RESUME_ROLE}
+      contacts={RESUME_CONTACTS}
+    />
+    <ResumeSection title="소개" first>
+      <ResumeBullets items={RESUME_INTRO} />
+    </ResumeSection>
+    <ResumeSection title="대표 프로젝트">
+      <ResumeProject
+        entry={RESUME_PROJECT}
+        role={RESUME_PROJECT_ROLE}
+        metrics={RESUME_METRICS}
+        metricsNote={RESUME_METRICS_NOTE}
+        details={RESUME_PROJECT_DETAILS}
+        links={RESUME_PROJECT_LINKS}
+      />
+    </ResumeSection>
+    <ResumeSection title="오픈소스 기여">
+      <ResumeOpenSource
+        entry={RESUME_OPEN_SOURCE}
+        contributions={RESUME_CONTRIBUTIONS}
+      />
+    </ResumeSection>
+    <ResumeSection title="AI 프로젝트">
+      <ResumeAiProject
+        entry={RESUME_AI_PROJECT}
+        details={RESUME_AI_PROJECT_DETAILS}
+        links={RESUME_AI_PROJECT_LINKS}
+      />
+    </ResumeSection>
+    <ResumeSection title="활동">
+      <ResumeActivities items={RESUME_ACTIVITIES} blog={RESUME_BLOG} />
+    </ResumeSection>
+    <ResumeSection title="기술">
+      <ResumeSkills items={RESUME_SKILLS} />
+    </ResumeSection>
+    <ResumeSection title="학력">
+      <ResumeEducation education={RESUME_EDUCATION} />
+    </ResumeSection>
+  </article>
+</div>

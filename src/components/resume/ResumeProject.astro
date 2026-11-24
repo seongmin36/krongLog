@@ -1,0 +1,56 @@
+---
+import ResumeBullets from "@/components/resume/ResumeBullets.astro";
+import ResumeEntryHead from "@/components/resume/ResumeEntryHead.astro";
+import ResumeLinks from "@/components/resume/ResumeLinks.astro";
+import ResumeMetrics from "@/components/resume/ResumeMetrics.astro";
+import type {
+  ResumeEntry,
+  ResumeLink,
+  ResumeMetric,
+  ResumeText,
+} from "@/lib/resume";
+
+interface DetailGroup {
+  title: string;
+  items: ResumeText[];
+}
+
+interface Props {
+  entry: ResumeEntry;
+  role: ResumeText;
+  metrics: ResumeMetric[];
+  metricsNote: string;
+  details: DetailGroup[];
+  links: ResumeLink[];
+}
+
+const { entry, role, metrics, metricsNote, details, links } = Astro.props;
+---
+
+<div>
+  <ResumeEntryHead entry={entry} />
+  <p class="mt-3 text-[13.5px] leading-[1.7] break-keep">
+    {
+      role.lead && (
+        <>
+          <strong class="font-bold">{role.lead}</strong>{" "}
+        </>
+      )
+    }
+    {role.text}
+  </p>
+  <ResumeMetrics metrics={metrics} note={metricsNote} />
+  <div class="mt-4 flex flex-col gap-3.5">
+    {
+      details.map((group) => (
+        <div>
+          <h4 class="text-dark text-[13.5px] leading-[1.5] font-bold">
+            {group.title}
+          </h4>
+          <ResumeBullets items={group.items} class="mt-1" />
+        </div>
+      ))
+    }
+  </div>
+  <ResumeLinks links={links} />
+</div>

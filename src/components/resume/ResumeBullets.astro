@@ -1,0 +1,30 @@
+---
+import type { ResumeText } from "@/lib/resume";
+
+interface Props {
+  items: ResumeText[];
+  class?: string;
+}
+
+const { items, class: className } = Astro.props;
+---
+
+<ul class:list={["flex flex-col gap-1.5", className]}>
+  {
+    items.map((item) => (
+      <li class="grid break-inside-avoid grid-cols-[12px_1fr] text-[13.5px] leading-[1.7] break-keep">
+        <span aria-hidden="true" class="text-description">
+          •
+        </span>
+        <span>
+          {item.lead && (
+            <>
+              <strong class="font-bold">{item.lead}</strong>{" "}
+            </>
+          )}
+          {item.text}
+        </span>
+      </li>
+    ))
+  }
+</ul>

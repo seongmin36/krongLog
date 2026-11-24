@@ -1,0 +1,19 @@
+---
+interface Props {
+  title: string;
+  first?: boolean;
+}
+
+const { title, first = false } = Astro.props;
+const headingId = `resume-${title.replace(/\s+/g, "-")}`;
+---
+
+<section aria-labelledby={headingId} class={first ? "mt-7" : "mt-8"}>
+  <h2 id={headingId} class="text-dark text-[18px] leading-[1.5] font-bold">
+    {title}
+  </h2>
+  <div class="bg-resume-accent mt-1.5 h-0.5 w-7" aria-hidden="true"></div>
+  <div class="mt-3.5">
+    <slot />
+  </div>
+</section>

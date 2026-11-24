@@ -1,0 +1,46 @@
+---
+import ResumeRow from "@/components/resume/ResumeRow.astro";
+import type { ResumeLink, ResumeText } from "@/lib/resume";
+
+interface ResumeActivity extends ResumeText {
+  period: string;
+}
+
+interface ResumeBlog {
+  lead: string;
+  link: ResumeLink;
+  text: string;
+}
+
+interface Props {
+  items: ResumeActivity[];
+  blog: ResumeBlog;
+}
+
+const { items, blog } = Astro.props;
+---
+
+<ul class="flex flex-col gap-2">
+  {
+    items.map((item) => (
+      <li>
+        <ResumeRow lead={item.lead} period={item.period}>
+          {item.text}
+        </ResumeRow>
+      </li>
+    ))
+  }
+  <li>
+    <ResumeRow lead={blog.lead}>
+      <a
+        href={blog.link.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-resume-accent no-underline hover:underline"
+      >
+        {blog.link.label}
+      </a>
+      {blog.text}
+    </ResumeRow>
+  </li>
+</ul>

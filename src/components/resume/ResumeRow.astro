@@ -1,0 +1,28 @@
+---
+interface Props {
+  lead?: string;
+  period?: string;
+}
+
+const { lead, period } = Astro.props;
+---
+
+<div
+  class="flex flex-wrap justify-between gap-x-4 text-[13.5px] leading-[1.5] break-keep"
+>
+  <p>
+    {
+      lead && (
+        <>
+          <strong class="font-bold">{lead}</strong>{" "}
+        </>
+      )
+    }
+    <slot />
+  </p>
+  {
+    period && (
+      <p class="text-description text-[12.5px] whitespace-nowrap">{period}</p>
+    )
+  }
+</div>
