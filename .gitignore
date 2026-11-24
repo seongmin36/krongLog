@@ -54,3 +54,6 @@ coverage/
 
 # 개인용 mise 설정
 mise.local.toml
+
+# 이력서 PDF (저장소에 올리지 않음)
+public/resume/
