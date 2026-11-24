@@ -168,4 +168,8 @@ html {
   --color-card-title-dark: #f0efed;
   --color-card-meta: #7d7a75;
   --color-card-meta-dark: #ada9a3;
+
+  /* 이력서 페이지 (/about/resume/). 종이는 다크 모드에서도 흰색이라 -dark 변형이 없다 */
+  --color-resume-accent: #1f4fd1;
+  --color-resume-surface: #f4f6fb;
 }

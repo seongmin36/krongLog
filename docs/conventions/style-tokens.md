@@ -101,6 +101,15 @@
 | `--color-brand-linkedin`                | LinkedIn 아이콘 hover |
 | `--color-brand-rss`                     | RSS 아이콘 hover      |
 
+### 이력서 (`/about/resume/`)
+
+| 토큰                       | 값        | 용도                                                           |
+| -------------------------- | --------- | -------------------------------------------------------------- |
+| `--color-resume-accent`    | `#1f4fd1` | 이력서 링크·수치·섹션 막대(종이 안, 라이트 고정)               |
+| `--color-resume-surface`   | `#f4f6fb` | 이력서 수치 상자 배경(종이 안, 라이트 고정)                    |
+
+종이는 다크 모드에서도 흰색이라 `-dark` 변형을 두지 않습니다. 종이 안 글자·선 색은 `text-dark`, `text-description`, `border-border` 등 기존 토큰을 씁니다.
+
 기술 태그(`--color-tag-react-*` 등) 전체 목록은 `global.css` `@theme` 블록을 참고합니다.
 
 ## 스타일 파일 위치
