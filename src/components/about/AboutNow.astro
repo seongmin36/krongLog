@@ -28,9 +28,10 @@ const lastIndex = ABOUT_NOW_ITEMS.length - 1;
           ]}
         >
           <CategoryPill label={item.label} />
-          <p class="text-description dark:text-muted min-w-0 text-[17px] leading-[1.75] break-keep">
-            {item.description}
-          </p>
+          <p
+            class="text-description dark:text-muted min-w-0 text-[17px] leading-[1.75] break-keep whitespace-pre-line"
+            set:text={item.description}
+          />
         </li>
       ))
     }
