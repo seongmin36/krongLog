@@ -1,4 +1,14 @@
 import { blogPostPath } from "@/lib/blog-url";
+import woowaconImage from "@/assets/blog/2026-woowacon/1.png";
+import pyconImage from "@/assets/about/events/2026-pycon.png";
+import aiExpoImage from "@/assets/about/events/2026-ai-expo.jpeg";
+import workshopImage from "@/assets/about/events/2026-univ-workshop.jpeg";
+import kDevconImage from "@/assets/about/events/2026-k-devcon.jpeg";
+import umc9thDemodayImage from "@/assets/about/events/2026-9th-umc-demoday.jpeg";
+import umcon9thImage from "@/assets/about/events/2026-9th-umcon.png";
+import teoconfImage from "@/assets/about/events/2025-teoconf.jpeg";
+import umc8thDemodayImage from "@/assets/about/events/2025-8th-umc-demoday.jpeg";
+import umcon8thImage from "@/assets/blog/reflection-2025/8.jpg";
 
 export const ABOUT_GITHUB_URL = "https://github.com/seongmin36";
 export const ABOUT_LINKEDIN_URL = "https://www.linkedin.com/in/krongsungmin/";
@@ -27,6 +37,8 @@ export interface AboutActivity {
 export interface AboutEvent {
   title: string;
   description: string;
+  date?: string;
+  image?: ImageMetadata;
 }
 
 export const ABOUT_VALUES: AboutValue[] = [
@@ -154,28 +166,62 @@ export const ABOUT_EVENTS: AboutEvent[] = [
   {
     title: "우아콘 2026",
     description: "critical-script 세션 발표자에게 측정 편차 질문",
+    date: "2026.10.28",
+    image: woowaconImage,
   },
   {
     title: "PyCon Korea 2026 스프린트",
     description: "김인제 님의 '누구나 원하는 오픈소스에 기여를!' 스프린트 참여",
+    date: "2026.08.17",
+    image: pyconImage,
   },
   {
-    title: "인공지능 페스타(AI FESTA) 2026",
+    title: "AI EXPO KOREA 2026",
     description: "행사 참여 및 네트워킹",
+    date: "2026.05.08",
+    image: aiExpoImage,
   },
-  { title: "K-DEVCON", description: "컨퍼런스 연사 발표 청취" },
-  { title: "UMC 9기 데모데이", description: "Travlocks 프로젝트 시연 및 설명" },
+  {
+    title: "송요창 님 초청 워크샵",
+    description:
+      "배달의민족 개발자 송요창 님의 '프롬프트로 간단한 프로그램 만들기' 워크샵과 진로 질의응답 멘토링 참여",
+    date: "2026.05.08",
+    image: workshopImage,
+  },
+  {
+    title: "K-DEVCON",
+    description: "컨퍼런스 연사 발표 청취",
+    date: "2026.03.21",
+    image: kDevconImage,
+  },
+  {
+    title: "UMC 9기 데모데이",
+    description: "Travlocks 프로젝트 시연 및 설명",
+    date: "2026.02.20",
+    image: umc9thDemodayImage,
+  },
   {
     title: "9기 UMCON",
     description: "UMC 컨퍼런스 연사 발표 청취 및 네트워킹",
+    date: "2026.01.24",
+    image: umcon9thImage,
   },
   {
     title: "TEO Conf 2025",
     description: "컨퍼런스 연사 발표 청취 및 네트워킹",
+    date: "2025.12.06",
+    image: teoconfImage,
   },
-  { title: "UMC 8기 데모데이", description: "CHICCHIC 프로젝트로 참여" },
+  {
+    title: "UMC 8기 데모데이",
+    description: "CHICCHIC 프로젝트로 참여",
+    date: "2025.08.22",
+    image: umc8thDemodayImage,
+  },
   {
     title: "8기 UMCON",
     description: "UMC 컨퍼런스 연사 발표 청취 및 네트워킹",
+    date: "2025.07.27",
+    image: umcon8thImage,
   },
 ];
