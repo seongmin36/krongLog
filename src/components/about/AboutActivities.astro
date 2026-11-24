@@ -8,6 +8,10 @@ import { ABOUT_ACTIVITIES } from "@/lib/about";
 // 처음 보이는 활동 개수. 나머지는 더 보기로 펼친다
 const VISIBLE_COUNT = 4;
 const extraCount = ABOUT_ACTIVITIES.length - VISIBLE_COUNT;
+
+// lg 미만은 제목 옆 작은 버튼, lg 이상은 마지막 칸의 큰 버튼으로 그린다
+const linkButtonClass =
+  "max-lg:h-7 max-lg:gap-1 max-lg:px-2.5 max-lg:text-[13px] max-lg:[&>svg]:size-3.5 lg:order-last lg:w-[140px]";
 ---
 
 <AboutSection number="03" title="활동" id="about-activities">
@@ -27,9 +31,21 @@ const extraCount = ABOUT_ACTIVITIES.length - VISIBLE_COUNT;
             <div class="mt-0.5">
               <CategoryPill label={activity.category} />
             </div>
-            <h3 class="text-dark text-[20px] leading-[1.4] font-bold tracking-[-0.02em] dark:text-gray-50">
-              {activity.title}
-            </h3>
+            <div class="flex items-start gap-3 lg:contents">
+              <h3 class="text-dark min-w-0 text-[20px] leading-[1.4] font-bold tracking-[-0.02em] break-keep dark:text-gray-50">
+                {activity.title}
+              </h3>
+              <PillButton
+                variant="outline"
+                href={activity.link.href}
+                disabled={!activity.link.href}
+                padding="px-4"
+                class={linkButtonClass}
+                trailing="arrow-up-right"
+              >
+                {activity.link.label}
+              </PillButton>
+            </div>
             <div class="flex flex-col gap-1.5">
               <p class="text-description dark:text-muted text-[16px] leading-[1.75] break-keep">
                 {activity.summary}
@@ -46,14 +62,6 @@ const extraCount = ABOUT_ACTIVITIES.length - VISIBLE_COUNT;
                 <span>{activity.learned}</span>
               </p>
             </div>
-            <PillButton
-              variant="outline"
-              padding="px-4"
-              class="w-[140px]"
-              trailing="arrow-up-right"
-            >
-              {activity.link.label}
-            </PillButton>
           </li>
         );
       })
