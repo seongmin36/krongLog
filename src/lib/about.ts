@@ -1,9 +1,9 @@
+import { blogPostPath } from "@/lib/blog-url";
+
 export const ABOUT_GITHUB_URL = "https://github.com/seongmin36";
 export const ABOUT_LINKEDIN_URL = "https://www.linkedin.com/in/krongsungmin/";
-// 페이지가 생기면 여기에 주소를 넣는다. 없으면 버튼이 비활성 자리표시로 그려진다.
-export const ABOUT_RESUME_HREF: string | undefined = undefined;
-export const ABOUT_PORTFOLIO_HREF: string | undefined = undefined;
-export const ABOUT_EMAIL = "[email@domain]";
+export const ABOUT_RESUME_HREF = "/about/resume/";
+export const ABOUT_EMAIL = "whtjdals3625@gmail.com";
 
 export interface AboutValue {
   title: string;
@@ -31,34 +31,44 @@ export interface AboutEvent {
 
 export const ABOUT_VALUES: AboutValue[] = [
   {
-    title: "발표와 세션을 좋아합니다",
+    title: "배운 것을 발표합니다",
     description:
-      "사람들 앞에서 제가 배운 것을 공유하는 순간이 가장 설렙니다. 교내 GitHub 세션을 직접 기획하고 진행했고, UMC에서는 파트 리더로서 매주 발표 자료를 준비하며 전달력을 키웠습니다.",
+      "배운 것을 사람들 앞에서 설명할 때 가장 많이 배웁니다. UMC 9기 Web 파트장으로 매주 6명의 코드를 리뷰했고, 기수를 마치며 초보자를 위한 GitHub 가이드를 발표했습니다.",
   },
   {
-    title: "듣는 것도 좋아합니다",
+    title: "행사에 가서 듣고 묻습니다",
     description:
-      "다른 개발자들의 이야기에서 항상 새로운 영감을 얻습니다. 테오콘, UMCON 같은 행사에서 커뮤니티의 열기를 직접 느끼는 것 — 그게 저를 계속 움직이게 하는 원동력입니다.",
+      "테오콘, UMCON 같은 행사에서 다른 개발자들의 이야기를 듣고 새로운 영감을 얻습니다. 우아콘 2026에서는 제 프로젝트에서 겪은 측정 고민을 발표자분께 직접 질문했습니다.",
   },
   {
     title: "결과를 한 번 더 의심합니다",
     description:
-      "AI가 '전부 통과'라고 해도 그대로 믿지 않습니다. Storybook 접근성 실험을 16번 다시 돌려 이전 결론을 바로잡은 뒤로, 결과는 측정으로 확인하는 습관이 생겼습니다.",
+      "한 번 통과한 결과로 결론 내리지 않습니다. Storybook 접근성 검사가 전부 통과했을 때 16번 다시 돌려 실패를 찾아낸 뒤로, 한 번의 결과로 결론 내리지 않는 습관이 생겼습니다.",
   },
   {
-    title: "경험을 나누는 것이 성장이라고 믿습니다",
+    title: "기록하고 정리합니다",
     description:
-      "블로그에 글을 쓰고, 스터디에서 발표하고, 팀 회고를 문서로 정리하는 건 경험을 체화하는 과정이라고 생각합니다.",
+      "블로그에 글을 쓰고, 스터디에서 발표하고, 팀 회고를 문서로 정리하는 건 경험을 제 것으로 만드는 과정이라고 생각합니다.",
   },
 ];
 
 export const ABOUT_NOW_ITEMS: AboutNowItem[] = [
-  { label: "공부", description: "[지금 공부하고 있는 것]" },
+  {
+    label: "공부",
+    description:
+      "5issue에서 쓴 검증 도구를 다시 공부하고 있습니다.\nStorybook 접근성 검사의 경고·차단 설정, Lighthouse CI, Playwright e2e를 CI에 넣는 방법입니다.",
+  },
   {
     label: "기여",
-    description: "OSSCA 2026에서 Fedify 테스트 신뢰성 개선에 기여하고 있어요.",
+    description:
+      "OSSCA 2026에서 Fedify 테스트 신뢰성 개선에 기여하고 있습니다.",
   },
-  { label: "준비", description: "[준비 중인 발표나 글, 또는 읽고 있는 책]" },
+  { label: "블로그", description: "우아콘 2026 회고 글을 쓰고 있습니다." },
+  {
+    label: "활동",
+    description:
+      "AWS Student Builder Group 서경대학교 1기 코어 멤버로 활동하고 있습니다.",
+  },
 ];
 
 export const ABOUT_ACTIVITIES: AboutActivity[] = [
@@ -67,69 +77,83 @@ export const ABOUT_ACTIVITIES: AboutActivity[] = [
     title: "OSSCA 2026 · Fedify 멘티",
     summary: "오픈소스 컨트리뷰션 아카데미 참여, 테스트 신뢰성 PR 4건 머지",
     period: "2026.06 — 현재",
-    learned: "[배운 점 한 줄]",
-    link: { label: "GitHub" },
+    learned:
+      "실제 시간에 의존하던 테스트를 Clock 주입으로 고쳐, 언제 돌려도 같은 결과가 나오게 만드는 법을 배웠습니다",
+    link: {
+      label: "블로그",
+      href: blogPostPath("fedify-cfworkers-listen-test"),
+    },
+  },
+  {
+    category: "커뮤니티",
+    title: "AWS Student Builder Group",
+    summary: "서경대학교 AWS Student Builder Group 1기 코어 멤버",
+    period: "2026.10 — 현재",
+    learned:
+      "클라우드 자격증 스터디 운영을 위해 계획 및 스터디 리딩을 맡고 있습니다",
+    link: { label: "링크" },
   },
   {
     category: "리딩",
     title: "kt cloud TECH-UP 프론트엔드 파트 리더",
-    summary: "Frontend 2기 수료 · 22인 통합 프로젝트(5issue) 프론트엔드 리딩",
+    summary:
+      "Frontend 2기 수료 · 통합 프로젝트(5issue, 7개 직군 22명) 프론트엔드 파트 리더",
     period: "2026.03 — 2026.10",
-    learned: "[배운 점 한 줄]",
-    link: { label: "GitHub" },
+    learned:
+      "API 명세만 있으면 백엔드를 기다리지 않고도 Zod 스키마와 MSW 목으로 화면을 먼저 만들 수 있다는 걸 배웠습니다",
+    link: { label: "GitHub", href: "https://github.com/5issue/total-client" },
+  },
+  {
+    category: "발표",
+    title: "UMC 9기 GitHub 가이드 발표",
+    summary:
+      "초보자도 이해하기 쉬운 실전 최적화 GitHub 가이드, 기획부터 자료 제작과 발표까지 담당",
+    period: "2026.03",
+    learned:
+      "처음 서 본 발표에서, 아는 것과 남에게 설명할 수 있는 것은 다르다는 걸 배웠습니다",
+    link: {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/feed/update/urn:li:activity:7440791682192896000/",
+    },
+  },
+  {
+    category: "공모전",
+    title: "ICT COC 피우다 프로젝트 15회 공모전 결선 진출",
+    summary:
+      "옷 교환 파티 예약·관리 서비스 ReFit Lab에서 예약, 마이페이지 QR 입장권, 관리자 페이지 구현",
+    period: "2025.10 — 2025.12",
+    learned:
+      "인증 상태 하이드레이션 오류를 고치며 Next.js 서버 렌더링과 클라이언트 상태의 차이를 배웠습니다",
+    link: {
+      label: "GitHub",
+      href: "https://github.com/refit-lab/refit-lab-fe",
+    },
   },
   {
     category: "리딩",
     title: "UMC 9기 Web 파트장",
-    summary: "매주 6명 코드 리뷰 및 파트원 대상 발표 세션 진행",
+    summary: "매주 6명 코드 리뷰, 기수 마무리 GitHub 가이드 발표",
     period: "2025.09 — 2026.02",
-    learned: "매주 발표를 준비하며 설명하는 법을 배웠습니다",
-    link: { label: "LinkedIn" },
+    learned: "매주 코드 리뷰를 하며 설명하는 법을 배웠습니다",
+    link: { label: "GitHub", href: "https://github.com/9th-SKU-UMC/9th-Web" },
   },
   {
-    category: "발표",
-    title: "교내 Git/GitHub 세션",
-    summary: "초보자를 위한 GitHub 가이드 기획부터 자료 제작, 진행까지 담당",
-    period: "[YYYY.MM]",
-    learned: "[배운 점 한 줄]",
-    link: { label: "GitHub" },
-  },
-  {
-    category: "[분류]",
-    title: "[활동 이름]",
-    summary: "[한 줄 설명]",
-    period: "[YYYY.MM]",
-    learned: "[배운 점 한 줄]",
-    link: { label: "GitHub" },
-  },
-  {
-    category: "[분류]",
-    title: "[활동 이름]",
-    summary: "[한 줄 설명]",
-    period: "[YYYY.MM]",
-    learned: "[배운 점 한 줄]",
-    link: { label: "GitHub" },
-  },
-  {
-    category: "[분류]",
-    title: "[활동 이름]",
-    summary: "[한 줄 설명]",
-    period: "[YYYY.MM]",
-    learned: "[배운 점 한 줄]",
-    link: { label: "GitHub" },
-  },
-  {
-    category: "[분류]",
-    title: "[활동 이름]",
-    summary: "[한 줄 설명]",
-    period: "[YYYY.MM]",
-    learned: "[배운 점 한 줄]",
-    link: { label: "GitHub" },
+    category: "프로젝트",
+    title: "UMC 8기 Web Challenger",
+    summary:
+      "AI 향수 추천 서비스 CHICCHIC Web 파트장, 커뮤니티·상세·쇼핑 페이지 API 연동",
+    period: "2025.03 — 2025.08",
+    learned:
+      "API 연동의 약 60%를 혼자 맡으며, 혼자 많이 하는 것이 협업은 아니라는 걸 배웠습니다",
+    link: { label: "GitHub", href: "https://github.com/UMC-CHICCHIC/FE" },
   },
 ];
 
 export const ABOUT_EVENTS: AboutEvent[] = [
-  { title: "UMCON #2", description: "UMC 연합 행사 발표 세션" },
+  { title: "UMCON #2", description: "UMC 연합 행사 발표 세션 참여" },
   { title: "UMCON #3", description: "UMC 네트워킹 행사 참여" },
-  { title: "[행사 이름]", description: "[한 줄 설명]" },
+  {
+    title: "우아콘 2026",
+    description: "critical-script 세션 발표자에게 측정 편차 질문",
+  },
 ];
