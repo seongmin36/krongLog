@@ -1,16 +1,37 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import AboutActivities from "@/components/about/AboutActivities.astro";
+import AboutEvents from "@/components/about/AboutEvents.astro";
+import AboutHero from "@/components/about/AboutHero.astro";
+import AboutNow from "@/components/about/AboutNow.astro";
+import AboutRecords from "@/components/about/AboutRecords.astro";
+import AboutResume from "@/components/about/AboutResume.astro";
+import AboutValues from "@/components/about/AboutValues.astro";
+import { getSortedArchive } from "@/lib/archive";
+import { countTopTags, getSortedPosts } from "@/lib/blog";
+import "@/styles/about.css";
+
+const posts = await getSortedPosts();
+const archive = await getSortedArchive();
+const topTags = countTopTags(posts, 5);
 ---
 
-<BaseLayout title="About | Krong Dev." description="About me" ogType="website">
-  <section class="pt-12 pb-8 sm:pt-16 sm:pb-10">
-    <h1
-      class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl dark:text-gray-50"
-    >
-      About
-    </h1>
-    <p class="mt-2 text-sm text-gray-500 sm:text-base dark:text-gray-400">
-      About me
-    </p>
-  </section>
+<BaseLayout
+  title="개발자 소개 | Krong Dev."
+  description="사람들과 이야기하는 걸 좋아하는 프론트엔드 개발자 조성민입니다."
+  ogType="website"
+>
+  <div class="about-page">
+    <AboutHero />
+    <AboutValues />
+    <AboutNow />
+    <AboutActivities />
+    <AboutEvents />
+    <AboutRecords
+      postCount={posts.length}
+      archiveCount={archive.length}
+      topTags={topTags}
+    />
+    <AboutResume />
+  </div>
 </BaseLayout>

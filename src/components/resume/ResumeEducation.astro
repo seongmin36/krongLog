@@ -1,0 +1,14 @@
+---
+import ResumeRow from "@/components/resume/ResumeRow.astro";
+import type { ResumeText } from "@/lib/resume";
+
+interface Props {
+  education: ResumeText & { period: string };
+}
+
+const { education } = Astro.props;
+---
+
+<ResumeRow lead={education.lead} period={education.period}>
+  {education.text}
+</ResumeRow>

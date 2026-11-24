@@ -1,0 +1,123 @@
+---
+import { Icon } from "astro-icon/components";
+
+type Trailing = "arrow-up-right" | "arrow-right" | "chevron-down";
+
+interface Props {
+  variant: "primary" | "outline";
+  href?: string;
+  /** 다운로드 파일 이름. href 링크에만 붙는다 */
+  download?: string;
+  type?: "button" | "submit" | "reset";
+  /** 비활성 자리표시. href·type과 무관하게 disabled 버튼으로 그리고 hover 효과를 뺀다 */
+  disabled?: boolean;
+  /** 좌우 padding 클래스 (기본 px-6) */
+  padding?: string;
+  /** 슬롯 뒤에 붙는 아이콘을 그린다 */
+  trailing?: Trailing;
+  class?: string;
+  id?: string;
+  [key: `aria-${string}`]: string | undefined;
+  [key: `data-${string}`]: string | undefined;
+}
+
+const {
+  variant,
+  href,
+  download,
+  type,
+  disabled = false,
+  padding = "px-6",
+  trailing,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const baseClass =
+  "inline-flex h-[52px] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full border text-[16px] font-bold no-underline";
+
+// 활성 버튼에만 붙는다. disabled면 group과 전환 효과를 주지 않는다
+const activeClass = "group transition-colors duration-200";
+
+const variantClass =
+  variant === "primary"
+    ? "border-transparent bg-primary text-white dark:bg-dark-text dark:text-dark"
+    : "border-border bg-white text-dark dark:border-border-dark dark:bg-dark dark:text-gray-50";
+
+const hoverClass =
+  variant === "primary"
+    ? "hover:bg-primary/92 dark:hover:bg-dark-text/92"
+    : "hover:border-primary hover:text-primary dark:hover:border-dark-text dark:hover:text-dark-text";
+
+// 아이콘마다 hover 움직임이 다르고, outline 아이콘만 기본 색을 따로 가진다
+const trailingIconClass: Record<Trailing, string> = {
+  "arrow-up-right":
+    "transition-[translate,color] duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 motion-reduce:transition-none",
+  "arrow-right":
+    "transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none",
+  "chevron-down":
+    "transition-transform duration-200 group-aria-expanded:rotate-180 motion-reduce:transition-none",
+};
+
+const outlineIconColor: Record<Trailing, string> = {
+  "arrow-up-right":
+    "text-muted-alpha dark:text-muted-dark group-hover:text-primary dark:group-hover:text-dark-text",
+  "arrow-right": "",
+  "chevron-down": "text-muted-alpha dark:text-muted-dark",
+};
+
+const trailingIcon = trailing
+  ? {
+      name: `lucide:${trailing}`,
+      // 비활성은 움직임과 hover 색을 빼고 기본 색만 남긴다
+      class: disabled
+        ? "size-4 text-muted-alpha dark:text-muted-dark"
+        : [
+            "size-4",
+            trailingIconClass[trailing],
+            variant === "outline" ? outlineIconColor[trailing] : "",
+          ].join(" "),
+    }
+  : undefined;
+
+const cursorClass = disabled ? "cursor-default opacity-35" : "cursor-pointer";
+
+const isExternal = href?.startsWith("http") ?? false;
+const classes = [
+  baseClass,
+  disabled ? "" : activeClass,
+  padding,
+  variantClass,
+  disabled ? "" : hoverClass,
+  cursorClass,
+  className,
+];
+
+// 태그마다 필요한 속성만 담는다. 자리표시(href 없음)는 링크지만 비활성으로 그린다
+const Tag = disabled || type ? "button" : "a";
+const tagProps: Record<string, string | boolean | undefined> = disabled
+  ? { type: "button", disabled: true }
+  : type
+    ? { type }
+    : href
+      ? {
+          href,
+          download,
+          target: isExternal ? "_blank" : undefined,
+          rel: isExternal ? "noopener noreferrer" : undefined,
+        }
+      : { role: "link", "aria-disabled": "true" };
+---
+
+<Tag class:list={classes} {...tagProps} {...rest}>
+  <slot />
+  {
+    trailingIcon && (
+      <Icon
+        name={trailingIcon.name}
+        class={trailingIcon.class}
+        aria-hidden="true"
+      />
+    )
+  }
+</Tag>

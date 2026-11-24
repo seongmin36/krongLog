@@ -1,0 +1,26 @@
+/* 이력서 페이지 전용 스타일. 이력서 라우트에서만 로드된다. */
+
+/* 종이는 다크 모드에서도 흰색이라 about 페이지의 dark-text 대신 primary 포커스 링을 쓴다 */
+.dark .about-page article a:focus-visible {
+  outline-color: color-mix(in srgb, var(--color-primary) 28%, transparent);
+}
+
+@media print {
+  @page {
+    margin: 16mm;
+  }
+
+  html,
+  body {
+    background: white !important;
+  }
+
+  #main-header {
+    display: none;
+  }
+
+  main {
+    padding: 0 !important;
+    max-width: none !important;
+  }
+}

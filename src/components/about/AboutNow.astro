@@ -1,0 +1,39 @@
+---
+import AboutSection from "@/components/about/AboutSection.astro";
+import CategoryPill from "@/components/about/CategoryPill.astro";
+import { ABOUT_NOW_ITEMS } from "@/lib/about";
+
+const lastIndex = ABOUT_NOW_ITEMS.length - 1;
+---
+
+<AboutSection
+  number="02"
+  title="요즘 하고 있는 것"
+  id="about-now"
+  layout="split"
+>
+  <p class="text-muted-alpha dark:text-muted-dark font-mono text-[13px]">
+    2026.11 기준
+  </p>
+
+  <ul class="border-border dark:border-border-dark mt-3.5 border-t">
+    {
+      ABOUT_NOW_ITEMS.map((item, index) => (
+        <li
+          class:list={[
+            "flex items-center gap-4 py-[18px]",
+            index < lastIndex &&
+              "border-border dark:border-border-dark border-b",
+            index === lastIndex && "pb-0",
+          ]}
+        >
+          <CategoryPill label={item.label} />
+          <p
+            class="text-description dark:text-muted min-w-0 text-[17px] leading-[1.75] break-keep whitespace-pre-line"
+            set:text={item.description}
+          />
+        </li>
+      ))
+    }
+  </ul>
+</AboutSection>

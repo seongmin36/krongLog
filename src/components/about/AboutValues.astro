@@ -1,0 +1,32 @@
+---
+import AboutSection from "@/components/about/AboutSection.astro";
+import { ABOUT_VALUES } from "@/lib/about";
+---
+
+<AboutSection
+  number="01"
+  title="저는 이런 사람입니다"
+  id="about-values"
+  layout="split"
+>
+  <ul class="flex flex-col gap-10">
+    {
+      ABOUT_VALUES.map((value) => (
+        <li class="flex gap-5">
+          <span
+            class="bg-primary dark:bg-dark-text w-[3px] shrink-0 rounded-full opacity-35"
+            aria-hidden="true"
+          />
+          <div class="max-w-[680px] min-w-0">
+            <h3 class="text-dark text-[18px] leading-[1.4] font-bold tracking-[-0.02em] dark:text-gray-50">
+              {value.title}
+            </h3>
+            <p class="text-description dark:text-muted mt-2.5 text-[16px] leading-[1.8] break-keep">
+              {value.description}
+            </p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+</AboutSection>

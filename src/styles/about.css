@@ -1,0 +1,8 @@
+/* about 페이지 포커스 링. 키보드 포커스에만 보이고 마우스 클릭에는 나오지 않는다. */
+.about-page :is(a, button):focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--color-primary) 28%, transparent);
+  outline-offset: 2px;
+}
+.dark .about-page :is(a, button):focus-visible {
+  outline-color: color-mix(in srgb, var(--color-dark-text) 28%, transparent);
+}

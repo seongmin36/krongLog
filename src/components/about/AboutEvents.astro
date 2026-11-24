@@ -1,0 +1,177 @@
+---
+import { Image } from "astro:assets";
+import { Icon } from "astro-icon/components";
+import AboutSection from "@/components/about/AboutSection.astro";
+import { ABOUT_EVENTS } from "@/lib/about";
+
+const totalLabel = String(ABOUT_EVENTS.length).padStart(2, "0");
+const navButtonClass =
+  "border-border bg-white text-dark dark:border-border-dark dark:bg-dark dark:text-gray-50 inline-flex size-12 cursor-pointer items-center justify-center rounded-full border transition-colors duration-200 enabled:hover:border-primary enabled:hover:text-primary disabled:cursor-default disabled:opacity-35 dark:enabled:hover:border-dark-text dark:enabled:hover:text-dark-text";
+---
+
+<AboutSection
+  number="04"
+  title="다녀온 행사들"
+  id="about-events"
+  description="직접 발표하고, 참여하고, 사람들을 만났던 순간들"
+>
+  <div slot="actions" class="flex gap-2.5">
+    <button
+      type="button"
+      class={navButtonClass}
+      aria-label="이전 행사"
+      data-events-prev
+      disabled
+    >
+      <Icon name="lucide:chevron-left" class="size-5" aria-hidden="true" />
+    </button>
+    <button
+      type="button"
+      class={navButtonClass}
+      aria-label="다음 행사"
+      data-events-next
+    >
+      <Icon name="lucide:chevron-right" class="size-5" aria-hidden="true" />
+    </button>
+  </div>
+
+  <div
+    role="region"
+    aria-label="다녀온 행사 목록"
+    class="overflow-hidden"
+    data-events-viewport
+  >
+    <ul class="flex touch-pan-y touch-pinch-zoom gap-6">
+      {
+        ABOUT_EVENTS.map((event) => (
+          <li class="w-5/6 shrink-0 sm:w-[48%] lg:w-[calc((100%-48px)/3)]">
+            <div class="border-border bg-inline-code-surface dark:border-border-dark dark:bg-inline-code-surface-dark flex aspect-[4/3] items-center justify-center overflow-hidden rounded-3xl border">
+              {event.image ? (
+                <Image
+                  src={event.image}
+                  alt=""
+                  format="webp"
+                  quality={75}
+                  widths={[400, 560, 720, 840]}
+                  sizes="(max-width: 639px) 83vw, (max-width: 1023px) 48vw, 395px"
+                  draggable="false"
+                  loading="lazy"
+                  class="h-full w-full object-cover"
+                />
+              ) : (
+                <span class="text-muted-alpha dark:text-muted-dark text-sm">
+                  실제 행사 사진
+                </span>
+              )}
+            </div>
+            {event.date && (
+              <time
+                datetime={event.date.replaceAll(".", "-")}
+                class="text-muted-alpha dark:text-muted-dark mt-4 block font-mono text-[13px] tabular-nums"
+              >
+                {event.date}
+              </time>
+            )}
+            <h3
+              class:list={[
+                "text-dark text-[22px] leading-[1.35] font-bold tracking-[-0.02em] dark:text-gray-50",
+                event.date ? "mt-1.5" : "mt-4",
+              ]}
+            >
+              {event.title}
+            </h3>
+            <p class="text-description dark:text-muted mt-1.5 text-[17px] leading-[1.75] break-keep">
+              {event.description}
+            </p>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+
+  <div class="mt-8 flex items-center gap-4">
+    <div
+      class="bg-border dark:bg-border-dark relative h-0.5 flex-1 overflow-hidden rounded-full"
+      aria-hidden="true"
+    >
+      <div
+        class="bg-primary dark:bg-dark-text absolute inset-y-0 left-0 rounded-full transition-all duration-300 motion-reduce:transition-none"
+        style={`width: ${100 / ABOUT_EVENTS.length}%`}
+        data-events-progress
+      >
+      </div>
+    </div>
+    <span
+      class="text-muted-alpha dark:text-muted-dark font-mono text-[13px] tabular-nums"
+      data-events-count
+    >
+      01 / {totalLabel}
+    </span>
+  </div>
+</AboutSection>
+
+<script>
+  import EmblaCarousel, { type EmblaCarouselType } from "embla-carousel";
+
+  // 상수
+  const OPTIONS = { align: "start", containScroll: "trimSnaps" } as const;
+
+  // DOM 참조
+  const viewport = document.querySelector<HTMLElement>(
+    "[data-events-viewport]",
+  );
+  const prevButton =
+    document.querySelector<HTMLButtonElement>("[data-events-prev]");
+  const nextButton =
+    document.querySelector<HTMLButtonElement>("[data-events-next]");
+  const progress = document.querySelector<HTMLElement>(
+    "[data-events-progress]",
+  );
+  const counter = document.querySelector<HTMLElement>("[data-events-count]");
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  // 상태
+  let emblaApi: EmblaCarouselType | undefined;
+
+  // 헬퍼
+  function pad(value: number) {
+    return String(value).padStart(2, "0");
+  }
+
+  // 렌더 (상태 → DOM)
+  // 스냅 수는 카드 수보다 적을 수 있어 카드 수를 기준으로 센다.
+  function render() {
+    if (!emblaApi || !prevButton || !nextButton || !progress || !counter)
+      return;
+
+    const total = emblaApi.slideNodes().length;
+    const canNext = emblaApi.canScrollNext();
+    const current = canNext ? emblaApi.selectedScrollSnap() + 1 : total;
+
+    prevButton.disabled = !emblaApi.canScrollPrev();
+    nextButton.disabled = !canNext;
+    progress.style.width = `${(current / total) * 100}%`;
+    counter.textContent = `${pad(current)} / ${pad(total)}`;
+  }
+
+  // 액션
+  // 동작 줄이기를 켠 사용자에게는 애니메이션 없이 바로 이동한다
+  function goPrev() {
+    emblaApi?.scrollPrev(reduceMotion.matches);
+  }
+
+  function goNext() {
+    emblaApi?.scrollNext(reduceMotion.matches);
+  }
+
+  // 이벤트 연결
+  prevButton?.addEventListener("click", goPrev);
+  nextButton?.addEventListener("click", goNext);
+
+  // 초기 실행
+  if (viewport) {
+    emblaApi = EmblaCarousel(viewport, OPTIONS);
+    emblaApi.on("select", render).on("reInit", render);
+    render();
+  }
+</script>

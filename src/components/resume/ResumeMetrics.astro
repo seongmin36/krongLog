@@ -1,0 +1,39 @@
+---
+import type { ResumeMetric } from "@/lib/resume";
+
+interface Props {
+  metrics: ResumeMetric[];
+  note: string;
+}
+
+const { metrics, note } = Astro.props;
+const lastIndex = metrics.length - 1;
+---
+
+<div
+  class="bg-resume-surface mt-4 rounded-[10px] px-5 py-4 [print-color-adjust:exact]"
+>
+  <dl
+    class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[auto_auto_auto_auto] lg:justify-between lg:gap-x-5"
+  >
+    {
+      metrics.map((metric, index) => (
+        <div
+          class:list={[
+            index === lastIndex && "lg:border-border lg:border-l lg:pl-5",
+          ]}
+        >
+          <dt class="text-description text-[11.5px] leading-[1.5]">
+            {metric.label}
+          </dt>
+          <dd class="text-resume-accent mt-1 text-[15px] leading-[1.5] font-bold sm:whitespace-nowrap">
+            {metric.value}
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  <p class="text-description mt-3 text-[12px] leading-[1.5] break-keep">
+    {note}
+  </p>
+</div>

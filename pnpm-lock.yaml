@@ -56,6 +56,9 @@ importers:
       astro-icon:
         specifier: ^1.2.0
         version: 1.2.0
+      embla-carousel:
+        specifier: ^8.6.0
+        version: 8.6.0
       nanostores:
         specifier: ^1.1.1
         version: 1.1.1
@@ -2044,6 +2047,9 @@ packages:
 
   electron-to-chromium@1.5.302:
     resolution: {integrity: sha512-sM6HAN2LyK82IyPBpznDRqlTQAtuSaO+ShzFiWTvoMJLHyZ+Y39r8VMfHzwbU8MVBzQ4Wdn85+wlZl2TLGIlwg==}
+
+  embla-carousel@8.6.0:
+    resolution: {integrity: sha512-SjWyZBHJPbqxHOzckOfo8lHisEaJWmwd23XppYFYVh10bU66/Pn5tkVkbkCMZVdbUE5eTCI2nD8OyIP4Z+uwkA==}
 
   emmet@2.4.11:
     resolution: {integrity: sha512-23QPJB3moh/U9sT4rQzGgeyyGIrcM+GH5uVYg2C6wZIxAIJq7Ng3QLT79tl8FUwDXhyq9SusfknOrofAKqvgyQ==}
@@ -5822,6 +5828,8 @@ snapshots:
   dset@3.1.4: {}
 
   electron-to-chromium@1.5.302: {}
+
+  embla-carousel@8.6.0: {}
 
   emmet@2.4.11:
     dependencies:

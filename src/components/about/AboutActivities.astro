@@ -1,0 +1,118 @@
+---
+import { Icon } from "astro-icon/components";
+import AboutSection from "@/components/about/AboutSection.astro";
+import CategoryPill from "@/components/about/CategoryPill.astro";
+import PillButton from "@/components/about/PillButton.astro";
+import { ABOUT_ACTIVITIES } from "@/lib/about";
+
+// 처음 보이는 활동 개수. 나머지는 더 보기로 펼친다
+const VISIBLE_COUNT = 4;
+const extraCount = ABOUT_ACTIVITIES.length - VISIBLE_COUNT;
+
+// lg 미만은 제목 옆 작은 버튼, lg 이상은 마지막 칸의 큰 버튼으로 그린다
+const linkButtonClass =
+  "max-lg:h-7 max-lg:gap-1 max-lg:px-2.5 max-lg:text-[13px] max-lg:[&>svg]:size-3.5 lg:order-last lg:w-[140px]";
+---
+
+<AboutSection number="03" title="활동" id="about-activities">
+  <ul
+    id="about-activities-list"
+    class="border-border dark:border-border-dark border-t"
+  >
+    {
+      ABOUT_ACTIVITIES.map((activity, index) => {
+        const isExtra = index >= VISIBLE_COUNT;
+        return (
+          <li
+            class="border-border dark:border-border-dark flex flex-col gap-4 border-b py-8 lg:grid lg:grid-cols-[69px_360px_1fr_140px] lg:items-start lg:gap-x-6"
+            hidden={isExtra}
+            data-activity-extra={isExtra ? "" : undefined}
+          >
+            <div class="mt-0.5">
+              <CategoryPill label={activity.category} />
+            </div>
+            <div class="flex items-start gap-3 lg:contents">
+              <h3 class="text-dark min-w-0 text-[20px] leading-[1.4] font-bold tracking-[-0.02em] break-keep dark:text-gray-50">
+                {activity.title}
+              </h3>
+              <PillButton
+                variant="outline"
+                href={activity.link.href}
+                disabled={!activity.link.href}
+                padding="px-4"
+                class={linkButtonClass}
+                trailing="arrow-up-right"
+              >
+                {activity.link.label}
+              </PillButton>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <p class="text-description dark:text-muted text-[16px] leading-[1.75] break-keep">
+                {activity.summary}
+              </p>
+              <p class="text-muted-alpha dark:text-muted-dark font-mono text-[13px]">
+                {activity.period}
+              </p>
+              <p class="text-muted-alpha dark:text-muted-dark flex items-start gap-2 text-[15px] leading-[1.65] break-keep">
+                <Icon
+                  name="lucide:arrow-right"
+                  class="mt-1 size-4 shrink-0"
+                  aria-hidden="true"
+                />
+                <span>{activity.learned}</span>
+              </p>
+            </div>
+          </li>
+        );
+      })
+    }
+  </ul>
+
+  <div class="mt-8">
+    <PillButton
+      variant="outline"
+      type="button"
+      trailing="chevron-down"
+      aria-expanded="false"
+      aria-controls="about-activities-list"
+      data-activities-toggle
+    >
+      <span data-activities-label>전체 활동 더 보기 (+{extraCount})</span>
+    </PillButton>
+  </div>
+</AboutSection>
+
+<script>
+  // DOM 참조
+  const toggle = document.querySelector<HTMLButtonElement>(
+    "[data-activities-toggle]",
+  );
+  const label = document.querySelector<HTMLElement>("[data-activities-label]");
+  const extraItems = Array.from(
+    document.querySelectorAll<HTMLElement>("[data-activity-extra]"),
+  );
+
+  // 상태
+  let expanded = false;
+
+  // 렌더 (상태 → DOM)
+  function render() {
+    if (!toggle || !label) return;
+    toggle.setAttribute("aria-expanded", String(expanded));
+    extraItems.forEach((item) => {
+      item.hidden = !expanded;
+    });
+    label.textContent = expanded
+      ? "대표 활동만 보기"
+      : `전체 활동 더 보기 (+${extraItems.length})`;
+  }
+
+  // 이벤트 연결
+  toggle?.addEventListener("click", () => {
+    expanded = !expanded;
+    render();
+  });
+
+  // 초기 실행
+  render();
+</script>

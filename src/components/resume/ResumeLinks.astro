@@ -1,0 +1,30 @@
+---
+import type { ResumeLink } from "@/lib/resume";
+
+interface Props {
+  links: ResumeLink[];
+}
+
+const { links } = Astro.props;
+---
+
+<div class="mt-3 flex gap-6 text-[13.5px] leading-[1.5]">
+  <p class="font-bold">링크</p>
+  <p class="break-keep">
+    {
+      links.map((link, index) => (
+        <>
+          {index > 0 && ", "}
+          <a
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-resume-accent no-underline hover:underline"
+          >
+            {link.label}
+          </a>
+        </>
+      ))
+    }
+  </p>
+</div>

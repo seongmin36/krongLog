@@ -1,0 +1,108 @@
+---
+import { Icon } from "astro-icon/components";
+import { RESUME_PDF_HREF, RESUME_PDF_NAME } from "@/lib/resume-file";
+
+// 알약 버튼 공통 모양. 인쇄 때는 툴바 전체를 숨긴다
+const pillBase =
+  "inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border text-[13px] no-underline";
+const outlinePill =
+  "border-border bg-white text-dark dark:border-border-dark dark:bg-dark dark:text-gray-50";
+const outlineHover =
+  "hover:border-primary hover:text-primary dark:hover:border-dark-text dark:hover:text-dark-text";
+const primaryPill =
+  "border-transparent bg-primary px-4 font-bold text-white dark:bg-dark-text dark:text-dark";
+const primaryHover = "hover:bg-primary/92 dark:hover:bg-dark-text/92";
+const activeMotion = "cursor-pointer transition-colors duration-200";
+const disabledMotion = "cursor-default opacity-35";
+const backLinkClass =
+  "inline-flex items-center gap-1.5 text-[13.5px] text-description no-underline transition-colors duration-200 hover:text-primary dark:text-muted dark:hover:text-dark-text";
+---
+
+<div
+  class="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 print:hidden"
+>
+  <a href="/about/" class={backLinkClass}>
+    <Icon name="lucide:arrow-left" class="size-4" aria-hidden="true" />
+    개발자 소개로
+  </a>
+
+  <div class="flex flex-wrap items-center gap-2">
+    <button
+      type="button"
+      data-print
+      class:list={[pillBase, outlinePill, "px-3.5", activeMotion, outlineHover]}
+    >
+      <Icon name="lucide:printer" class="size-3.5" aria-hidden="true" />
+      인쇄
+    </button>
+
+    {
+      RESUME_PDF_HREF ? (
+        <a
+          href={RESUME_PDF_HREF}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-astro-prefetch="false"
+          class:list={[
+            pillBase,
+            outlinePill,
+            "px-3.5",
+            activeMotion,
+            outlineHover,
+          ]}
+        >
+          <Icon
+            name="lucide:external-link"
+            class="size-3.5"
+            aria-hidden="true"
+          />
+          원본 PDF
+        </a>
+      ) : (
+        <button
+          type="button"
+          disabled
+          class:list={[pillBase, outlinePill, "px-3.5", disabledMotion]}
+        >
+          <Icon
+            name="lucide:external-link"
+            class="size-3.5"
+            aria-hidden="true"
+          />
+          원본 PDF
+        </button>
+      )
+    }
+
+    {
+      RESUME_PDF_HREF ? (
+        <a
+          href={RESUME_PDF_HREF}
+          download={RESUME_PDF_NAME}
+          data-astro-prefetch="false"
+          class:list={[pillBase, primaryPill, activeMotion, primaryHover]}
+        >
+          <Icon name="lucide:download" class="size-3.5" aria-hidden="true" />
+          PDF 다운로드
+        </a>
+      ) : (
+        <button
+          type="button"
+          disabled
+          class:list={[pillBase, primaryPill, disabledMotion]}
+        >
+          <Icon name="lucide:download" class="size-3.5" aria-hidden="true" />
+          PDF 다운로드
+        </button>
+      )
+    }
+  </div>
+</div>
+
+<script>
+  // DOM 참조
+  const printButton = document.querySelector<HTMLButtonElement>("[data-print]");
+
+  // 이벤트 연결
+  printButton?.addEventListener("click", () => window.print());
+</script>

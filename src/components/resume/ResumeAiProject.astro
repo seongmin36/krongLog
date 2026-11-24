@@ -1,0 +1,20 @@
+---
+import ResumeBullets from "@/components/resume/ResumeBullets.astro";
+import ResumeEntryHead from "@/components/resume/ResumeEntryHead.astro";
+import ResumeLinks from "@/components/resume/ResumeLinks.astro";
+import type { ResumeEntry, ResumeLink, ResumeText } from "@/lib/resume";
+
+interface Props {
+  entry: ResumeEntry;
+  details: ResumeText[];
+  links: ResumeLink[];
+}
+
+const { entry, details, links } = Astro.props;
+---
+
+<div>
+  <ResumeEntryHead entry={entry} />
+  <ResumeBullets items={details} class="mt-3" />
+  <ResumeLinks links={links} />
+</div>
