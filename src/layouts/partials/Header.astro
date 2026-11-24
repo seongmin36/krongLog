@@ -1,14 +1,49 @@
 ---
+import { Icon } from "astro-icon/components";
 import NavLink from "@/layouts/partials/NavLink.astro";
+import MobileMenu from "@/layouts/partials/MobileMenu.astro";
 import { archiveIndexPath, blogsIndexPath } from "@/lib/blog-url";
 import { AppIcon } from "@/components/ui/AppIcons";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const NAV_ITEMS = [
-  // { href: "/about", label: "개발자 소개" },
+  { href: "/about/", label: "개발자 소개" },
   { href: blogsIndexPath(), label: "전체 글" },
   { href: archiveIndexPath(), label: "아카이브" },
 ] as const;
+
+// 소셜 아이콘 버튼 공통 클래스 (데스크톱·모바일 크기는 각각 붙인다)
+const SOCIAL_BUTTON_CLASS =
+  "inline-flex items-center justify-center rounded-lg border-none bg-transparent text-gray-500 no-underline transition-colors duration-200 hover:bg-black/5 dark:text-gray-400 dark:hover:bg-white/8";
+
+const SOCIAL_LINKS = [
+  {
+    href: "https://github.com/seongmin36",
+    label: "GitHub",
+    title: "GitHub",
+    icon: "github",
+    iconClass: "size-4.5 sm:size-4.5",
+    hoverClass: "hover:text-gray-900 dark:hover:text-gray-50",
+  },
+  {
+    href: "https://www.linkedin.com/in/krongsungmin/",
+    label: "LinkedIn",
+    icon: "linkedin",
+    iconClass: "size-6",
+    hoverClass: "hover:text-brand-linkedin! dark:hover:text-brand-linkedin!",
+  },
+  {
+    href: "/rss.xml",
+    label: "RSS 피드",
+    title: "RSS 피드",
+    icon: "rss",
+    iconClass: "size-4.5 sm:size-4.5",
+    hoverClass: "hover:text-brand-rss! dark:hover:text-brand-rss!",
+  },
+] as const;
+
+const menuButtonClass =
+  "md:hidden group inline-flex size-9 cursor-pointer items-center justify-center rounded-lg border-none bg-transparent text-gray-500 transition-colors duration-200 hover:bg-black/5 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/8 dark:hover:text-gray-50";
 ---
 
 <header
@@ -20,7 +55,7 @@ const NAV_ITEMS = [
   >
     <a
       href="/"
-      class="group flex shrink-0 items-center no-underline"
+      class="group flex shrink-0 items-center whitespace-nowrap no-underline"
       data-astro-prefetch
     >
       <span
@@ -32,13 +67,15 @@ const NAV_ITEMS = [
 
     <nav class="flex items-center gap-4 sm:gap-8" aria-label="메인 네비게이션">
       <ul
-        class="m-0 flex list-none items-center gap-3 p-0 sm:gap-6"
+        class="m-0 flex list-none items-center gap-3 p-0 max-md:hidden sm:gap-6"
         role="list"
       >
         {
           NAV_ITEMS.map((item) => (
             <li>
-              <NavLink href={item.href}>{item.label}</NavLink>
+              <NavLink href={item.href} class="whitespace-nowrap">
+                {item.label}
+              </NavLink>
             </li>
           ))
         }
@@ -51,38 +88,49 @@ const NAV_ITEMS = [
       >
         <ThemeToggle client:load />
 
-        <NavLink
-          href="https://github.com/seongmin36"
-          class="inline-flex size-8 items-center justify-center rounded-lg border-none bg-transparent text-gray-500 no-underline transition-colors duration-200 hover:bg-black/5 hover:text-gray-900 sm:size-9 dark:text-gray-400 dark:hover:bg-white/8 dark:hover:text-gray-50"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="GitHub"
-          title="GitHub"
-        >
-          <AppIcon name="github" className="size-4.5 sm:size-4.5" />
-        </NavLink>
+        <div class="flex items-center gap-0 max-md:hidden sm:gap-1">
+          {
+            SOCIAL_LINKS.map((link) => (
+              <NavLink
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={link.label}
+                title={"title" in link ? link.title : undefined}
+                class={`${SOCIAL_BUTTON_CLASS} size-8 sm:size-9 ${link.hoverClass}`}
+              >
+                <AppIcon name={link.icon} className={link.iconClass} />
+              </NavLink>
+            ))
+          }
+        </div>
 
-        <NavLink
-          href="https://www.linkedin.com/in/krongsungmin/"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="LinkedIn"
-          class="hover:text-brand-linkedin! dark:hover:text-brand-linkedin! inline-flex size-8 items-center justify-center rounded-lg border-none bg-transparent text-gray-500 no-underline transition-colors duration-200 hover:bg-black/5 sm:size-9 dark:text-gray-400 dark:hover:bg-white/8"
+        <button
+          type="button"
+          id="mobile-menu-toggle"
+          class={menuButtonClass}
+          aria-controls="mobile-menu"
+          aria-expanded="false"
+          aria-label="메뉴 열기"
         >
-          <AppIcon name="linkedin" className="size-4.5 sm:size-6" />
-        </NavLink>
-
-        <NavLink
-          href="/rss.xml"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="RSS 피드"
-          title="RSS 피드"
-          class="hover:text-brand-rss! dark:hover:text-brand-rss! inline-flex size-8 items-center justify-center rounded-lg border-none bg-transparent text-gray-500 no-underline transition-colors duration-200 hover:bg-black/5 sm:size-9 dark:text-gray-400 dark:hover:bg-white/8"
-        >
-          <AppIcon name="rss" className="size-4.5 sm:size-4.5" />
-        </NavLink>
+          <Icon
+            name="lucide:menu"
+            class="size-5 group-aria-expanded:hidden"
+            aria-hidden="true"
+          />
+          <Icon
+            name="lucide:x"
+            class="hidden size-5 group-aria-expanded:block"
+            aria-hidden="true"
+          />
+        </button>
       </div>
     </nav>
   </div>
+
+  <MobileMenu
+    items={NAV_ITEMS}
+    socialLinks={SOCIAL_LINKS}
+    socialButtonClass={SOCIAL_BUTTON_CLASS}
+  />
 </header>

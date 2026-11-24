@@ -1,0 +1,129 @@
+---
+import NavLink from "@/layouts/partials/NavLink.astro";
+import { AppIcon } from "@/components/ui/AppIcons";
+
+type SocialIcon = Parameters<typeof AppIcon>[0]["name"];
+
+interface Props {
+  items: readonly { href: string; label: string }[];
+  socialLinks: readonly {
+    href: string;
+    label: string;
+    title?: string;
+    icon: SocialIcon;
+    iconClass: string;
+    hoverClass: string;
+  }[];
+  socialButtonClass: string;
+}
+
+const { items, socialLinks, socialButtonClass } = Astro.props;
+---
+
+<nav
+  id="mobile-menu"
+  aria-label="모바일 메뉴"
+  hidden
+  class="dark:bg-dark absolute inset-x-0 top-full h-[calc(100dvh-60px)] overflow-y-auto bg-white md:hidden"
+>
+  <div class="flex min-h-full flex-col px-4 sm:px-6">
+    <ul class="m-0 flex list-none flex-col p-0" role="list">
+      {
+        items.map((item) => (
+          <li class="border-border dark:border-border-dark border-b">
+            <NavLink
+              href={item.href}
+              class="flex! min-h-13 w-full items-center py-0! text-lg! after:hidden!"
+            >
+              <span>{item.label}</span>
+            </NavLink>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="flex items-center gap-1 py-4">
+      {
+        socialLinks.map((link) => (
+          <NavLink
+            href={link.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={link.label}
+            title={link.title}
+            class={`${socialButtonClass} size-11 ${link.hoverClass}`}
+          >
+            <AppIcon name={link.icon} className={link.iconClass} />
+          </NavLink>
+        ))
+      }
+    </div>
+  </div>
+</nav>
+
+<script>
+  // 상수
+  const CLOSE_LABEL = "메뉴 닫기";
+  const OPEN_LABEL = "메뉴 열기";
+
+  // DOM 참조
+  const toggle = document.getElementById(
+    "mobile-menu-toggle",
+  ) as HTMLButtonElement;
+  const panel = document.getElementById("mobile-menu") as HTMLElement;
+
+  // 상태: 열기 직전의 body overflow 값을 기억한다
+  let savedOverflow = "";
+
+  // 헬퍼
+  const isOpen = () => !panel.hidden;
+
+  // 렌더 (상태 → DOM)
+  function render(open: boolean) {
+    panel.hidden = !open;
+    toggle.setAttribute("aria-expanded", String(open));
+    toggle.setAttribute("aria-label", open ? CLOSE_LABEL : OPEN_LABEL);
+  }
+
+  // 액션
+  function openMenu() {
+    if (isOpen()) return;
+    savedOverflow = document.body.style.overflow;
+    render(true);
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeMenu(restoreFocus = false) {
+    if (!isOpen()) return;
+    render(false);
+    document.body.style.overflow = savedOverflow;
+    if (restoreFocus) toggle.focus();
+  }
+
+  // 이벤트 연결
+  toggle.addEventListener("click", () => {
+    if (isOpen()) closeMenu();
+    else openMenu();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape" && isOpen()) closeMenu(true);
+  });
+
+  panel.addEventListener("click", (event) => {
+    if ((event.target as Element).closest("a")) closeMenu();
+  });
+
+  window
+    .matchMedia("(min-width: 768px)")
+    .addEventListener("change", (event) => {
+      if (event.matches) closeMenu();
+    });
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) closeMenu();
+  });
+
+  // 초기 실행: 처음에는 닫힌 상태로 맞춘다
+  render(false);
+</script>
